@@ -1,0 +1,10 @@
+.idea
+*.iml
+lib_managed
+src_managed
+target
+*.ipr
+*.iws
+*.swp
+.DS_Store
+dependency-reduced-pom.xml

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Package name="org.apache.hadoop.hbase.client.mock*"/>
+    </Match>
+    <Match>
+        <Class name="io.hgraphdb.Constants"/>
+        <Bug pattern="MS_MUTABLE_ARRAY"/>
+    </Match>
+
+    <!-- don't worry about ignored exceptions -->
+    <Match>
+        <Bug pattern="DE_MIGHT_IGNORE"/>
+    </Match>
+    <!-- don't worry about dead local stores or unread fields -->
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE,URF_UNREAD_FIELD"/>
+    </Match>
+    <!-- don't worry about non-static inner classes. -->
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
+    </Match>
+</FindBugsFilter>
