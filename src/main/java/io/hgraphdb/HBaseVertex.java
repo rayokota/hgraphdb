@@ -196,11 +196,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         return graph.getEdgeIndexModel().vertices(this, direction, edgeLabels);
     }
 
-    /*
-    public Iterator<Vertex> vertices(final Direction direction, final OperationType op, final String... edgeLabels) {
-        return graph.getEdgeIndexModel().vertices(this, direction, op, edgeLabels);
-    }
-
     public Iterator<Vertex> vertices(final Direction direction, final String label, final String key, final Object value) {
         return graph.getEdgeIndexModel().vertices(this, direction, label, key, value);
     }
@@ -209,7 +204,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                                 final Object inclusiveFromValue, final Object exclusiveToValue) {
         return graph.getEdgeIndexModel().vertices(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
     }
-    */
 
     @Override
     public String toString() {
