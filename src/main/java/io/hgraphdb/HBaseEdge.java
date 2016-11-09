@@ -88,11 +88,9 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     @Override
     public void remove() {
-        removeStaleIndex();
-
         // Get rid of the endpoints and edge themselves.
-        graph.getEdgeIndexModel().deleteEdgeEndpoints(this);
         graph.getEdgeModel().deleteEdge(this);
+        graph.getEdgeIndexModel().deleteEdgeEndpoints(this);
 
         setDeleted(true);
         if (!isCached()) {
@@ -109,7 +107,7 @@ public class HBaseEdge extends HBaseElement implements Edge {
         if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
             graph.getExecutor().submit(() -> {
                 try {
-                    graph.getEdgeIndexModel().deleteEdgeEndpoints(this, indexKey.propertyKey(), ts);
+                    graph.getEdgeIndexModel().deleteEdgeIndex(this, indexKey, ts);
                 } catch (Exception e) {
                     LOGGER.error("Could not delete stale index", e);
                 }

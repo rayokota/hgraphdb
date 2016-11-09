@@ -33,7 +33,6 @@ public class EdgeModel extends ElementModel {
     }
 
     public void writeEdge(Edge edge) {
-        graph.getEdgeIndexModel().writeEdgeEndpoints(edge);
         Creator creator = new EdgeWriter(graph, edge);
         Mutators.create(table, creator);
     }

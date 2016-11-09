@@ -34,7 +34,6 @@ public class VertexModel extends ElementModel {
     }
 
     public void writeVertex(Vertex vertex) {
-        graph.getVertexIndexModel().writeVertexIndex(vertex);
         Creator creator = new VertexWriter(graph, vertex);
         Mutators.create(table, creator);
     }

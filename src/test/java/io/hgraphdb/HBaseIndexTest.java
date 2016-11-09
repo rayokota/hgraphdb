@@ -145,7 +145,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     }
 
     @Test
-    public void testStaleIndex() {
+    public void testIndexRemoval() {
         assertEquals(0, count(graph.vertices()));
 
         graph.createIndex(IndexType.EDGE, "b", "key1");
@@ -169,20 +169,6 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.removeEdge(edge);
 
         it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
-        // The stale index still returns 4
-        assertEquals(4, count(it));
-
-        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
-        it.forEachRemaining(e -> {
-            try {
-                ((HBaseEdge) e).load();
-            } catch (HBaseGraphNotFoundException nfe) {
-                nfe.getElement().removeStaleIndex();
-            }
-        });
-
-        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
-        // The stale index is gone
         assertEquals(3, count(it));
     }
 

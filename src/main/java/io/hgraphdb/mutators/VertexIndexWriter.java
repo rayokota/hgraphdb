@@ -16,18 +16,18 @@ public class VertexIndexWriter implements Mutator {
 
     private final HBaseGraph graph;
     private final Vertex vertex;
-    private final Iterator<IndexMetadata> indices;
+    private final Iterator<String> keys;
 
     public VertexIndexWriter(HBaseGraph graph, Vertex vertex, Iterator<IndexMetadata> indices) {
         this.graph = graph;
         this.vertex = vertex;
-        this.indices = indices;
+        this.keys = IteratorUtils.map(indices, IndexMetadata::propertyKey);
     }
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        return IteratorUtils.map(indices, index -> {
-            Put put = new Put(graph.getVertexIndexModel().serializeForWrite(vertex, index.propertyKey()));
+        return IteratorUtils.map(keys, key -> {
+            Put put = new Put(graph.getVertexIndexModel().serializeForWrite(vertex, key));
             put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                     Serializer.serialize(((HBaseVertex) vertex).createdAt()));
             return put;

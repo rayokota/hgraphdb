@@ -17,40 +17,27 @@ public class EdgeIndexWriter implements Mutator {
 
     private final HBaseGraph graph;
     private final Edge edge;
-    private final String key;
-    private final Iterator<IndexMetadata> indices;
+    private final Iterator<String> keys;
 
     public EdgeIndexWriter(HBaseGraph graph, Edge edge, String key) {
         this.graph = graph;
         this.edge = edge;
-        this.key = key;
-        this.indices = null;
+        this.keys = IteratorUtils.of(key);
     }
 
     public EdgeIndexWriter(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices) {
         this.graph = graph;
         this.edge = edge;
-        this.key = null;
-        this.indices = indices;
+        this.keys = IteratorUtils.map(indices, IndexMetadata::propertyKey);
     }
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        return indices != null ? constructPutsForIndices() : constructPutsForKey();
-    }
-
-    private Iterator<Mutation> constructPutsForIndices() {
-        return IteratorUtils.flatMap(indices, index -> {
-            Put in = constructPut(Direction.IN, index.propertyKey());
-            Put out = constructPut(Direction.OUT, index.propertyKey());
+        return IteratorUtils.flatMap(keys, key -> {
+            Put in = constructPut(Direction.IN, key);
+            Put out = constructPut(Direction.OUT, key);
             return IteratorUtils.of(in, out);
         });
-    }
-
-    private Iterator<Mutation> constructPutsForKey() {
-        Put in = constructPut(Direction.IN, key);
-        Put out = constructPut(Direction.OUT, key);
-        return IteratorUtils.of(in, out);
     }
 
     private Put constructPut(Direction direction, String key) {

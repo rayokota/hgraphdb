@@ -221,6 +221,7 @@ public class HBaseGraph implements Graph {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
+        vertexIndexModel.writeVertexIndex(newVertex);
         vertexModel.writeVertex(newVertex);
 
         Vertex vertex = findOrCreateVertex(idValue);
@@ -465,7 +466,7 @@ public class HBaseGraph implements Graph {
                     if (index.type() == IndexType.VERTEX) {
                         allVertices().forEachRemaining(vertex -> vertexIndexModel.writeVertexIndex(vertex, index));
                     } else {
-                        allEdges().forEachRemaining(edge -> edgeIndexModel.writeEdgeEndpoints(edge, index));
+                        allEdges().forEachRemaining(edge -> edgeIndexModel.writeEdgeIndex(edge, index));
                     }
                     index.state(State.ACTIVE);
                     indexMetadataModel.writeIndexMetadata(index);

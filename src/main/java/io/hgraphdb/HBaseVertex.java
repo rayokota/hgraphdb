@@ -79,8 +79,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
-        graph.getEdgeModel().writeEdge(newEdge);
         graph.getEdgeIndexModel().writeEdgeEndpoints(newEdge);
+        graph.getEdgeModel().writeEdge(newEdge);
 
         invalidateEdgeCache();
         if (!isCached()) {
@@ -100,13 +100,12 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     @Override
     public void remove() {
-        removeStaleIndex();
-
         // Remove edges incident to this vertex.
         edges(Direction.BOTH, OperationType.REMOVE).forEachRemaining(Edge::remove);
 
         // Get rid of the vertex.
         getModel().deleteVertex(this);
+        graph.getVertexIndexModel().deleteVertexIndex(this);
 
         setDeleted(true);
         if (!isCached()) {
@@ -123,7 +122,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
             graph.getExecutor().submit(() -> {
                 try {
-                    graph.getVertexIndexModel().deleteVertexIndex(this, indexKey.propertyKey(), ts);
+                    graph.getVertexIndexModel().deleteVertexIndex(this, indexKey, ts);
                 } catch (Exception e) {
                     LOGGER.error("Could not delete stale index", e);
                 }

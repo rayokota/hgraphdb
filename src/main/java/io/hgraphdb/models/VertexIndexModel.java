@@ -46,8 +46,15 @@ public class VertexIndexModel extends BaseModel {
         Mutators.write(table, writer);
     }
 
-    public void deleteVertexIndex(Vertex vertex, String key, Long ts) {
-        Mutator writer = new VertexIndexRemover(graph, vertex, key, ts);
+    public void deleteVertexIndex(Vertex vertex) {
+        Iterator<IndexMetadata> indices = graph.getIndices(
+                OperationType.WRITE, IndexType.VERTEX, vertex.label(), ((HBaseVertex) vertex).getPropertyKeys());
+        VertexIndexRemover writer = new VertexIndexRemover(graph, vertex, indices);
+        Mutators.write(table, writer);
+    }
+
+    public void deleteVertexIndex(Vertex vertex, IndexMetadata.Key key, Long ts) {
+        Mutator writer = new VertexIndexRemover(graph, vertex, key.propertyKey(), ts);
         Mutators.write(table, writer);
     }
 

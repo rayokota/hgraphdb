@@ -49,17 +49,21 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.write(table, indexWriter, writer);
     }
 
-    public void writeEdgeEndpoints(Edge edge, IndexMetadata index) {
+    public void writeEdgeIndex(Edge edge, IndexMetadata index) {
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index));
         Mutators.write(table, indexWriter);
     }
 
     public void deleteEdgeEndpoints(Edge edge) {
-        deleteEdgeEndpoints(edge, Constants.CREATED_AT, null);
+        Iterator<IndexMetadata> indices = graph.getIndices(
+                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
+        Mutator writer = new EdgeIndexRemover(graph, edge, Constants.CREATED_AT, null);
+        Mutators.write(table, writer, indexWriter);
     }
 
-    public void deleteEdgeEndpoints(Edge edge, String key, Long ts) {
-        Mutator writer = new EdgeIndexRemover(graph, edge, key, ts);
+    public void deleteEdgeIndex(Edge edge, IndexMetadata.Key key, Long ts) {
+        Mutator writer = new EdgeIndexRemover(graph, edge, key.propertyKey(), ts);
         Mutators.write(table, writer);
     }
 
