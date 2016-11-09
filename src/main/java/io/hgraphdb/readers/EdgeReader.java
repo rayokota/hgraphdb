@@ -32,7 +32,7 @@ public class EdgeReader extends ElementReader<Edge> {
     @Override
     public void load(Edge edge, Result result) {
         if (result.isEmpty()) {
-            throw new HBaseGraphNotFoundException("Edge does not exist: " + edge.id());
+            throw new HBaseGraphNotFoundException(edge, "Edge does not exist: " + edge.id());
         }
         Object inVertexId = null;
         Object outVertexId = null;

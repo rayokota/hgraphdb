@@ -6,7 +6,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.javatuples.Triplet;
 
-public class EdgeIndexReader implements Reader<Triplet<IndexMetadata.Key, Edge, Long>> {
+public class EdgeIndexReader implements Reader<Edge> {
 
     private final HBaseGraph graph;
 
@@ -15,11 +15,11 @@ public class EdgeIndexReader implements Reader<Triplet<IndexMetadata.Key, Edge, 
     }
 
     @Override
-    public Triplet<IndexMetadata.Key, Edge, Long> parse(Result result) {
+    public Edge parse(Result result) {
         return makeEdge(result);
     }
 
-    private Triplet<IndexMetadata.Key, Edge, Long> makeEdge(Result result) {
+    private Edge makeEdge(Result result) {
         if (result.isEmpty()) return null;
         return graph.getEdgeIndexModel().deserialize(result);
     }

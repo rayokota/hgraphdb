@@ -15,6 +15,16 @@ import static org.junit.Assert.assertEquals;
 
 public class HBaseIndexTest extends HBaseGraphTest {
 
+    @Override
+    protected HBaseGraphConfiguration generateGraphConfig(String graphName) {
+        HBaseGraphConfiguration config = super.generateGraphConfig(graphName);
+        config.setElementCacheMaxSize(0);
+        config.setRelationshipCacheMaxSize(0);
+        config.setLazyLoading(true);
+        config.setStaleIndexExpiryMs(0);
+        return config;
+    }
+
     @Test
     public void testVertexIndex() {
         assertEquals(0, count(graph.vertices()));
@@ -88,6 +98,11 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         assertEquals(2, count(it));
+
+        /*
+        it = ((HBaseVertex) v10).vertices(Direction.OUT, "b", "key1", 11);
+        assertEquals(2, count(it));
+        */
     }
 
     @Test
@@ -127,6 +142,48 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 12, 16);
         assertEquals(4, count(it));
+    }
+
+    @Test
+    public void testStaleIndex() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.EDGE, "b", "key1");
+        Vertex v0 = graph.addVertex(T.id, id(0));
+        Vertex v1 = graph.addVertex(T.id, id(1));
+        Vertex v2 = graph.addVertex(T.id, id(2));
+        Vertex v3 = graph.addVertex(T.id, id(3));
+        Vertex v4 = graph.addVertex(T.id, id(4));
+        Vertex v5 = graph.addVertex(T.id, id(5));
+        Vertex v6 = graph.addVertex(T.id, id(6));
+        v0.addEdge("b", v1, "key1", 1);
+        Edge edge = v0.addEdge("b", v2, "key1", 2);
+        v0.addEdge("b", v3, "key1", 3);
+        v0.addEdge("b", v4, "key1", 4);
+        v0.addEdge("b", v5, "key1", 5);
+        v0.addEdge("b", v6, "key1", 6);
+
+        Iterator<Edge> it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        assertEquals(4, count(it));
+
+        graph.removeEdge(edge);
+
+        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        // The stale index still returns 4
+        assertEquals(4, count(it));
+
+        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        it.forEachRemaining(e -> {
+            try {
+                ((HBaseEdge) e).load();
+            } catch (HBaseGraphNotFoundException nfe) {
+                nfe.getElement().removeStaleIndex();
+            }
+        });
+
+        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        // The stale index is gone
+        assertEquals(3, count(it));
     }
 
     @Test

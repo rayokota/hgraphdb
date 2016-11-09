@@ -34,6 +34,13 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String RELATIONSHIP_CACHE_TTL_SECS     = "gremlin.hbase.relationshipCacheTtlSecs";
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
 
+        /* How often to refresh the index cache */
+        public static final String INDEX_CACHE_REFRESH_SECS        = "gremlin.hbase.indexCacheRefreshSecs";
+        /* How long to wait before an index state change is propagated to other index caches */
+        public static final String INDEX_STATE_CHANGE_DELAY_SECS   = "gremlin.hbase.indexStateChangeDelaySecs";
+        /* How old stale indices have to be in order to delete */
+        public static final String STALE_INDEX_EXPIRY_MS           = "gremlin.hbase.staleIndexExpiryMs";
+
         public static final String HBASE_SECURITY_AUTHENTICATION   = "hbase.security.authentication";
         public static final String HBASE_CLIENT_KERBEROS_PRINCIPAL = "hbase.client.kerberos.principal";
         public static final String HBASE_CLIENT_KEYTAB_FILE        = "hbase.client.keytab.file";
@@ -108,7 +115,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public long getElementCacheMaxSize() {
-        return conf.getLong(Keys.ELEMENT_CACHE_MAX_SIZE, 10000);
+        return conf.getLong(Keys.ELEMENT_CACHE_MAX_SIZE, 1000000);
     }
 
     public HBaseGraphConfiguration setElementCacheMaxSize(long maxSize) {
@@ -126,7 +133,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public long getRelationshipCacheMaxSize() {
-        return conf.getLong(Keys.RELATIONSHIP_CACHE_MAX_SIZE, 10000);
+        return conf.getLong(Keys.RELATIONSHIP_CACHE_MAX_SIZE, 1000);
     }
 
     public HBaseGraphConfiguration setRelationshipCacheMaxSize(long maxSize) {
@@ -144,11 +151,38 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public boolean isLazyLoading() {
-        return conf.getBoolean(Keys.LAZY_LOADING, true);
+        return conf.getBoolean(Keys.LAZY_LOADING, false);
     }
 
     public HBaseGraphConfiguration setLazyLoading(boolean lazyLoading) {
         conf.setProperty(Keys.LAZY_LOADING, lazyLoading);
+        return this;
+    }
+
+    public int getIndexCacheRefreshSecs() {
+        return conf.getInt(Keys.INDEX_CACHE_REFRESH_SECS, 1);
+    }
+
+    public HBaseGraphConfiguration setIndexCacheRefreshSecs(int indexCacheRefreshSecs) {
+        conf.setProperty(Keys.INDEX_CACHE_REFRESH_SECS, indexCacheRefreshSecs);
+        return this;
+    }
+
+    public int getIndexStateChangeDelaySecs() {
+        return conf.getInt(Keys.INDEX_STATE_CHANGE_DELAY_SECS, 2);
+    }
+
+    public HBaseGraphConfiguration setIndexStateChangeDelaySecs(int indexStateChangeDelaySecs) {
+        conf.setProperty(Keys.INDEX_STATE_CHANGE_DELAY_SECS, indexStateChangeDelaySecs);
+        return this;
+    }
+
+    public int getStaleIndexExpiryMs() {
+        return conf.getInt(Keys.STALE_INDEX_EXPIRY_MS, 50000);
+    }
+
+    public HBaseGraphConfiguration setStaleIndexExpiryMs(int staleIndexExpiryMs) {
+        conf.setProperty(Keys.STALE_INDEX_EXPIRY_MS, staleIndexExpiryMs);
         return this;
     }
 

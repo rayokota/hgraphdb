@@ -65,15 +65,12 @@ public class VertexIndexModel extends BaseModel {
         try {
             scanner = table.getScanner(scan);
             return IteratorUtils.<Result, Vertex>flatMap(scanner.iterator(), result -> {
-                Triplet<IndexMetadata.Key, Vertex, Long> triplet = parser.parse(result);
-                IndexMetadata.Key indexKey = triplet.getValue0();
-                Vertex vertex = triplet.getValue1();
-                Long ts = triplet.getValue2();
+                Vertex vertex = parser.parse(result);
                 try {
                     if (!graph.isLazyLoading()) ((HBaseVertex) vertex).load();
                     return IteratorUtils.of(vertex);
                 } catch (final HBaseGraphNotFoundException e) {
-                    graph.deleteStaleIndex(indexKey, vertex, ts);
+                    e.getElement().removeStaleIndex();
                     return Collections.emptyIterator();
                 }
             });
@@ -120,7 +117,7 @@ public class VertexIndexModel extends BaseModel {
         return bytes;
     }
 
-    public Triplet<IndexMetadata.Key, Vertex, Long> deserialize(Result result) {
+    public Vertex deserialize(Result result) {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         String label = OrderedBytes.decodeString(buffer);
@@ -132,8 +129,10 @@ public class VertexIndexModel extends BaseModel {
         Map<String, Object> properties = new HashMap<>();
         properties.put(key, value);
         HBaseVertex newVertex = new HBaseVertex(graph, id, label, createdAt, null, properties, false);
-        Vertex vertex = graph.findOrCreateVertex(id);
-        ((HBaseVertex) vertex).copyFrom(newVertex);
-        return new Triplet<>(new IndexMetadata.Key(IndexType.VERTEX, label, key), vertex, createdAtCell.getTimestamp());
+        HBaseVertex vertex = (HBaseVertex) graph.findOrCreateVertex(id);
+        vertex.copyFrom(newVertex);
+        vertex.setIndexKey(new IndexMetadata.Key(IndexType.VERTEX, label, key));
+        vertex.setIndexTs(createdAtCell.getTimestamp());
+        return vertex;
     }
 }

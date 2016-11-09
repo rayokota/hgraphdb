@@ -103,13 +103,6 @@ public class HBaseGraph implements Graph {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraph.class);
 
-    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    /* How often to refresh the index cache */
-    private static final int INDEX_CACHE_REFRESH_SECS = 1;
-    /* How long to wait before an index state change is propagated to other index caches */
-    private static final int INDEX_STATE_CHANGE_DELAY_SECS = 2;
-    /* How old stale indices have to be in order to delete */
-    private static final int DEFAULT_STALE_INDEX_EXPIRY_MS = 50000;
 
     static {
         TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class, TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(HBaseGraphStepStrategy.instance()));
@@ -126,6 +119,7 @@ public class HBaseGraph implements Graph {
     private Cache<ByteBuffer, Edge> edgeCache;
     private Cache<ByteBuffer, Vertex> vertexCache;
     private Map<Key, IndexMetadata> indices = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public static HBaseGraph open(final Configuration properties) throws HBaseGraphException {
         return new HBaseGraph(properties);
@@ -185,10 +179,15 @@ public class HBaseGraph implements Graph {
                     .build();
 
             refreshIndices();
-            executor.scheduleAtFixedRate(this::refreshIndices, INDEX_CACHE_REFRESH_SECS, INDEX_CACHE_REFRESH_SECS, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(this::refreshIndices,
+                    config.getIndexCacheRefreshSecs(), config.getIndexCacheRefreshSecs(), TimeUnit.SECONDS);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
+    }
+
+    protected ScheduledExecutorService getExecutor() {
+        return executor;
     }
 
     public EdgeModel getEdgeModel() {
@@ -471,7 +470,7 @@ public class HBaseGraph implements Graph {
                     index.state(State.ACTIVE);
                     indexMetadataModel.writeIndexMetadata(index);
                 },
-                INDEX_STATE_CHANGE_DELAY_SECS, TimeUnit.SECONDS);
+                config.getIndexStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
     public boolean hasIndex(IndexType type, String label, String... propertyKeys ) {
@@ -550,32 +549,6 @@ public class HBaseGraph implements Graph {
         oldIndex.updatedAt(System.currentTimeMillis());
         indexMetadataModel.writeIndexMetadata(index);
         indices.put(index.key(), index);
-    }
-
-    public void deleteStaleIndex(IndexMetadata.Key indexKey, Vertex vertex, long ts) {
-        // delete after some expiry due to timing issues between index creation and element creation
-        if (ts + DEFAULT_STALE_INDEX_EXPIRY_MS < System.currentTimeMillis()) {
-            executor.submit(() -> {
-                try {
-                    vertexIndexModel.deleteVertexIndex(vertex, indexKey.propertyKey(), ts);
-                } catch (Exception e) {
-                    LOGGER.error("Could not delete stale index", e);
-                }
-            });
-        }
-    }
-
-    public void deleteStaleIndex(IndexMetadata.Key indexKey, Edge edge, long ts) {
-        // delete after some expiry due to timing issues between index creation and element creation
-        if (ts + DEFAULT_STALE_INDEX_EXPIRY_MS < System.currentTimeMillis()) {
-            executor.submit(() -> {
-                try {
-                    edgeIndexModel.deleteEdgeEndpoints(edge, indexKey.propertyKey(), ts);
-                } catch (Exception e) {
-                    LOGGER.error("Could not delete stale index", e);
-                }
-            });
-        }
     }
 
     @Override

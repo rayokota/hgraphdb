@@ -32,7 +32,7 @@ public class VertexReader extends ElementReader<Vertex> {
     @Override
     public void load(Vertex vertex, Result result) {
         if (result.isEmpty()) {
-            throw new HBaseGraphNotFoundException("Vertex does not exist: " + vertex.id());
+            throw new HBaseGraphNotFoundException(vertex, "Vertex does not exist: " + vertex.id());
         }
         String label = null;
         Long createdAt = null;

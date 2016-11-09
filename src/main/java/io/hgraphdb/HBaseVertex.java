@@ -12,6 +12,8 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.javatuples.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class HBaseVertex extends HBaseElement implements Vertex {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
     private Cache<Tuple, List<Edge>> edgeCache;
     private Cache<Tuple, List<Vertex>> vertexCache;
@@ -113,6 +117,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     @Override
     public void remove() {
+        removeStaleIndex();
+
         // Remove edges incident to this vertex.
         edges(Direction.BOTH, OperationType.REMOVE).forEachRemaining(Edge::remove);
 
@@ -123,6 +129,22 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         if (!isCached()) {
             HBaseVertex cachedVertex = (HBaseVertex) graph.findVertex(id, false);
             if (cachedVertex != null) cachedVertex.setDeleted(true);
+        }
+    }
+
+    @Override
+    public void removeStaleIndex() {
+        IndexMetadata.Key indexKey = getIndexKey();
+        long ts = getIndexTs();
+        // delete after some expiry due to timing issues between index creation and element creation
+        if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
+            graph.getExecutor().submit(() -> {
+                try {
+                    graph.getVertexIndexModel().deleteVertexIndex(this, indexKey.propertyKey(), ts);
+                } catch (Exception e) {
+                    LOGGER.error("Could not delete stale index", e);
+                }
+            });
         }
     }
 
@@ -173,6 +195,21 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     public Iterator<Vertex> vertices(final Direction direction, final String... edgeLabels) {
         return graph.getEdgeIndexModel().vertices(this, direction, edgeLabels);
     }
+
+    /*
+    public Iterator<Vertex> vertices(final Direction direction, final OperationType op, final String... edgeLabels) {
+        return graph.getEdgeIndexModel().vertices(this, direction, op, edgeLabels);
+    }
+
+    public Iterator<Vertex> vertices(final Direction direction, final String label, final String key, final Object value) {
+        return graph.getEdgeIndexModel().vertices(this, direction, label, key, value);
+    }
+
+    public Iterator<Vertex> vertices(final Direction direction, final String label, final String key,
+                                final Object inclusiveFromValue, final Object exclusiveToValue) {
+        return graph.getEdgeIndexModel().vertices(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
+    }
+    */
 
     @Override
     public String toString() {

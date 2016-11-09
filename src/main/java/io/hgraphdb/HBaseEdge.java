@@ -8,11 +8,15 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Map;
 
 public class HBaseEdge extends HBaseElement implements Edge {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
     private Vertex inVertex;
     private Vertex outVertex;
@@ -84,6 +88,8 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     @Override
     public void remove() {
+        removeStaleIndex();
+
         // Get rid of the endpoints and edge themselves.
         graph.getEdgeIndexModel().deleteEdgeEndpoints(this);
         graph.getEdgeModel().deleteEdge(this);
@@ -92,6 +98,22 @@ public class HBaseEdge extends HBaseElement implements Edge {
         if (!isCached()) {
             HBaseEdge cachedEdge = (HBaseEdge) graph.findEdge(id, false);
             if (cachedEdge != null) cachedEdge.setDeleted(true);
+        }
+    }
+
+    @Override
+    public void removeStaleIndex() {
+        IndexMetadata.Key indexKey = getIndexKey();
+        long ts = getIndexTs();
+        // delete after some expiry due to timing issues between index creation and element creation
+        if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
+            graph.getExecutor().submit(() -> {
+                try {
+                    graph.getEdgeIndexModel().deleteEdgeEndpoints(this, indexKey.propertyKey(), ts);
+                } catch (Exception e) {
+                    LOGGER.error("Could not delete stale index", e);
+                }
+            });
         }
     }
 

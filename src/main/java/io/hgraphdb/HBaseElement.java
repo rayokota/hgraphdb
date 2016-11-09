@@ -22,6 +22,8 @@ public abstract class HBaseElement implements Element {
     protected Long updatedAt;
     protected Map<String, Object> properties;
     protected boolean propertiesFullyLoaded;
+    protected IndexMetadata.Key indexKey;
+    protected long indexTs;
     protected boolean isCached;
     protected boolean isDeleted;
 
@@ -72,6 +74,22 @@ public abstract class HBaseElement implements Element {
         return id;
     }
 
+    public IndexMetadata.Key getIndexKey() {
+        return indexKey;
+    }
+
+    public void setIndexKey(IndexMetadata.Key indexKey) {
+        this.indexKey = indexKey;
+    }
+
+    public long getIndexTs() {
+        return indexTs;
+    }
+
+    public void setIndexTs(long indexTs) {
+        this.indexTs = indexTs;
+    }
+
     public boolean isCached() {
         return isCached;
     }
@@ -95,6 +113,8 @@ public abstract class HBaseElement implements Element {
         }
         return properties;
     }
+
+    public abstract void removeStaleIndex();
 
     public void copyFrom(HBaseElement element) {
         if (element.label != null) this.label = element.label;

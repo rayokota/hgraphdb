@@ -82,16 +82,13 @@ public class EdgeIndexModel extends BaseModel {
                             vertex.cacheEdges(cacheKey, cached);
                             return Collections.emptyIterator();
                         }
-                        Triplet<IndexMetadata.Key, Edge, Long> triplet = parser.parse(result);
-                        IndexMetadata.Key indexKey = triplet.getValue0();
-                        Edge edge = triplet.getValue1();
-                        Long ts = triplet.getValue2();
+                        Edge edge = parser.parse(result);
                         try {
                             if (!graph.isLazyLoading() && op != OperationType.REMOVE) ((HBaseEdge) edge).load();
                             cached.add(edge);
                             return IteratorUtils.of(edge);
                         } catch (final HBaseGraphNotFoundException e) {
-                            graph.deleteStaleIndex(indexKey, edge, ts);
+                            e.getElement().removeStaleIndex();
                             return Collections.emptyIterator();
                         }
                     });
@@ -125,10 +122,7 @@ public class EdgeIndexModel extends BaseModel {
                             vertex.cacheEdges(cacheKey, cached);
                             return Collections.emptyIterator();
                         }
-                        Triplet<IndexMetadata.Key, Edge, Long> triplet = parser.parse(result);
-                        IndexMetadata.Key indexKey = triplet.getValue0();
-                        Edge edge = triplet.getValue1();
-                        Long ts = triplet.getValue2();
+                        Edge edge = parser.parse(result);
                         try {
                             if (!graph.isLazyLoading()) ((HBaseEdge) edge).load();
                             boolean passesCheck = useIndex;
@@ -143,7 +137,7 @@ public class EdgeIndexModel extends BaseModel {
                                 return Collections.emptyIterator();
                             }
                         } catch (final HBaseGraphNotFoundException e) {
-                            graph.deleteStaleIndex(indexKey, vertex, ts);
+                            e.getElement().removeStaleIndex();
                             return Collections.emptyIterator();
                         }
                     });
@@ -178,10 +172,7 @@ public class EdgeIndexModel extends BaseModel {
                             vertex.cacheEdges(cacheKey, cached);
                             return Collections.emptyIterator();
                         }
-                        Triplet<IndexMetadata.Key, Edge, Long> triplet = parser.parse(result);
-                        IndexMetadata.Key indexKey = triplet.getValue0();
-                        Edge edge = triplet.getValue1();
-                        Long ts = triplet.getValue2();
+                        Edge edge = parser.parse(result);
                         try {
                             if (!graph.isLazyLoading()) ((HBaseEdge) edge).load();
                             boolean passesCheck = useIndex;
@@ -197,7 +188,7 @@ public class EdgeIndexModel extends BaseModel {
                                 return Collections.emptyIterator();
                             }
                         } catch (final HBaseGraphNotFoundException e) {
-                            graph.deleteStaleIndex(indexKey, vertex, ts);
+                            e.getElement().removeStaleIndex();
                             return Collections.emptyIterator();
                         }
                     });
@@ -226,10 +217,7 @@ public class EdgeIndexModel extends BaseModel {
                             vertex.cacheVertices(cacheKey, cached);
                             return Collections.emptyIterator();
                         }
-                        Triplet<IndexMetadata.Key, Edge, Long> triplet = parser.parse(result);
-                        IndexMetadata.Key indexKey = triplet.getValue0();
-                        Edge edge = triplet.getValue1();
-                        Long ts = triplet.getValue2();
+                        Edge edge = parser.parse(result);
                         Object inVertexId = edge.inVertex().id();
                         Object outVertexId = edge.outVertex().id();
                         Object vertexId = vertex.id().equals(inVertexId) ? outVertexId : inVertexId;
@@ -239,7 +227,7 @@ public class EdgeIndexModel extends BaseModel {
                             cached.add(v);
                             return IteratorUtils.of(v);
                         } catch (final HBaseGraphNotFoundException e) {
-                            graph.deleteStaleIndex(indexKey, edge, ts);
+                            e.getElement().removeStaleIndex();
                             return Collections.emptyIterator();
                         }
                     });
@@ -358,7 +346,7 @@ public class EdgeIndexModel extends BaseModel {
         return bytes;
     }
 
-    public Triplet<IndexMetadata.Key, Edge, Long> deserialize(Result result) {
+    public Edge deserialize(Result result) {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         Object vertexId1 = Serializer.deserializeWithSalt(buffer);
@@ -382,8 +370,10 @@ public class EdgeIndexModel extends BaseModel {
                     graph.findOrCreateVertex(vertexId2),
                     graph.findOrCreateVertex(vertexId1));
         }
-        Edge edge = graph.findOrCreateEdge(edgeId);
-        ((HBaseEdge) edge).copyFrom(newEdge);
-        return new Triplet<>(new IndexMetadata.Key(IndexType.EDGE, label, key), edge, createdAttsCell.getTimestamp());
+        HBaseEdge edge = (HBaseEdge) graph.findOrCreateEdge(edgeId);
+        edge.copyFrom(newEdge);
+        edge.setIndexKey(new IndexMetadata.Key(IndexType.EDGE, label, key));
+        edge.setIndexTs(createdAttsCell.getTimestamp());
+        return edge;
     }
 }
