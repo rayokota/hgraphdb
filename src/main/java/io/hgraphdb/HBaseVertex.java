@@ -37,11 +37,11 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
         this.edgeCache = CacheBuilder.<Tuple, List<Edge>>newBuilder()
                 .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
-                .expireAfterWrite(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
+                .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
                 .build();
         this.vertexCache = CacheBuilder.<Tuple, List<Vertex>>newBuilder()
                 .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
-                .expireAfterWrite(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
+                .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
                 .build();
     }
 

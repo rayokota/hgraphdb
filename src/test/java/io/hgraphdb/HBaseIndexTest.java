@@ -7,6 +7,7 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.Iterator;
 
 import static org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils.count;
@@ -143,5 +144,32 @@ public class HBaseIndexTest extends HBaseGraphTest {
         GraphTraversalSource g = graph.traversal();
         Iterator<Vertex> it = g.V().has("a", "key1", 0);
         assertEquals(1, count(it));
+    }
+
+    @Test
+    public void testIndexExample() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(IndexType.EDGE, "knows", "since");
+        Vertex v0 = graph.addVertex(T.id, id(0), T.label, "person", "name", "John");
+        Vertex v1 = graph.addVertex(T.id, id(1), T.label, "person", "name", "Kierkegaard");
+        Vertex v2 = graph.addVertex(T.id, id(2), T.label, "person", "name", "Barth");
+        Vertex v3 = graph.addVertex(T.id, id(3), T.label, "person", "name", "Brunner");
+        Vertex v4 = graph.addVertex(T.id, id(4), T.label, "person", "name", "Niebuhr");
+        Vertex v5 = graph.addVertex(T.id, id(5), T.label, "person", "name", "Tillich");
+
+        v0.addEdge("knows", v1, "since", LocalDate.parse("2000-01-01"));
+        v0.addEdge("knows", v2, "since", LocalDate.parse("2007-01-01"));
+        v0.addEdge("knows", v3, "since", LocalDate.parse("2007-01-02"));
+        v0.addEdge("knows", v4, "since", LocalDate.parse("2007-12-01"));
+        v0.addEdge("knows", v5, "since", LocalDate.parse("2008-01-01"));
+
+        Iterator<Vertex> it = graph.allVertices("person", "name", "John");
+        HBaseVertex v = (HBaseVertex) it.next();
+
+        Iterator<Edge> it2 = v.edges(Direction.OUT, "knows", "since",
+                LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
+        assertEquals(3, count(it2));
     }
 }

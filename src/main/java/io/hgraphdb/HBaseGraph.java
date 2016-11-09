@@ -175,12 +175,12 @@ public class HBaseGraph implements Graph {
 
             this.edgeCache = CacheBuilder.<ByteBuffer, Edge>newBuilder()
                     .maximumSize(config.getElementCacheMaxSize())
-                    .expireAfterWrite(config.getElementCacheTtlSecs(), TimeUnit.SECONDS)
+                    .expireAfterAccess(config.getElementCacheTtlSecs(), TimeUnit.SECONDS)
                     .removalListener((RemovalListener<ByteBuffer, Edge>) notif -> ((HBaseEdge) notif.getValue()).setCached(false))
                     .build();
             this.vertexCache = CacheBuilder.<ByteBuffer, Vertex>newBuilder()
                     .maximumSize(config.getElementCacheMaxSize())
-                    .expireAfterWrite(config.getElementCacheTtlSecs(), TimeUnit.SECONDS)
+                    .expireAfterAccess(config.getElementCacheTtlSecs(), TimeUnit.SECONDS)
                     .removalListener((RemovalListener<ByteBuffer, Vertex>) notif -> ((HBaseVertex) notif.getValue()).setCached(false))
                     .build();
 

@@ -34,7 +34,9 @@ public class Mutators {
         try {
             table.batch(batch, results);
             for (Object result : results) {
-                // TODO RAY
+                if (result instanceof Exception) {
+                    throw new HBaseGraphException((Exception) result);
+                }
             }
         } catch (IOException | InterruptedException e) {
             throw new HBaseGraphException(e);

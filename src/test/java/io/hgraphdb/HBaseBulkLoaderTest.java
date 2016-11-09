@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class HBaseBulkLoaderTest extends HBaseGraphTest {
 
     @Test
-    public void testBulkIngester() throws Exception {
+    public void testBulkLoader() throws Exception {
         HBaseBulkLoader loader = new HBaseBulkLoader(graph);
 
         Vertex v1 = loader.addVertex(T.id, "A");
