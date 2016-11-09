@@ -25,7 +25,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     public static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
     private Cache<Tuple, List<Edge>> edgeCache;
-    private Cache<Tuple, List<Vertex>> vertexCache;
 
     public HBaseVertex(HBaseGraph graph, Object id) {
         this(graph, id, null, null, null, null, false);
@@ -43,10 +42,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                 .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
                 .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
                 .build();
-        this.vertexCache = CacheBuilder.<Tuple, List<Vertex>>newBuilder()
-                .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
-                .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
-                .build();
     }
 
     @Override
@@ -60,25 +55,13 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         return edges != null ? IteratorUtils.filter(edges.iterator(), edge -> !((HBaseEdge) edge).isDeleted()) : null;
     }
 
-    public Iterator<Vertex> getVerticesFromCache(Tuple cacheKey) {
-        if (!isCached()) return null;
-        List<Vertex> vertices = vertexCache.getIfPresent(cacheKey);
-        return vertices != null ? IteratorUtils.filter(vertices.iterator(), vertex -> !((HBaseVertex) vertex).isDeleted()) : null;
-    }
-
     public void cacheEdges(Tuple cacheKey, List<Edge> edges) {
         if (!isCached()) return;
         edgeCache.put(cacheKey, edges);
     }
 
-    public void cacheVertices(Tuple cacheKey, List<Vertex> vertices) {
-        if (!isCached()) return;
-        vertexCache.put(cacheKey, vertices);
-    }
-
-    protected void invalidateCaches() {
+    protected void invalidateEdgeCache() {
         edgeCache.invalidateAll();
-        vertexCache.invalidateAll();
     }
 
     @Override
@@ -99,15 +82,15 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         graph.getEdgeModel().writeEdge(newEdge);
         graph.getEdgeIndexModel().writeEdgeEndpoints(newEdge);
 
-        invalidateCaches();
+        invalidateEdgeCache();
         if (!isCached()) {
             HBaseVertex cachedVertex = (HBaseVertex) graph.findVertex(id, false);
-            if (cachedVertex != null) cachedVertex.invalidateCaches();
+            if (cachedVertex != null) cachedVertex.invalidateEdgeCache();
         }
-        ((HBaseVertex) inVertex).invalidateCaches();
+        ((HBaseVertex) inVertex).invalidateEdgeCache();
         if (!((HBaseVertex) inVertex).isCached()) {
             HBaseVertex cachedInVertex = (HBaseVertex) graph.findVertex(inVertex.id(), false);
-            if (cachedInVertex != null) cachedInVertex.invalidateCaches();
+            if (cachedInVertex != null) cachedInVertex.invalidateEdgeCache();
         }
 
         Edge edge = graph.findOrCreateEdge(idValue);
