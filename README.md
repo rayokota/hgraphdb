@@ -1,21 +1,16 @@
-
 # HGraphDB - HBase as a Tinkerpop Graph Database
 
-HGraphDB is a client layer for using HBase as a graph database.  It is an implementation of the [Apache TinkerPop 3](http://tinkerpop.apache.org) framework.
+HGraphDB is a client layer for using HBase as a graph database.  It is an implementation of the [Apache TinkerPop 3](http://tinkerpop.apache.org) interfaces.
 
-## Building
+## Installing
 
-Prerequisites for building HGraphDB:
+Releases of HGraphDB are deployed to Maven Central.
 
-* git
-* Maven
-* Java 8
-
-```
-git clone https://github.com/rayokota/hgraphdb.git
-cd hgraphdb
-mvn clean package -DskipTests
-```
+		<dependency>
+		    <groupId>io.hgraphdb</groupId>
+		    <artifactId>hgraphdb</artifactId>
+		    <version>0.0.2</version>
+		</dependency>
 
 ## Setup
 
@@ -67,9 +62,9 @@ Two types of indices are supported by HGraphDB:
 
 An index is created as follows:
 
-		graph.createIndex(IndexType.VERTEX, "person", "name")
+		graph.createIndex(IndexType.VERTEX, "person", "name");
 		...
-		graph.createIndex(IndexType.EDGE, "knows", "since")
+		graph.createIndex(IndexType.EDGE, "knows", "since");
 
 Indices should be created before the relevant data is populated.  A future [enhancement](#future) will allow for index creation after data population.
 
@@ -78,14 +73,15 @@ Once an index is created and data has been populated, it can be used as follows:
 		// get persons named John
 		Iterator<Vertex> it = graph.allVertices("person", "name", "John");
 		...
-		// get persons first known betwen 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
-		Iterator<Edge> it = v1.edges(Direction.OUT, "knows", "since", 
+		// get persons first known by John between 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
+		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", 
 			LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
 		
-		
+Note that the indices support range queries, where the start of the range is inclusive and the end of the range is exclusive.
+
 ## Using the Gremlin Shell
 
-One advantage of providing a TinkerPop layer to HBase is the abundance of tools that suddenly become available, including the Gremlin DSL and the Gremlin shell.  To use the Gremlin shell, the following commands can be used.
+One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin shell.  To use HGraphDB in the Gremlin shell, run the following commands:
 
                  \,,,/
                  (o o)
@@ -93,47 +89,46 @@ One advantage of providing a TinkerPop layer to HBase is the abundance of tools 
         plugin activated: tinkerpop.server
         plugin activated: tinkerpop.utilities
         plugin activated: tinkerpop.tinkergraph
-        gremlin> :install io.hgraphdb hgraphdb 0.0.1
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
         gremlin> :install io.hgraphdb hgraphdb 0.0.1
         gremlin> :plugin use io.hgraphdb
                 
-Then restart the console.
+Then restart the Gremlin console and run the following:
 
 		gremlin> g = HBaseGraph.open("foo", "127.0.0.1", "/hbase-unsecure")
 
 
 ## Performance Tuning
 
-### Lazy Loading
-
-By default, vertices and edges are lazily loaded.  In some failure conditions, it may be possible for indices to point to vertices or edges which no longer exist.  In this case the application will need to handle the exception that is thrown when the vertex or edge is accessed.  However, if lazy loading is disabled, then HGraphDB will automatically clean up stale indices.  This can be done by calling `HBaseGraphConfiguration.setLazyLoading(true)`.
-
 ### Caching
 
-HGraphDB supports two kinds of caches, element caches and relationship caches.  Element caches are global, while relationship caches are specific to a vertex.  Both caches can be controlled through `HBaseGraphConfiguration` by specifying a maximum size for each type of cache as well as a TTL for elements after they have been accessed via the cache.  Specifying a maximum size of 0 will disable caching.
+HGraphDB supports two kinds of caches, global caches and relationship caches.  Global caches contain both vertices and edges. Relationship caches are specific to a vertex and cache the edges that are incident to the vertex.  Both caches can be controlled through `HBaseGraphConfiguration` by specifying a maximum size for each type of cache as well as a TTL for elements after they have been accessed via the cache.  Specifying a maximum size of 0 will disable caching.
+
+### Lazy Loading
+
+By default, vertices and edges are eagerly loaded.  In some failure conditions, it may be possible for indices to point to vertices or edges which have been deleted.  By eagerly loading graph elements, stale data can be filtered out before it reaches the client.  However, this incurs a slight performance penalty if the element has not previously been cached.  As an alternative, lazy loading can be enabled.  This can be done by calling `HBaseGraphConfiguration.setLazyLoading(true)`.  However, if there is stale data in the graph, the client will need to handle the exception that is thrown when an attempt is made to access the non-existent vertex or edge.
 
 ### Bulk Loading
 
-HGraphDB also provides a `HBaseBulkLoader` class for more performant loading of vertices and edges.  The bulk loader will not attempt to check if elements with the same ID already exist before adding new elements.
+HGraphDB also provides an `HBaseBulkLoader` class for more performant loading of vertices and edges.  The bulk loader will not attempt to check if elements with the same ID already exist when adding new elements.
 
 ## Implementation Notes
 
-HGraphDB uses a tall table model, similar to Zen and S2Graph.  The tables look as follows:
+HGraphDB uses a tall table schema.  The tables look as follows:
 
 ### Vertex Table
 
-| Row Key | Column: label | Column: createdAt | Column: [property1 key] | Column: [property2 key] |
-|---|---|---|---|---|
-| [vertex ID] | [label value] | [createdAt value] | [property1 value] | [property2 value] |
+| Row Key | Column: label | Column: createdAt | Column: [property1 key] | Column: [property2 key] | ... |
+|---|---|---|---|---|---|
+| [vertex ID] | [label value] | [createdAt value] | [property1 value] | [property2 value] |...|
 
 ### Edge Table
 
-| Row Key | Column: label | Column: createdAt | Column: [property1 key] | Column: [property2 key] |
-|---|---|---|---|---|
-| [edge ID] | [label value] | [createdAt value] | [property1 value] | [property2 value] |
+| Row Key | Column: label | Column: fromVertex | Column: toVertex | Column: createdAt | Column: [property1 key] | Column: [property2 key] | ... |
+|---|---|---|---|---|---|---|---|
+| [edge ID] | [label value] | [fromVertex ID ] | [toVertex ID] | [createdAt value] | [property1 value] | [property2 value] | ... |
 
 ### Vertex Index Table
 
@@ -141,7 +136,7 @@ HGraphDB uses a tall table model, similar to Zen and S2Graph.  The tables look a
 |---|---|
 | [vertex label, property key, property value, vertex ID] | [createdAt value] |
 	
-### Edge INdex Table
+### Edge Index Table
 
 | Row Key | Column: createdAt |
 |---|---|
@@ -151,15 +146,14 @@ HGraphDB uses a tall table model, similar to Zen and S2Graph.  The tables look a
 
 | Row Key | Column: createdAt | Column: state |
 |---|---|---|
-| [label, property key, index type] | [createdAt value] | [index state] |
+| [label, property key, index type] | [createdAt value] | [state value] |
 	
 ## <a name="future"></a>Future Enhancements 
 
 Possible future enhancements include map-reduce jobs for the following:
 
-- Populating indices after graph elements have already been added
-- Cleaning up stale indices
-- Deleting indices
-
+- Populating indices after graph elements have already been added.
+- Cleaning up stale indices.
+- Deleting indices.
 
 
