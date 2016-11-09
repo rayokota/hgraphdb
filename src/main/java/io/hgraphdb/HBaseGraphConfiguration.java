@@ -28,8 +28,8 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String CREATE_TABLES                   = "gremlin.hbase.createTables";
         public static final String REGION_COUNT                    = "gremlin.hbase.regionCount";
         public static final String COMPRESSION_ALGO                = "gremlin.hbase.compression";
-        public static final String ELEMENT_CACHE_MAX_SIZE          = "gremlin.hbase.elementCacheMaxSize";
-        public static final String ELEMENT_CACHE_TTL_SECS          = "gremlin.hbase.elementCacheTtlSecs";
+        public static final String GLOBAL_CACHE_MAX_SIZE           = "gremlin.hbase.globalCacheMaxSize";
+        public static final String GLOBAL_CACHE_TTL_SECS           = "gremlin.hbase.globalCacheTtlSecs";
         public static final String RELATIONSHIP_CACHE_MAX_SIZE     = "gremlin.hbase.relationshipCacheMaxSize";
         public static final String RELATIONSHIP_CACHE_TTL_SECS     = "gremlin.hbase.relationshipCacheTtlSecs";
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
@@ -115,20 +115,20 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public long getElementCacheMaxSize() {
-        return conf.getLong(Keys.ELEMENT_CACHE_MAX_SIZE, 1000000);
+        return conf.getLong(Keys.GLOBAL_CACHE_MAX_SIZE, 1000000);
     }
 
     public HBaseGraphConfiguration setElementCacheMaxSize(long maxSize) {
-        conf.setProperty(Keys.ELEMENT_CACHE_MAX_SIZE, maxSize);
+        conf.setProperty(Keys.GLOBAL_CACHE_MAX_SIZE, maxSize);
         return this;
     }
 
     public long getElementCacheTtlSecs() {
-        return conf.getLong(Keys.ELEMENT_CACHE_TTL_SECS, 60);
+        return conf.getLong(Keys.GLOBAL_CACHE_TTL_SECS, 60);
     }
 
     public HBaseGraphConfiguration setElementCacheTtlSecs(long maxSize) {
-        conf.setProperty(Keys.ELEMENT_CACHE_TTL_SECS, maxSize);
+        conf.setProperty(Keys.GLOBAL_CACHE_TTL_SECS, maxSize);
         return this;
     }
 
