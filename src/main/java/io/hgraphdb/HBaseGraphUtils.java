@@ -68,6 +68,7 @@ public final class HBaseGraphUtils {
     }
 
     public static void createTables(HBaseGraphConfiguration config, Connection conn) {
+        if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) return;
         Admin admin = null;
         try {
             admin = conn.getAdmin();
