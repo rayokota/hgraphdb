@@ -164,7 +164,7 @@ public class HBaseGraph implements Graph {
             this.connection = connection;
             this.features = new HBaseGraphFeatures(config.getInstanceType() == InstanceType.DISTRIBUTED);
 
-            if (config.getCreateTables()) {
+            if (config.getInstanceType() == InstanceType.DISTRIBUTED && config.getCreateTables()) {
                 HBaseGraphUtils.createTables(config, connection);
             }
 
