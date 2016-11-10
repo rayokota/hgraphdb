@@ -101,7 +101,13 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     @Override
     public void remove() {
         // Remove edges incident to this vertex.
-        edges(Direction.BOTH, OperationType.REMOVE).forEachRemaining(Edge::remove);
+        edges(Direction.BOTH, OperationType.REMOVE).forEachRemaining(edge -> {
+            try {
+                edge.remove();
+            } catch (HBaseGraphNotFoundException e) {
+                // ignore
+            }
+        });
 
         // Get rid of the vertex.
         getModel().deleteVertex(this);

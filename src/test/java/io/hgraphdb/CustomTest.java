@@ -15,10 +15,7 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.tinkerpop.gremlin.LoadGraphWith.GraphData.MODERN;
 import static org.junit.Assert.*;
@@ -26,7 +23,25 @@ import static org.junit.Assert.*;
 @Ignore
 public class CustomTest extends AbstractGremlinProcessTest {
 
-    @Ignore
+    @Test
+    public void shouldNotGetConcurrentModificationException() {
+        for (int i = 0; i < 25; i++) {
+            graph.addVertex("myId", i);
+        }
+        graph.vertices().forEachRemaining(v -> graph.vertices().forEachRemaining(u -> v.addEdge("knows", u, "myEdgeId", 12)));
+
+        tryCommit(graph, getAssertVertexEdgeCounts(25, 625));
+
+        final List<Vertex> vertices = new ArrayList<>();
+        IteratorUtils.fill(graph.vertices(), vertices);
+        for (Vertex v : vertices) {
+            v.remove();
+            tryCommit(graph);
+        }
+
+        tryCommit(graph, getAssertVertexEdgeCounts(0, 0));
+    }
+
     @Test
     public void shouldNotHaveAConcurrentModificationExceptionWhenIteratingAndRemovingAddingEdges() {
         final Vertex v1 = graph.addVertex("name", "marko");
