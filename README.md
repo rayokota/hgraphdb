@@ -79,9 +79,9 @@ Once an index is created and data has been populated, it can be used as follows:
 		
 Note that the indices support range queries, where the start of the range is inclusive and the end of the range is exclusive.
 
-## Using the Gremlin Shell
+## Using the Gremlin Console
 
-One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin shell.  To use HGraphDB in the Gremlin shell, run the following commands:
+One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
 
                  \,,,/
                  (o o)
@@ -92,12 +92,12 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.0.1
+        gremlin> :install io.hgraphdb hgraphdb 0.0.2
         gremlin> :plugin use io.hgraphdb
                 
 Then restart the Gremlin console and run the following:
 
-		gremlin> g = HBaseGraph.open("foo", "127.0.0.1", "/hbase-unsecure")
+		gremlin> g = HBaseGraph.open("mygraph", "127.0.0.1", "/hbase-unsecure")
 
 
 ## Performance Tuning
