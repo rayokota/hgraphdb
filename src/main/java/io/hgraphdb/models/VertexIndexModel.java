@@ -20,7 +20,6 @@ import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
 import org.apache.hadoop.hbase.util.SimplePositionedMutableByteRange;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
-import org.javatuples.Triplet;
 
 import java.io.IOException;
 import java.util.Collections;

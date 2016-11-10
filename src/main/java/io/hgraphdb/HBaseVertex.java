@@ -101,7 +101,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     @Override
     public void remove() {
         // Remove edges incident to this vertex.
-        edges(Direction.BOTH, OperationType.REMOVE).forEachRemaining(edge -> {
+        edges(Direction.BOTH).forEachRemaining(edge -> {
             try {
                 edge.remove();
             } catch (HBaseGraphNotFoundException e) {
@@ -163,11 +163,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     @Override
     public Iterator<Edge> edges(final Direction direction, final String... edgeLabels) {
-        return graph.getEdgeIndexModel().edges(this, direction, OperationType.READ, edgeLabels);
-    }
-
-    public Iterator<Edge> edges(final Direction direction, final OperationType op, final String... edgeLabels) {
-        return graph.getEdgeIndexModel().edges(this, direction, op, edgeLabels);
+        return graph.getEdgeIndexModel().edges(this, direction, edgeLabels);
     }
 
     public Iterator<Edge> edges(final Direction direction, final String label, final String key, final Object value) {

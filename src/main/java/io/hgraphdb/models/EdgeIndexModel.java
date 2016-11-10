@@ -67,8 +67,7 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.write(table, writer);
     }
 
-    public Iterator<Edge> edges(HBaseVertex vertex, Direction direction,
-                                OperationType op, String... labels) {
+    public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String... labels) {
         Tuple cacheKey = labels.length > 0
                 ? new Pair<>(direction, Arrays.asList(labels)) : new Unit<>(direction);
         Iterator<Edge> edges = vertex.getEdgesFromCache(cacheKey);
@@ -76,7 +75,7 @@ public class EdgeIndexModel extends BaseModel {
             return edges;
         }
         Scan scan = getEdgesScan(vertex, direction, Constants.CREATED_AT, labels);
-        return performEdgesScan(vertex, scan, cacheKey, op, edge -> true);
+        return performEdgesScan(vertex, scan, cacheKey, edge -> true);
     }
 
     public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String label,
@@ -92,7 +91,7 @@ public class EdgeIndexModel extends BaseModel {
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, label, key, value)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
-        return performEdgesScan(vertex, scan, cacheKey, OperationType.READ, edge -> {
+        return performEdgesScan(vertex, scan, cacheKey, edge -> {
             if (useIndex) return true;
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
@@ -113,7 +112,7 @@ public class EdgeIndexModel extends BaseModel {
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, label, key, inclusiveFromValue, exclusiveToValue)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
-        return performEdgesScan(vertex, scan, cacheKey, OperationType.READ, edge -> {
+        return performEdgesScan(vertex, scan, cacheKey, edge -> {
             if (useIndex) return true;
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
@@ -121,8 +120,9 @@ public class EdgeIndexModel extends BaseModel {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private Iterator<Edge> performEdgesScan(HBaseVertex vertex, Scan scan, Tuple cacheKey,
-                                            OperationType op, Predicate<HBaseEdge> filter) {
+                                            Predicate<HBaseEdge> filter) {
         List<Edge> cached = new ArrayList<>();
         final EdgeIndexReader parser = new EdgeIndexReader(graph);
         ResultScanner scanner;
@@ -137,7 +137,7 @@ public class EdgeIndexModel extends BaseModel {
                         }
                         HBaseEdge edge = (HBaseEdge) parser.parse(result);
                         try {
-                            if (!graph.isLazyLoading() && op != OperationType.REMOVE) edge.load();
+                            if (!graph.isLazyLoading() ) edge.load();
                             boolean passesFilter = filter.test(edge);
                             if (passesFilter) {
                                 cached.add(edge);
@@ -156,7 +156,7 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String... labels) {
-        return IteratorUtils.flatMap(edges(vertex, direction, OperationType.READ, labels), transformEdge(vertex));
+        return IteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,

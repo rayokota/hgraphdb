@@ -1,10 +1,8 @@
 package io.hgraphdb.readers;
 
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.IndexMetadata;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.javatuples.Triplet;
 
 public class VertexIndexReader implements Reader<Vertex> {
 

@@ -1,10 +1,8 @@
 package io.hgraphdb.readers;
 
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.IndexMetadata;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.javatuples.Triplet;
 
 public class EdgeIndexReader implements Reader<Edge> {
 
