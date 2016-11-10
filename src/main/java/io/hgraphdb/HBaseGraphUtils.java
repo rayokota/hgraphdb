@@ -117,7 +117,7 @@ public final class HBaseGraphUtils {
         admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);
     }
 
-    public static void drop(HBaseGraphConfiguration config, Connection conn) {
+    public static void dropTables(HBaseGraphConfiguration config, Connection conn) {
         Admin admin = null;
         try {
             admin = conn.getAdmin();

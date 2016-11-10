@@ -576,7 +576,7 @@ public class HBaseGraph implements Graph {
 
     @VisibleForTesting
     public void drop() {
-        HBaseGraphUtils.drop(config, connection);
+        HBaseGraphUtils.dropTables(config, connection);
     }
 
     public void dump() {
