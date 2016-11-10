@@ -61,7 +61,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public InstanceType getInstanceType() {
-        return InstanceType.valueOf(conf.getString(Keys.INSTANCE_TYPE));
+        return InstanceType.valueOf(conf.getString(Keys.INSTANCE_TYPE, InstanceType.DISTRIBUTED.toString()));
     }
 
     public HBaseGraphConfiguration setInstanceType(InstanceType type) {
@@ -70,7 +70,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public String getGraphNamespace() {
-        return conf.getString(Keys.GRAPH_NAMESPACE);
+        return conf.getString(Keys.GRAPH_NAMESPACE, "default");
     }
 
     public HBaseGraphConfiguration setGraphNamespace(String name) {

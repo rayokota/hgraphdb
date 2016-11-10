@@ -164,6 +164,10 @@ public class HBaseGraph implements Graph {
             this.connection = connection;
             this.features = new HBaseGraphFeatures(config.getInstanceType() == InstanceType.DISTRIBUTED);
 
+            if (config.getCreateTables()) {
+                HBaseGraphUtils.createTables(config, connection);
+            }
+
             String ns = config.getGraphNamespace();
             this.edgeModel = new EdgeModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGES)));
             this.edgeIndexModel = new EdgeIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_INDICES)));

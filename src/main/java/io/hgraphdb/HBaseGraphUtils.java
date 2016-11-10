@@ -36,7 +36,6 @@ public final class HBaseGraphUtils {
         Connection conn = connections.get(config.getGraphNamespace());
         if (conn != null) return conn;
         Configuration hbaseConfig = config.toHBaseConfiguration();
-        Admin admin = null;
         try {
             if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) {
                 return new MockConnection(hbaseConfig);
@@ -61,11 +60,19 @@ public final class HBaseGraphUtils {
             } else {
                 conn = ConnectionFactory.createConnection(hbaseConfig);
             }
+        } catch (Exception e) {
+            throw new HBaseGraphException(e);
+        }
+        connections.put(config.getGraphNamespace(), conn);
+        return conn;
+    }
+
+    public static void createTables(HBaseGraphConfiguration config, Connection conn) {
+        Admin admin = null;
+        try {
             admin = conn.getAdmin();
-            if (config.getCreateTables()) {
-                createNamespace(config, admin);
-                createTables(config, admin);
-            }
+            createNamespace(config, admin);
+            createTables(config, admin);
         } catch (Exception e) {
             throw new HBaseGraphException(e);
         } finally {
@@ -73,8 +80,6 @@ public final class HBaseGraphUtils {
                 if (admin != null) admin.close();
             } catch (IOException ignored) { }
         }
-        connections.put(config.getGraphNamespace(), conn);
-        return conn;
     }
 
     private static void createNamespace(HBaseGraphConfiguration config, Admin admin) throws IOException {
