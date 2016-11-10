@@ -104,7 +104,7 @@ Then restart the Gremlin console and run the following:
 
 ### Caching
 
-HGraphDB supports two kinds of caches, global caches and relationship caches.  Global caches contain both vertices and edges. Relationship caches are specific to a vertex and cache the edges that are incident to the vertex.  Both caches can be controlled through `HBaseGraphConfiguration` by specifying a maximum size for each type of cache as well as a TTL for elements after they have been accessed via the cache.  Specifying a maximum size of 0 will disable caching.
+HGraphDB provides two kinds of caches, global caches and relationship caches.  Global caches contain both vertices and edges. Relationship caches are specific to a vertex and cache the edges that are incident to the vertex.  Both caches can be controlled through `HBaseGraphConfiguration` by specifying a maximum size for each type of cache as well as a TTL for elements after they have been accessed via the cache.  Specifying a maximum size of 0 will disable caching.
 
 ### Lazy Loading
 
