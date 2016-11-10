@@ -155,10 +155,14 @@ public class HBaseGraph implements Graph {
     }
 
     public HBaseGraph(HBaseGraphConfiguration config) {
+        this(config, HBaseGraphUtils.getConnection(config));
+    }
+
+    public HBaseGraph(HBaseGraphConfiguration config, Connection connection) {
         try {
             this.config = config;
+            this.connection = connection;
             this.features = new HBaseGraphFeatures(config.getInstanceType() == InstanceType.DISTRIBUTED);
-            this.connection = HBaseGraphUtils.getConnection(config);
 
             String ns = config.getGraphNamespace();
             this.edgeModel = new EdgeModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGES)));

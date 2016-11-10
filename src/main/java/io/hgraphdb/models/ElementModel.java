@@ -64,7 +64,7 @@ public abstract class ElementModel extends BaseModel {
      * Write the given property to the property table.
      *
      * @param element The element
-     * @param key The propety key
+     * @param key The property key
      * @param value The property value
      */
     public PropertyWriter writeProperty(Element element, String key, Object value) {

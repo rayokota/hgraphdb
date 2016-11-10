@@ -32,7 +32,6 @@ public final class HBaseGraphUtils {
 
     private static Map<String, Connection> connections = new ConcurrentHashMap<>();
 
-
     public static Connection getConnection(HBaseGraphConfiguration config) {
         Connection conn = connections.get(config.getGraphNamespace());
         if (conn != null) return conn;
