@@ -108,7 +108,7 @@ HGraphDB supports two kinds of caches, global caches and relationship caches.  G
 
 ### Lazy Loading
 
-By default, vertices and edges are eagerly loaded.  In some failure conditions, it may be possible for indices to point to vertices or edges which have been deleted.  By eagerly loading graph elements, stale data can be filtered out before it reaches the client.  However, this incurs a slight performance penalty if the element has not previously been cached.  As an alternative, lazy loading can be enabled.  This can be done by calling `HBaseGraphConfiguration.setLazyLoading(true)`.  However, if there is stale data in the graph, the client will need to handle the exception that is thrown when an attempt is made to access the non-existent vertex or edge.
+By default, vertices and edges are eagerly loaded.  In some failure conditions, it may be possible for indices to point to vertices or edges which have been deleted.  By eagerly loading graph elements, stale data can be filtered out and removed before it reaches the client.  However, this incurs a slight performance penalty if the element has not previously been cached.  As an alternative, lazy loading can be enabled.  This can be done by calling `HBaseGraphConfiguration.setLazyLoading(true)`.  However, if there is stale data in the graph, the client will need to handle the exception that is thrown when an attempt is made to access the non-existent vertex or edge.
 
 ### Bulk Loading
 
