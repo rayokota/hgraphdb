@@ -116,7 +116,7 @@ HGraphDB also provides an `HBaseBulkLoader` class for more performant loading of
 
 ## Implementation Notes
 
-HGraphDB uses a tall table schema.  The tables look as follows:
+HGraphDB uses a tall table schema.  The schema is created in the namespace specified to the `HBaseGraphConfiguration`.  The tables look as follows:
 
 ### Vertex Table
 
