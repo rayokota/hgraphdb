@@ -23,7 +23,7 @@ To initialize HGraphDB, create an `HBaseGraphConfiguration` instance, and then u
   			.setCreateTables(true)
   			.set("hbase.zookeeper.quorum", "127.0.0.1")
   			.set("zookeeper.znode.parent", "/hbase-unsecure");
-		HBaseGraph graph = GraphFactory.open(cfg);
+		HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);
 		...
 
 As you can see above, HBase-specific configuration parameters can be passed directly.  These will be used when obtaining an HBase connection. 
