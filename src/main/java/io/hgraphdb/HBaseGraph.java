@@ -479,7 +479,7 @@ public class HBaseGraph implements Graph {
     }
 
     public boolean hasIndex(IndexType type, String label, String... propertyKeys ) {
-        return getIndices(OperationType.READ, type, label, propertyKeys).hasNext();
+        return hasIndex(OperationType.READ, type, label, propertyKeys);
     }
 
     public boolean hasIndex(OperationType op, IndexType type, String label, String... propertyKeys ) {
