@@ -137,7 +137,7 @@ public class EdgeIndexModel extends BaseModel {
                         }
                         HBaseEdge edge = (HBaseEdge) parser.parse(result);
                         try {
-                            if (!graph.isLazyLoading() ) edge.load();
+                            if (!graph.isLazyLoading()) edge.load();
                             boolean passesFilter = filter.test(edge);
                             if (passesFilter) {
                                 cached.add(edge);

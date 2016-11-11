@@ -297,6 +297,10 @@ public class HBaseGraph implements Graph {
         return vertexModel.vertices();
     }
 
+    public Iterator<Vertex> allVertices(Object fromId, int limit) {
+        return vertexModel.vertices(fromId, limit);
+    }
+
     public Iterator<Vertex> allVertices(String label) {
         return vertexModel.vertices(label);
     }
@@ -380,6 +384,10 @@ public class HBaseGraph implements Graph {
 
     public Iterator<Edge> allEdges() {
         return edgeModel.edges();
+    }
+
+    public Iterator<Edge> allEdges(Object fromId, int limit) {
+        return edgeModel.edges(fromId, limit);
     }
 
     public Iterator<Edge> allEdges(String key, Object value) {

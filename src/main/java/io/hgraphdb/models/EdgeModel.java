@@ -13,6 +13,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -49,6 +50,20 @@ public class EdgeModel extends ElementModel {
         try {
             scanner = table.getScanner(new Scan());
             return IteratorUtils.<Result, Edge>map(scanner.iterator(), parser::parse);
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    public Iterator<Edge> edges(Object fromId, int limit) {
+        final EdgeReader parser = new EdgeReader(graph);
+
+        Scan scan = fromId != null ? new Scan(Serializer.serializeWithSalt(fromId)) : new Scan();
+        scan.setFilter(new PageFilter(limit));
+        ResultScanner scanner = null;
+        try {
+            scanner = table.getScanner(scan);
+            return IteratorUtils.limit(IteratorUtils.<Result, Edge>map(scanner.iterator(), parser::parse), limit);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
