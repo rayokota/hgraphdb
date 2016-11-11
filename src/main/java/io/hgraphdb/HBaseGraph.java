@@ -29,11 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -491,15 +487,10 @@ public class HBaseGraph implements Graph {
     }
 
     public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, String... propertyKeys) {
-        List<String> keys = Arrays.asList(propertyKeys);
-        return indices.values().stream()
-                .filter(index -> isIndexActive(op, index)
-                        && index.type().equals(type)
-                        && index.label().equals(label)
-                        && keys.contains(index.propertyKey())).iterator();
+        return getIndices(op, type, label, Arrays.asList(propertyKeys));
     }
 
-    public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, Set<String> propertyKeys) {
+    public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, Collection<String> propertyKeys) {
         return indices.values().stream()
                 .filter(index -> isIndexActive(op, index)
                         && index.type().equals(type)
