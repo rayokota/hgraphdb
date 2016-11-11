@@ -33,7 +33,7 @@ The resulting graph can be used like any other TinkerPop graph instance.
 		...
 		Vertex v1 = graph.addVertex(T.id, 1, T.label, "person", "name", "John");
 		Vertex v2 = graph.addVertex(T.id, 2, T.label, "person", "name", "Sally");
-                v1.addEdge("knows", v2, T.id, "edge1", "since", LocalDate.now());
+		v1.addEdge("knows", v2, T.id, "edge1", "since", LocalDate.now());
 		...
 		
 A few things to note from the above example :
