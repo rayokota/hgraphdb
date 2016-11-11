@@ -50,7 +50,7 @@ A few things to note from the above example :
 	- java.time.Duration
 	- byte arrays
 	- Enum instances
-	- Kryo-serializable instances
+	- [Kryo](https://github.com/EsotericSoftware/kryo)-serializable instances
 	- Java-serializable instances
 
 ## Creating Indices
