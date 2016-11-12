@@ -11,7 +11,9 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -211,7 +213,9 @@ public abstract class HBaseElement implements Element {
         this.updatedAt = updatedAt;
     }
 
-    public abstract boolean hasIndex(OperationType op, String label, String... propertyKeys);
+    public abstract boolean hasIndex(OperationType op, String... propertyKeys);
+
+    public abstract Iterator<IndexMetadata> getIndices(OperationType op);
 
     public abstract ElementModel getModel();
 

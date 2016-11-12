@@ -12,6 +12,7 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -117,8 +118,13 @@ public class HBaseEdge extends HBaseElement implements Edge {
     }
 
     @Override
-    public boolean hasIndex(OperationType op, String label, String... propertyKeys) {
+    public boolean hasIndex(OperationType op, String... propertyKeys) {
         return graph.hasIndex(op, IndexType.EDGE, label, propertyKeys);
+    }
+
+    @Override
+    public Iterator<IndexMetadata> getIndices(OperationType op) {
+        return graph.getIndices(op, IndexType.EDGE, label, getPropertyKeys());
     }
 
     @Override

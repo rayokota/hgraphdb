@@ -31,8 +31,7 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public void writeVertexIndex(Vertex vertex) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.VERTEX, vertex.label(), ((HBaseVertex) vertex).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
         VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices);
         Mutators.write(table, writer);
     }
@@ -48,8 +47,7 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public void deleteVertexIndex(Vertex vertex) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.VERTEX, vertex.label(), ((HBaseVertex) vertex).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
         VertexIndexRemover writer = new VertexIndexRemover(graph, vertex, indices);
         Mutators.write(table, writer);
     }

@@ -42,16 +42,14 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public void writeEdgeEndpoints(Edge edge) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
         Mutator writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
         Mutators.write(table, indexWriter, writer);
     }
 
     public void writeEdgeIndex(Edge edge) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
         Mutators.write(table, indexWriter);
     }
@@ -67,16 +65,14 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public void deleteEdgeEndpoints(Edge edge) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
         Mutator writer = new EdgeIndexRemover(graph, edge, Constants.CREATED_AT, null);
         Mutators.write(table, writer, indexWriter);
     }
 
     public void deleteEdgeIndex(Edge edge) {
-        Iterator<IndexMetadata> indices = graph.getIndices(
-                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
         Mutators.write(table, indexWriter);
     }

@@ -51,7 +51,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
             // find a vertex by label and key/value
             for (final HasContainer hasContainer : hasContainers) {
                 if (Compare.eq == hasContainer.getBiPredicate() && !hasContainer.getKey().equals(T.label.getAccessor())) {
-                    if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label.get(), hasContainer.getKey())) {
+                    if (graph.hasIndex(IndexType.VERTEX, label.get(), hasContainer.getKey())) {
                         return IteratorUtils.stream(graph.allVertices(label.get(), hasContainer.getKey(), hasContainer.getValue()))
                                 .filter(vertex -> HasContainer.testAll(vertex, hasContainers)).iterator();
                     }
