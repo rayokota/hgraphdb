@@ -170,6 +170,11 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     }
 
     @Override
+    public boolean hasIndex(OperationType op, String label, String... propertyKeys) {
+        return graph.hasIndex(op, IndexType.VERTEX, label, propertyKeys);
+    }
+
+    @Override
     public VertexModel getModel() {
         return graph.getVertexModel();
     }

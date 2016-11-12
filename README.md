@@ -140,7 +140,7 @@ HGraphDB uses a tall table schema.  The schema is created in the namespace speci
 
 | Row Key | Column: createdAt |
 |---|---|
-| [vertex1 ID, direction, edge label, property key, property value, vertex2 ID, edge ID] | [createdAt value] |
+| [vertex1 ID, direction, property key, edge label, property value, vertex2 ID, edge ID] | [createdAt value] |
 
 ### Index Metadata Table
 

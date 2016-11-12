@@ -147,17 +147,20 @@ public abstract class HBaseElement implements Element {
 
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
-        /*
-        Object oldValue = getProperty(key);
-        if (oldValue != null && !oldValue.equals(value)) {
-            deleteFromIndexModel(key, null);
+        boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
+        if (hasIndex) {
+            Object oldValue = getProperty(key);
+            if (oldValue != null && !oldValue.equals(value)) {
+                deleteFromIndexModel(key, null);
+            }
         }
-        */
         if (!key.equals(Constants.LABEL)) {
             getProperties().put(key, value);
         }
         updatedAt(System.currentTimeMillis());
-        //writeToIndexModel(key);
+        if (hasIndex) {
+            writeToIndexModel(key);
+        }
         Mutator writer = getModel().writeProperty(this, key, value);
         Mutators.write(getTable(), writer);
     }
@@ -166,7 +169,10 @@ public abstract class HBaseElement implements Element {
         V value = getProperty(key);
         if (value != null) {
             updatedAt(System.currentTimeMillis());
-            //deleteFromIndexModel(key, null);
+            boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
+            if (hasIndex) {
+                deleteFromIndexModel(key, null);
+            }
             Mutator writer = getModel().clearProperty(this, key);
             Mutators.write(getTable(), writer);
             getProperties().remove(key);
@@ -193,6 +199,8 @@ public abstract class HBaseElement implements Element {
     public void updatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public abstract boolean hasIndex(OperationType op, String label, String... propertyKeys);
 
     public abstract ElementModel getModel();
 

@@ -117,6 +117,11 @@ public class HBaseEdge extends HBaseElement implements Edge {
     }
 
     @Override
+    public boolean hasIndex(OperationType op, String label, String... propertyKeys) {
+        return graph.hasIndex(op, IndexType.EDGE, label, propertyKeys);
+    }
+
+    @Override
     public EdgeModel getModel() {
         return graph.getEdgeModel();
     }
@@ -145,13 +150,13 @@ public class HBaseEdge extends HBaseElement implements Edge {
         getIndexModel().writeEdgeIndex(this, key);
     }
 
-    public void deleteEdgeEndpoints() {
-        getIndexModel().deleteEdgeEndpoints(this);
-    }
-
     @Override
     public void deleteFromModel() {
         getModel().deleteEdge(this);
+    }
+
+    public void deleteEdgeEndpoints() {
+        getIndexModel().deleteEdgeEndpoints(this);
     }
 
     @Override

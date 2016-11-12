@@ -11,10 +11,18 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.io.GraphReader;
+import org.apache.tinkerpop.gremlin.structure.io.GraphWriter;
+import org.apache.tinkerpop.gremlin.structure.io.Io;
+import org.apache.tinkerpop.gremlin.structure.io.IoTest;
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONIo;
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 import static org.apache.tinkerpop.gremlin.LoadGraphWith.GraphData.MODERN;
@@ -23,6 +31,7 @@ import static org.junit.Assert.*;
 @Ignore
 public class CustomTest extends AbstractGremlinProcessTest {
 
+    @Ignore
     @Test
     public void shouldNotGetConcurrentModificationException() {
         for (int i = 0; i < 25; i++) {
@@ -42,6 +51,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         tryCommit(graph, getAssertVertexEdgeCounts(0, 0));
     }
 
+    @Ignore
     @Test
     public void shouldNotHaveAConcurrentModificationExceptionWhenIteratingAndRemovingAddingEdges() {
         final Vertex v1 = graph.addVertex("name", "marko");
@@ -62,6 +72,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(0, IteratorUtils.count(v2.edges(Direction.BOTH)));
     }
 
+    @Ignore
     @Test
     public void shouldEvaluateConnectivityPatterns() {
         final Vertex a;
@@ -190,7 +201,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
     private void assert_g_v1_outXknowsX(final Traversal<Vertex, Vertex> traversal) {
         printTraversalForm(traversal);
         printTraversalForm2(traversal);
-        ((HBaseGraph)graph).dump();
         int counter = 0;
         final Set<Vertex> vertices = new HashSet<>();
         while (traversal.hasNext()) {
@@ -234,5 +244,41 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(1.0d, edge.<Double>value("weight"), 0.00001d);
         assertFalse(traversal.hasNext());
         assertFalse(traversal.hasNext());
+    }
+
+    public String ioType;
+
+    public Io.Builder ioBuilderToTest = GraphSONIo.build(GraphSONVersion.V2_0);
+
+    public boolean assertDouble = true;
+
+    public boolean lossyForId = true;
+
+    public String fileExtension = ".json";
+
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void shouldReadWriteModern() throws Exception {
+        try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            ((HBaseGraph)graph).createIndex(IndexType.EDGE, "knows", "weight");
+            final GraphWriter writer = graph.io(ioBuilderToTest).writer().create();
+            writer.writeGraph(os, graph);
+
+            final Configuration configuration = graphProvider.newGraphConfiguration("readGraph", this.getClass(), name.getMethodName(), LoadGraphWith.GraphData.MODERN);
+            graphProvider.clear(configuration);
+            final Graph g1 = graphProvider.openTestGraph(configuration);
+            ((HBaseGraph)g1).createIndex(IndexType.EDGE, "knows", "weight");
+            final GraphReader reader = graph.io(ioBuilderToTest).reader().create();
+            //((HBaseGraph) graph).dump();
+            //((HBaseGraph) g1).dump();
+            try (final ByteArrayInputStream bais = new ByteArrayInputStream(os.toByteArray())) {
+                reader.readGraph(bais, g1);
+            }
+
+            // modern uses double natively so always assert as such
+            IoTest.assertModernGraph(g1, true, lossyForId);
+
+            graphProvider.clear(g1, configuration);
+        }
     }
 }

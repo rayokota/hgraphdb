@@ -111,7 +111,7 @@ public class EdgeIndexModel extends BaseModel {
             LOGGER.debug("Using edge index for ({}, {})", label, key);
         }
         Scan scan = useIndex
-                ? getEdgesScan(vertex, direction, label, key, value)
+                ? getEdgesScan(vertex, direction, key, label, value)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
         return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
@@ -134,7 +134,7 @@ public class EdgeIndexModel extends BaseModel {
             LOGGER.debug("Using edge index for ({}, {})", label, key);
         }
         Scan scan = useIndex
-                ? getEdgesScan(vertex, direction, label, key, inclusiveFromValue, exclusiveToValue)
+                ? getEdgesScan(vertex, direction, key, label, inclusiveFromValue, exclusiveToValue)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
         return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
@@ -226,20 +226,27 @@ public class EdgeIndexModel extends BaseModel {
             scan.setFilter(new PrefixFilter(startRow));
         }
 
-        if (labels.length > 0) {
-            applyEdgeLabelsRowFilter(scan, vertex, direction, key, labels);
-        }
+        applyEdgeLabelsRowFilter(scan, vertex, direction, key, labels);
         return scan;
     }
 
     private void applyEdgeLabelsRowFilter(Scan scan, Vertex vertex, Direction direction, String key, String... labels) {
         FilterList rowFilters = new FilterList(FilterList.Operator.MUST_PASS_ONE);
-        for (String label : labels) {
+        if (labels.length > 0) {
+            for (String label : labels) {
+                if (direction == Direction.BOTH) {
+                    applyEdgeLabelRowFilter(rowFilters, vertex, Direction.IN, key, label);
+                    applyEdgeLabelRowFilter(rowFilters, vertex, Direction.OUT, key, label);
+                } else {
+                    applyEdgeLabelRowFilter(rowFilters, vertex, direction, key, label);
+                }
+            }
+        } else {
             if (direction == Direction.BOTH) {
-                applyEdgeLabelRowFilter(rowFilters, vertex, Direction.IN, label, key);
-                applyEdgeLabelRowFilter(rowFilters, vertex, Direction.OUT, label, key);
+                applyEdgeLabelRowFilter(rowFilters, vertex, Direction.IN, key, null);
+                applyEdgeLabelRowFilter(rowFilters, vertex, Direction.OUT, key, null);
             } else {
-                applyEdgeLabelRowFilter(rowFilters, vertex, direction, label, key);
+                applyEdgeLabelRowFilter(rowFilters, vertex, direction, key, null);
             }
         }
 
@@ -253,43 +260,43 @@ public class EdgeIndexModel extends BaseModel {
         }
     }
 
-    private void applyEdgeLabelRowFilter(FilterList filters, Vertex vertex, Direction direction, String label, String key) {
+    private void applyEdgeLabelRowFilter(FilterList filters, Vertex vertex, Direction direction, String key, String label) {
         RowFilter rowFilter = new RowFilter(CompareFilter.CompareOp.EQUAL,
-                new BinaryPrefixComparator(serializeForRead(vertex, direction, label, key, null)));
+                new BinaryPrefixComparator(serializeForRead(vertex, direction, key, label, null)));
         filters.addFilter(rowFilter);
     }
 
-    private Scan getEdgesScan(Vertex vertex, Direction direction, String label, String key, Object value) {
+    private Scan getEdgesScan(Vertex vertex, Direction direction, String key, String label, Object value) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key-value", vertex.id());
 
-        byte[] startRow = serializeForRead(vertex, direction, label, key, value);
+        byte[] startRow = serializeForRead(vertex, direction, key, label, value);
         Scan scan = new Scan(startRow);
         scan.setFilter(new PrefixFilter(startRow));
         return scan;
     }
 
-    private Scan getEdgesScan(Vertex vertex, Direction direction, String label, String key,
+    private Scan getEdgesScan(Vertex vertex, Direction direction, String key, String label,
                               Object fromInclusiveValue, Object toExclusiveValue) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key-range", vertex.id());
 
-        byte[] startRow = serializeForRead(vertex, direction, label, key, fromInclusiveValue);
-        byte[] stopRow = serializeForRead(vertex, direction, label, key, toExclusiveValue);
+        byte[] startRow = serializeForRead(vertex, direction, key, label, fromInclusiveValue);
+        byte[] stopRow = serializeForRead(vertex, direction, key, label, toExclusiveValue);
         return new Scan(startRow, stopRow);
     }
 
     public byte[] serializeForRead(Vertex vertex, Direction direction, String label) {
-        return serializeForRead(vertex, direction, label, Constants.CREATED_AT, null);
+        return serializeForRead(vertex, direction, Constants.CREATED_AT, label, null);
     }
 
-    public byte[] serializeForRead(Vertex vertex, Direction direction, String label, String key, Object value) {
+    public byte[] serializeForRead(Vertex vertex, Direction direction, String key, String label, Object value) {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         Serializer.serializeWithSalt(buffer, vertex.id());
         if (direction != null) {
             OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
-            if (label != null) {
-                OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
-                if (key != null) {
-                    OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+            if (key != null) {
+                OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+                if (label != null) {
+                    OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
                     if (value != null) {
                         Serializer.serialize(buffer, value);
                     }
@@ -309,8 +316,8 @@ public class EdgeIndexModel extends BaseModel {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         Serializer.serializeWithSalt(buffer, direction == Direction.IN ? inVertexId : outVertexId);
         OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
-        OrderedBytes.encodeString(buffer, edge.label(), Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+        OrderedBytes.encodeString(buffer, edge.label(), Order.ASCENDING);
         Serializer.serialize(buffer, key.equals(Constants.CREATED_AT) ? ((HBaseEdge) edge).createdAt() : edge.value(key));
         Serializer.serialize(buffer, direction == Direction.IN ? outVertexId : inVertexId);
         Serializer.serialize(buffer, edge.id());
@@ -326,8 +333,8 @@ public class EdgeIndexModel extends BaseModel {
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         Object vertexId1 = Serializer.deserializeWithSalt(buffer);
         Direction direction = OrderedBytes.decodeInt8(buffer) == 1 ? Direction.IN : Direction.OUT;
-        String label = OrderedBytes.decodeString(buffer);
         String key = OrderedBytes.decodeString(buffer);
+        String label = OrderedBytes.decodeString(buffer);
         Object value = Serializer.deserialize(buffer);
         Object vertexId2 = Serializer.deserialize(buffer);
         Cell createdAttsCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
