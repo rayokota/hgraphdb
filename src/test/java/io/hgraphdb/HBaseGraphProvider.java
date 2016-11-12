@@ -70,6 +70,12 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     graph.createIndex(IndexType.VERTEX, "song", "songType");
                 if (random.nextBoolean())
                     graph.createIndex(IndexType.VERTEX, "song", "performances");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "followedBy", "weight");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "sungBy", "weight");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "writtenBy", "weight");
             } // else no indices
         } else if (graphData.equals(LoadGraphWith.GraphData.MODERN)) {
             if (pick) {
@@ -79,9 +85,12 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     graph.createIndex(IndexType.VERTEX, "person", "age");
                 if (random.nextBoolean())
                     graph.createIndex(IndexType.VERTEX, "software", "name");
-                if (random.nextBoolean()) {
+                if (random.nextBoolean())
                     graph.createIndex(IndexType.VERTEX, "software", "lang");
-                }
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "created", "weight");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "knows", "weight");
             } // else no indices
         } else if (graphData.equals(LoadGraphWith.GraphData.CLASSIC)) {
             if (pick) {
@@ -91,6 +100,10 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     graph.createIndex(IndexType.VERTEX, "vertex", "age");
                 if (random.nextBoolean())
                     graph.createIndex(IndexType.VERTEX, "vertex", "lang");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "created", "weight");
+                if (random.nextBoolean())
+                    graph.createIndex(IndexType.EDGE, "knows", "weight");
             } // else no indices
         } else {
             //throw new RuntimeException("Could not load graph with " + graphData);
