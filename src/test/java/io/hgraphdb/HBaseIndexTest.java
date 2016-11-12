@@ -1,10 +1,7 @@
 package io.hgraphdb;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.*;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -98,11 +95,6 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         assertEquals(2, count(it));
-
-        /*
-        it = ((HBaseVertex) v10).vertices(Direction.OUT, "b", "key1", 11);
-        assertEquals(2, count(it));
-        */
     }
 
     @Test
@@ -170,6 +162,57 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
         assertEquals(3, count(it));
+    }
+
+    @Test
+    public void testVertexIndexModifyingProperty() {
+        assertEquals(0, count(graph.vertices()));
+        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        Vertex v = graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
+
+        Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
+        assertEquals(1, count(it));
+
+        VertexProperty<Integer> p = v.property("key1", 12);
+
+        it = graph.allVertices("a", "key1", 11);
+        assertEquals(0, count(it));
+        it = graph.allVertices("a", "key1", 12);
+        assertEquals(1, count(it));
+
+        p.remove();
+
+        it = graph.allVertices("a", "key1", 11);
+        assertEquals(0, count(it));
+        it = graph.allVertices("a", "key1", 12);
+        assertEquals(0, count(it));
+    }
+
+    @Test
+    public void testEdgeIndexModifyingProperty() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.EDGE, "b", "key1");
+        HBaseVertex v10 = (HBaseVertex) graph.addVertex(T.id, id(10));
+        HBaseVertex v11 = (HBaseVertex) graph.addVertex(T.id, id(11));
+        Edge e = v10.addEdge("b", v11, "key1", 11);
+
+        Iterator<Edge> it = v10.edges(Direction.OUT, "b", "key1", 11);
+        assertEquals(1, count(it));
+
+        Property<Integer> p = e.property("key1", 12);
+
+        it = v10.edges(Direction.OUT, "b", "key1", 11);
+        assertEquals(0, count(it));
+        it = v10.edges(Direction.OUT, "b", "key1", 12);
+        assertEquals(1, count(it));
+
+        p.remove();
+
+        it = v10.edges(Direction.OUT, "b", "key1", 11);
+        assertEquals(0, count(it));
+        it = v10.edges(Direction.OUT, "b", "key1", 12);
+        assertEquals(0, count(it));
     }
 
     @Test
