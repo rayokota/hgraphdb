@@ -448,9 +448,10 @@ public class HBaseGraph implements Graph {
     }
 
     public void createIndex(IndexType type, String label, String propertyKey, boolean populate) {
-        IndexMetadata oldIndex = indexMetadataModel.index(type, label, propertyKey);
+        IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
+        IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex != null && oldIndex.state() != State.DROPPED) {
-            throw new HBaseGraphException("Index for (" + label + ", " + propertyKey + ") of type " + type + " already exists");
+            throw new HBaseGraphException("Index for " + indexKey.toString() + " already exists");
         }
         long now = System.currentTimeMillis();
         IndexMetadata index = new IndexMetadata(type, label, propertyKey, State.CREATED, now, now);
@@ -463,14 +464,12 @@ public class HBaseGraph implements Graph {
         if (populate) {
             populateIndex(index);
         } else {
-            index.state(State.ACTIVE);
-            indexMetadataModel.writeIndexMetadata(index);
+            updateIndex(indexKey, State.ACTIVE);
         }
     }
 
     private void populateIndex(IndexMetadata index) {
-        index.state(State.BUILDING);
-        indexMetadataModel.writeIndexMetadata(index);
+        updateIndex(index.key(), State.BUILDING);
 
         executor.schedule(
                 () -> {
@@ -479,8 +478,7 @@ public class HBaseGraph implements Graph {
                     } else {
                         allEdges().forEachRemaining(edge -> edgeIndexModel.writeEdgeIndex(edge, index));
                     }
-                    index.state(State.ACTIVE);
-                    indexMetadataModel.writeIndexMetadata(index);
+                    updateIndex(index.key(), State.ACTIVE);
                 },
                 config.getIndexStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
@@ -516,11 +514,10 @@ public class HBaseGraph implements Graph {
         return false;
     }
 
-    private void updateIndex(IndexMetadata index, State newState) {
-        IndexMetadata oldIndex = indexMetadataModel.index(index.type(), index.label(), index.propertyKey());
+    private void updateIndex(IndexMetadata.Key indexKey, State newState) {
+        IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex == null) {
-            throw new HBaseGraphException("Index for (" + index.label() + ", " + index.propertyKey() + ") of type "
-                    + index.type() + " does not exists");
+            throw new HBaseGraphException("Index for " + indexKey.toString() + " does not exists");
         }
         State oldState = oldIndex.state();
 
@@ -554,8 +551,8 @@ public class HBaseGraph implements Graph {
         }
         oldIndex.state(newState);
         oldIndex.updatedAt(System.currentTimeMillis());
-        indexMetadataModel.writeIndexMetadata(index);
-        indices.put(index.key(), index);
+        indexMetadataModel.writeIndexMetadata(oldIndex);
+        indices.put(indexKey, oldIndex);
     }
 
     @Override

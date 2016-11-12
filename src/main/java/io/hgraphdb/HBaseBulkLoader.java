@@ -67,7 +67,6 @@ public final class HBaseBulkLoader {
                     HBaseGraphUtils.propertiesToMap(keyValues));
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
-
             VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices);
             vertexIndicesMutator.mutate(IteratorUtils.list(writer.constructMutations()));
 

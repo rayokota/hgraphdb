@@ -46,9 +46,9 @@ public class IndexMetadataModel extends BaseModel {
         Mutators.write(table, writer);
     }
 
-    public IndexMetadata index(IndexType type, String label, String propertyKey) {
+    public IndexMetadata index(IndexMetadata.Key indexKey) {
         final IndexMetadataReader parser = new IndexMetadataReader(graph);
-        Get get = new Get(serialize(new IndexMetadata.Key(type, label, propertyKey)));
+        Get get = new Get(serialize(indexKey));
         try {
             Result result = table.get(get);
             return parser.parse(result);

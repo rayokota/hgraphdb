@@ -97,13 +97,6 @@ public final class Serializer {
 
     }
 
-    private static final ThreadLocal<ByteArrayOutputStream> BOUTS = new ThreadLocal<ByteArrayOutputStream>() {
-        @Override
-        public ByteArrayOutputStream initialValue() {
-            return new ByteArrayOutputStream(32);
-        }
-    };
-
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] target) {
         if (target == null) return null;
