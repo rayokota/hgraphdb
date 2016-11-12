@@ -1,5 +1,6 @@
 package io.hgraphdb;
 
+import io.hgraphdb.models.BaseModel;
 import io.hgraphdb.models.ElementModel;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
@@ -53,6 +54,8 @@ public abstract class HBaseElement implements Element {
     }
 
     public abstract ElementModel getModel();
+
+    public abstract BaseModel getIndexModel();
 
     public Table getTable() {
         return getModel().getTable();

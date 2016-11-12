@@ -1,5 +1,6 @@
 package io.hgraphdb;
 
+import io.hgraphdb.models.EdgeIndexModel;
 import io.hgraphdb.models.EdgeModel;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -42,6 +43,11 @@ public class HBaseEdge extends HBaseElement implements Edge {
     @Override
     public EdgeModel getModel() {
         return graph.getEdgeModel();
+    }
+
+    @Override
+    public EdgeIndexModel getIndexModel() {
+        return graph.getEdgeIndexModel();
     }
 
     @Override
@@ -89,8 +95,8 @@ public class HBaseEdge extends HBaseElement implements Edge {
     @Override
     public void remove() {
         // Get rid of the endpoints and edge themselves.
-        graph.getEdgeModel().deleteEdge(this);
-        graph.getEdgeIndexModel().deleteEdgeEndpoints(this);
+        getModel().deleteEdge(this);
+        getIndexModel().deleteEdgeEndpoints(this);
 
         setDeleted(true);
         if (!isCached()) {
@@ -107,7 +113,7 @@ public class HBaseEdge extends HBaseElement implements Edge {
         if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
             graph.getExecutor().submit(() -> {
                 try {
-                    graph.getEdgeIndexModel().deleteEdgeIndex(this, indexKey, ts);
+                    getIndexModel().deleteEdgeIndex(this, indexKey, ts);
                 } catch (Exception e) {
                     LOGGER.error("Could not delete stale index", e);
                 }

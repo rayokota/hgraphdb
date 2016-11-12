@@ -2,6 +2,7 @@ package io.hgraphdb;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.hgraphdb.models.VertexIndexModel;
 import io.hgraphdb.models.VertexModel;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -49,6 +50,11 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         return graph.getVertexModel();
     }
 
+    @Override
+    public VertexIndexModel getIndexModel() {
+        return graph.getVertexIndexModel();
+    }
+
     public Iterator<Edge> getEdgesFromCache(Tuple cacheKey) {
         if (!isCached()) return null;
         List<Edge> edges = edgeCache.getIfPresent(cacheKey);
@@ -79,8 +85,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
-        graph.getEdgeIndexModel().writeEdgeEndpoints(newEdge);
-        graph.getEdgeModel().writeEdge(newEdge);
+        newEdge.getIndexModel().writeEdgeEndpoints(newEdge);
+        newEdge.getModel().writeEdge(newEdge);
 
         invalidateEdgeCache();
         if (!isCached()) {
@@ -111,7 +117,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
         // Get rid of the vertex.
         getModel().deleteVertex(this);
-        graph.getVertexIndexModel().deleteVertexIndex(this);
+        getIndexModel().deleteVertexIndex(this);
 
         setDeleted(true);
         if (!isCached()) {
@@ -128,7 +134,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
             graph.getExecutor().submit(() -> {
                 try {
-                    graph.getVertexIndexModel().deleteVertexIndex(this, indexKey, ts);
+                    getIndexModel().deleteVertexIndex(this, indexKey, ts);
                 } catch (Exception e) {
                     LOGGER.error("Could not delete stale index", e);
                 }
