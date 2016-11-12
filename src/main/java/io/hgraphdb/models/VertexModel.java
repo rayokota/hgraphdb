@@ -102,6 +102,7 @@ public class VertexModel extends ElementModel {
     public Iterator<Vertex> vertices(String label, String key, Object value) {
         ElementHelper.validateProperty(key, value);
         if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label, key)) {
+            LOGGER.debug("Using vertex index for ({}, {})", label, key);
             return graph.getVertexIndexModel().vertices(label, key, value);
         }
         final VertexReader parser = new VertexReader(graph);
@@ -122,6 +123,7 @@ public class VertexModel extends ElementModel {
         ElementHelper.validateProperty(key, inclusiveFrom);
         ElementHelper.validateProperty(key, exclusiveTo);
         if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label, key)) {
+            LOGGER.debug("Using vertex index for ({}, {})", label, key);
             return graph.getVertexIndexModel().vertices(label, key, inclusiveFrom, exclusiveTo);
         }
         final VertexReader parser = new VertexReader(graph);

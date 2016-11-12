@@ -38,7 +38,7 @@ public abstract class ElementModel extends BaseModel {
      */
     @SuppressWarnings("unchecked")
     public void load(Element element) {
-        LOGGER.debug("Executing Get, type: {}, id: {}", getClass().getSimpleName(), element.id());
+        LOGGER.trace("Executing Get, type: {}, id: {}", getClass().getSimpleName(), element.id());
 
         Get get = new Get(Serializer.serializeWithSalt(element.id()));
 

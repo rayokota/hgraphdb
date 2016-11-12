@@ -75,7 +75,7 @@ public class EdgeIndexModel extends BaseModel {
             return edges;
         }
         Scan scan = getEdgesScan(vertex, direction, Constants.CREATED_AT, labels);
-        return performEdgesScan(vertex, scan, cacheKey, edge -> true);
+        return performEdgesScan(vertex, scan, cacheKey, false, edge -> true);
     }
 
     public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String label,
@@ -88,11 +88,13 @@ public class EdgeIndexModel extends BaseModel {
         }
         final boolean useIndex = !key.equals(Constants.CREATED_AT)
                 && graph.hasIndex(OperationType.READ, IndexType.EDGE, label, key);
+        if (useIndex) {
+            LOGGER.debug("Using edge index for ({}, {})", label, key);
+        }
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, label, key, value)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
-        return performEdgesScan(vertex, scan, cacheKey, edge -> {
-            if (useIndex) return true;
+        return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
         });
@@ -109,11 +111,13 @@ public class EdgeIndexModel extends BaseModel {
         }
         final boolean useIndex = !key.equals(Constants.CREATED_AT)
                 && graph.hasIndex(OperationType.READ, IndexType.EDGE, label, key);
+        if (useIndex) {
+            LOGGER.debug("Using edge index for ({}, {})", label, key);
+        }
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, label, key, inclusiveFromValue, exclusiveToValue)
                 : getEdgesScan(vertex, direction, Constants.CREATED_AT, label);
-        return performEdgesScan(vertex, scan, cacheKey, edge -> {
-            if (useIndex) return true;
+        return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = Serializer.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
                     && Bytes.compareTo(propValueBytes, toBytes) < 0;
@@ -122,7 +126,7 @@ public class EdgeIndexModel extends BaseModel {
 
     @SuppressWarnings("unchecked")
     private Iterator<Edge> performEdgesScan(HBaseVertex vertex, Scan scan, Tuple cacheKey,
-                                            Predicate<HBaseEdge> filter) {
+                                            boolean useIndex, Predicate<HBaseEdge> filter) {
         List<Edge> cached = new ArrayList<>();
         final EdgeIndexReader parser = new EdgeIndexReader(graph);
         ResultScanner scanner;
@@ -137,16 +141,18 @@ public class EdgeIndexModel extends BaseModel {
                         }
                         HBaseEdge edge = (HBaseEdge) parser.parse(result);
                         try {
-                            if (!graph.isLazyLoading()) edge.load();
-                            boolean passesFilter = filter.test(edge);
+                            boolean isLazy = graph.isLazyLoading();
+                            if (!isLazy) edge.load();
+                            boolean passesFilter = (isLazy && useIndex) || filter.test(edge);
                             if (passesFilter) {
                                 cached.add(edge);
                                 return IteratorUtils.of(edge);
                             } else {
+                                if (useIndex) edge.removeStaleIndex();
                                 return Collections.emptyIterator();
                             }
                         } catch (final HBaseGraphNotFoundException e) {
-                            e.getElement().removeStaleIndex();
+                            edge.removeStaleIndex();
                             return Collections.emptyIterator();
                         }
                     });
@@ -180,14 +186,14 @@ public class EdgeIndexModel extends BaseModel {
                 if (!graph.isLazyLoading()) v.load();
                 return IteratorUtils.of(v);
             } catch (final HBaseGraphNotFoundException e) {
-                e.getElement().removeStaleIndex();
+                ((HBaseEdge) edge).removeStaleIndex();
                 return Collections.emptyIterator();
             }
         };
     }
 
     private Scan getEdgesScan(Vertex vertex, Direction direction, String key, String... labels) {
-        LOGGER.debug("Executing Scan, type: {}, id: {}", "key", vertex.id());
+        LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
         Scan scan;
         if (direction == Direction.BOTH) {
@@ -235,7 +241,7 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     private Scan getEdgesScan(Vertex vertex, Direction direction, String label, String key, Object value) {
-        LOGGER.debug("Executing Scan, type: {}, id: {}", "key-value", vertex.id());
+        LOGGER.trace("Executing Scan, type: {}, id: {}", "key-value", vertex.id());
 
         byte[] startRow = serializeForRead(vertex, direction, label, key, value);
         Scan scan = new Scan(startRow);
@@ -245,7 +251,7 @@ public class EdgeIndexModel extends BaseModel {
 
     private Scan getEdgesScan(Vertex vertex, Direction direction, String label, String key,
                               Object fromInclusiveValue, Object toExclusiveValue) {
-        LOGGER.debug("Executing Scan, type: {}, id: {}", "key-range", vertex.id());
+        LOGGER.trace("Executing Scan, type: {}, id: {}", "key-range", vertex.id());
 
         byte[] startRow = serializeForRead(vertex, direction, label, key, fromInclusiveValue);
         byte[] stopRow = serializeForRead(vertex, direction, label, key, toExclusiveValue);

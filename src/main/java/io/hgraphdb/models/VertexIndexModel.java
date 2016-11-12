@@ -13,11 +13,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
-import org.apache.hadoop.hbase.util.Order;
-import org.apache.hadoop.hbase.util.OrderedBytes;
-import org.apache.hadoop.hbase.util.PositionedByteRange;
-import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
-import org.apache.hadoop.hbase.util.SimplePositionedMutableByteRange;
+import org.apache.hadoop.hbase.util.*;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
@@ -26,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class VertexIndexModel extends BaseModel {
 
@@ -58,25 +55,42 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(String label, String key, Object value) {
-        return vertices(getVertexIndexScan(label, key, value));
+        byte[] valueBytes = Serializer.serialize(value);
+        return vertices(getVertexIndexScan(label, key, value), vertex -> {
+            byte[] propValueBytes = Serializer.serialize(vertex.getProperty(key));
+            return Bytes.compareTo(propValueBytes, valueBytes) == 0;
+        });
     }
 
     public Iterator<Vertex> vertices(String label, String key, Object inclusiveFrom, Object exclusiveTo) {
-        return vertices(getVertexIndexScan(label, key, inclusiveFrom, exclusiveTo));
+        byte[] fromBytes = Serializer.serialize(inclusiveFrom);
+        byte[] toBytes = Serializer.serialize(exclusiveTo);
+        return vertices(getVertexIndexScan(label, key, inclusiveFrom, exclusiveTo), vertex -> {
+            byte[] propValueBytes = Serializer.serialize(vertex.getProperty(key));
+            return Bytes.compareTo(propValueBytes, fromBytes) >= 0
+                    && Bytes.compareTo(propValueBytes, toBytes) < 0;
+        });
     }
 
-    private Iterator<Vertex> vertices(Scan scan) {
+    private Iterator<Vertex> vertices(Scan scan, Predicate<HBaseVertex> filter) {
         final VertexIndexReader parser = new VertexIndexReader(graph);
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(scan);
             return IteratorUtils.<Result, Vertex>flatMap(scanner.iterator(), result -> {
-                Vertex vertex = parser.parse(result);
+                HBaseVertex vertex = (HBaseVertex) parser.parse(result);
                 try {
-                    if (!graph.isLazyLoading()) ((HBaseVertex) vertex).load();
-                    return IteratorUtils.of(vertex);
+                    boolean isLazy = graph.isLazyLoading();
+                    if (!isLazy) vertex.load();
+                    boolean passesFilter = isLazy || filter.test(vertex);
+                    if (passesFilter) {
+                        return IteratorUtils.of(vertex);
+                    } else {
+                        vertex.removeStaleIndex();
+                        return Collections.emptyIterator();
+                    }
                 } catch (final HBaseGraphNotFoundException e) {
-                    e.getElement().removeStaleIndex();
+                    vertex.removeStaleIndex();
                     return Collections.emptyIterator();
                 }
             });

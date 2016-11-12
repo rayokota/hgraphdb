@@ -146,6 +146,10 @@ public abstract class HBaseElement implements Element {
 
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
+        Object oldValue = getProperty(key);
+        if (!value.equals(oldValue)) {
+
+        }
         updatedAt(System.currentTimeMillis());
         Mutator writer = getModel().writeProperty(this, key, value);
         Mutators.write(getTable(), writer);
