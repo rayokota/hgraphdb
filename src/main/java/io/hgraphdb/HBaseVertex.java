@@ -45,16 +45,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                 .build();
     }
 
-    @Override
-    public VertexModel getModel() {
-        return graph.getVertexModel();
-    }
-
-    @Override
-    public VertexIndexModel getIndexModel() {
-        return graph.getVertexIndexModel();
-    }
-
     public Iterator<Edge> getEdgesFromCache(Tuple cacheKey) {
         if (!isCached()) return null;
         List<Edge> edges = edgeCache.getIfPresent(cacheKey);
@@ -85,8 +75,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
-        newEdge.getIndexModel().writeEdgeEndpoints(newEdge);
-        newEdge.getModel().writeEdge(newEdge);
+        newEdge.writeEdgeEndpoints();
+        newEdge.writeToModel();
 
         invalidateEdgeCache();
         if (!isCached()) {
@@ -116,29 +106,13 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         });
 
         // Get rid of the vertex.
-        getModel().deleteVertex(this);
-        getIndexModel().deleteVertexIndex(this);
+        deleteFromModel();
+        deleteFromIndexModel();
 
         setDeleted(true);
         if (!isCached()) {
             HBaseVertex cachedVertex = (HBaseVertex) graph.findVertex(id, false);
             if (cachedVertex != null) cachedVertex.setDeleted(true);
-        }
-    }
-
-    @Override
-    public void removeStaleIndex() {
-        IndexMetadata.Key indexKey = getIndexKey();
-        long ts = getIndexTs();
-        // delete after some expiry due to timing issues between index creation and element creation
-        if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
-            graph.getExecutor().submit(() -> {
-                try {
-                    getIndexModel().deleteVertexIndex(this, indexKey, ts);
-                } catch (Exception e) {
-                    LOGGER.error("Could not delete stale index", e);
-                }
-            });
         }
     }
 
@@ -193,6 +167,46 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     public Iterator<Vertex> vertices(final Direction direction, final String label, final String key,
                                 final Object inclusiveFromValue, final Object exclusiveToValue) {
         return graph.getEdgeIndexModel().vertices(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
+    }
+
+    @Override
+    public VertexModel getModel() {
+        return graph.getVertexModel();
+    }
+
+    @Override
+    public VertexIndexModel getIndexModel() {
+        return graph.getVertexIndexModel();
+    }
+
+    @Override
+    public void writeToModel() {
+        getModel().writeVertex(this);
+    }
+
+    @Override
+    public void writeToIndexModel() {
+        getIndexModel().writeVertexIndex(this);
+    }
+
+    @Override
+    public void writeToIndexModel(String key) {
+        getIndexModel().writeVertexIndex(this, key);
+    }
+
+    @Override
+    public void deleteFromModel() {
+        getModel().deleteVertex(this);
+    }
+
+    @Override
+    public void deleteFromIndexModel() {
+        getIndexModel().deleteVertexIndex(this);
+    }
+
+    @Override
+    public void deleteFromIndexModel(String key, Long ts) {
+        getIndexModel().deleteVertexIndex(this, key, ts);
     }
 
     @Override

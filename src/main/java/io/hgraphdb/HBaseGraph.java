@@ -99,7 +99,6 @@ public class HBaseGraph implements Graph {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraph.class);
 
-
     static {
         TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class, TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(HBaseGraphStepStrategy.instance()));
     }
@@ -225,8 +224,8 @@ public class HBaseGraph implements Graph {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
-        vertexIndexModel.writeVertexIndex(newVertex);
-        vertexModel.writeVertex(newVertex);
+        newVertex.writeToIndexModel();
+        newVertex.writeToModel();
 
         Vertex vertex = findOrCreateVertex(idValue);
         ((HBaseVertex) vertex).copyFrom(newVertex);

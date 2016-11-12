@@ -18,6 +18,12 @@ public class VertexIndexWriter implements Mutator {
     private final Vertex vertex;
     private final Iterator<String> keys;
 
+    public VertexIndexWriter(HBaseGraph graph, Vertex vertex, String key) {
+        this.graph = graph;
+        this.vertex = vertex;
+        this.keys = IteratorUtils.of(key);
+    }
+
     public VertexIndexWriter(HBaseGraph graph, Vertex vertex, Iterator<IndexMetadata> indices) {
         this.graph = graph;
         this.vertex = vertex;

@@ -8,6 +8,8 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class HBaseElement implements Element {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseElement.class);
 
     protected final HBaseGraph graph;
     protected final Object id;
@@ -52,10 +56,6 @@ public abstract class HBaseElement implements Element {
         this.properties = properties;
         this.propertiesFullyLoaded = propertiesFullyLoaded;
     }
-
-    public abstract ElementModel getModel();
-
-    public abstract BaseModel getIndexModel();
 
     public Table getTable() {
         return getModel().getTable();
@@ -111,8 +111,6 @@ public abstract class HBaseElement implements Element {
         return properties;
     }
 
-    public abstract void removeStaleIndex();
-
     public void copyFrom(HBaseElement element) {
         if (element.label != null) this.label = element.label;
         if (element.createdAt != null) this.createdAt = element.createdAt;
@@ -149,22 +147,26 @@ public abstract class HBaseElement implements Element {
 
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
+        /*
         Object oldValue = getProperty(key);
-        if (!value.equals(oldValue)) {
-
+        if (oldValue != null && !oldValue.equals(value)) {
+            deleteFromIndexModel(key, null);
         }
-        updatedAt(System.currentTimeMillis());
-        Mutator writer = getModel().writeProperty(this, key, value);
-        Mutators.write(getTable(), writer);
+        */
         if (!key.equals(Constants.LABEL)) {
             getProperties().put(key, value);
         }
+        updatedAt(System.currentTimeMillis());
+        //writeToIndexModel(key);
+        Mutator writer = getModel().writeProperty(this, key, value);
+        Mutators.write(getTable(), writer);
     }
 
     public <V> V removeProperty(String key) {
         V value = getProperty(key);
         if (value != null) {
             updatedAt(System.currentTimeMillis());
+            //deleteFromIndexModel(key, null);
             Mutator writer = getModel().clearProperty(this, key);
             Mutators.write(getTable(), writer);
             getProperties().remove(key);
@@ -190,6 +192,37 @@ public abstract class HBaseElement implements Element {
 
     public void updatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public abstract ElementModel getModel();
+
+    public abstract BaseModel getIndexModel();
+
+    public abstract void writeToModel();
+
+    public abstract void writeToIndexModel();
+
+    public abstract void writeToIndexModel(String key);
+
+    public abstract void deleteFromModel();
+
+    public abstract void deleteFromIndexModel();
+
+    public abstract void deleteFromIndexModel(String key, Long ts);
+
+    public void removeStaleIndex() {
+        IndexMetadata.Key indexKey = getIndexKey();
+        long ts = getIndexTs();
+        // delete after some expiry due to timing issues between index creation and element creation
+        if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
+            graph.getExecutor().submit(() -> {
+                try {
+                    deleteFromIndexModel(indexKey.propertyKey(), ts);
+                } catch (Exception e) {
+                    LOGGER.error("Could not delete stale index", e);
+                }
+            });
+        }
     }
 
     @Override

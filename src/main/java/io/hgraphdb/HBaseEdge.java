@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class HBaseEdge extends HBaseElement implements Edge {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseEdge.class);
 
     private Vertex inVertex;
     private Vertex outVertex;
@@ -38,16 +38,6 @@ public class HBaseEdge extends HBaseElement implements Edge {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
         this.inVertex = inVertex;
         this.outVertex = outVertex;
-    }
-
-    @Override
-    public EdgeModel getModel() {
-        return graph.getEdgeModel();
-    }
-
-    @Override
-    public EdgeIndexModel getIndexModel() {
-        return graph.getEdgeIndexModel();
     }
 
     @Override
@@ -95,29 +85,13 @@ public class HBaseEdge extends HBaseElement implements Edge {
     @Override
     public void remove() {
         // Get rid of the endpoints and edge themselves.
-        getModel().deleteEdge(this);
-        getIndexModel().deleteEdgeEndpoints(this);
+        deleteFromModel();
+        deleteEdgeEndpoints();
 
         setDeleted(true);
         if (!isCached()) {
             HBaseEdge cachedEdge = (HBaseEdge) graph.findEdge(id, false);
             if (cachedEdge != null) cachedEdge.setDeleted(true);
-        }
-    }
-
-    @Override
-    public void removeStaleIndex() {
-        IndexMetadata.Key indexKey = getIndexKey();
-        long ts = getIndexTs();
-        // delete after some expiry due to timing issues between index creation and element creation
-        if (indexKey != null && ts + graph.configuration().getStaleIndexExpiryMs() < System.currentTimeMillis()) {
-            graph.getExecutor().submit(() -> {
-                try {
-                    getIndexModel().deleteEdgeIndex(this, indexKey, ts);
-                } catch (Exception e) {
-                    LOGGER.error("Could not delete stale index", e);
-                }
-            });
         }
     }
 
@@ -140,6 +114,54 @@ public class HBaseEdge extends HBaseElement implements Edge {
     public <V> Property<V> property(final String key, final V value) {
         setProperty(key, value);
         return new HBaseProperty<>(graph, this, key, value);
+    }
+
+    @Override
+    public EdgeModel getModel() {
+        return graph.getEdgeModel();
+    }
+
+    @Override
+    public EdgeIndexModel getIndexModel() {
+        return graph.getEdgeIndexModel();
+    }
+
+    @Override
+    public void writeToModel() {
+        getModel().writeEdge(this);
+    }
+
+    public void writeEdgeEndpoints() {
+        getIndexModel().writeEdgeEndpoints(this);
+    }
+
+    @Override
+    public void writeToIndexModel() {
+        getIndexModel().writeEdgeIndex(this);
+    }
+
+    @Override
+    public void writeToIndexModel(String key) {
+        getIndexModel().writeEdgeIndex(this, key);
+    }
+
+    public void deleteEdgeEndpoints() {
+        getIndexModel().deleteEdgeEndpoints(this);
+    }
+
+    @Override
+    public void deleteFromModel() {
+        getModel().deleteEdge(this);
+    }
+
+    @Override
+    public void deleteFromIndexModel() {
+        getIndexModel().deleteEdgeIndex(this);
+    }
+
+    @Override
+    public void deleteFromIndexModel(String key, Long ts) {
+        getIndexModel().deleteEdgeIndex(this, key, ts);
     }
 
     @Override

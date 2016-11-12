@@ -49,6 +49,18 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.write(table, indexWriter, writer);
     }
 
+    public void writeEdgeIndex(Edge edge) {
+        Iterator<IndexMetadata> indices = graph.getIndices(
+                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
+        Mutators.write(table, indexWriter);
+    }
+
+    public void writeEdgeIndex(Edge edge, String key) {
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key);
+        Mutators.write(table, indexWriter);
+    }
+
     public void writeEdgeIndex(Edge edge, IndexMetadata index) {
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index));
         Mutators.write(table, indexWriter);
@@ -62,8 +74,15 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.write(table, writer, indexWriter);
     }
 
-    public void deleteEdgeIndex(Edge edge, IndexMetadata.Key key, Long ts) {
-        Mutator writer = new EdgeIndexRemover(graph, edge, key.propertyKey(), ts);
+    public void deleteEdgeIndex(Edge edge) {
+        Iterator<IndexMetadata> indices = graph.getIndices(
+                OperationType.WRITE, IndexType.EDGE, edge.label(), ((HBaseEdge) edge).getPropertyKeys());
+        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
+        Mutators.write(table, indexWriter);
+    }
+
+    public void deleteEdgeIndex(Edge edge, String key, Long ts) {
+        Mutator writer = new EdgeIndexRemover(graph, edge, key, ts);
         Mutators.write(table, writer);
     }
 
