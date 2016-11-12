@@ -173,7 +173,14 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
         assertEquals(1, count(it));
 
-        VertexProperty<Integer> p = v.property("key1", 12);
+        VertexProperty<Integer> p = v.property("key1", 11);
+
+        it = graph.allVertices("a", "key1", 11);
+        assertEquals(1, count(it));
+        it = graph.allVertices("a", "key1", 12);
+        assertEquals(0, count(it));
+
+        p = v.property("key1", 12);
 
         it = graph.allVertices("a", "key1", 11);
         assertEquals(0, count(it));
@@ -200,7 +207,14 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Edge> it = v10.edges(Direction.OUT, "b", "key1", 11);
         assertEquals(1, count(it));
 
-        Property<Integer> p = e.property("key1", 12);
+        Property<Integer> p = e.property("key1", 11);
+
+        it = v10.edges(Direction.OUT, "b", "key1", 11);
+        assertEquals(1, count(it));
+        it = v10.edges(Direction.OUT, "b", "key1", 12);
+        assertEquals(0, count(it));
+
+        p = e.property("key1", 12);
 
         it = v10.edges(Direction.OUT, "b", "key1", 11);
         assertEquals(0, count(it));

@@ -147,19 +147,27 @@ public abstract class HBaseElement implements Element {
 
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
+
+        // delete from index model before setting property
+        Object oldValue = null;
         boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
         if (hasIndex) {
-            Object oldValue = getProperty(key);
+            // only load old value if using index
+            oldValue = getProperty(key);
             if (oldValue != null && !oldValue.equals(value)) {
                 deleteFromIndexModel(key, null);
             }
         }
+
         if (!key.equals(Constants.LABEL)) {
             getProperties().put(key, value);
         }
         updatedAt(System.currentTimeMillis());
+
         if (hasIndex) {
-            writeToIndexModel(key);
+            if (oldValue == null || !oldValue.equals(value)) {
+                writeToIndexModel(key);
+            }
         }
         Mutator writer = getModel().writeProperty(this, key, value);
         Mutators.write(getTable(), writer);
@@ -168,14 +176,17 @@ public abstract class HBaseElement implements Element {
     public <V> V removeProperty(String key) {
         V value = getProperty(key);
         if (value != null) {
-            updatedAt(System.currentTimeMillis());
+            // delete from index model before removing property
             boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
             if (hasIndex) {
                 deleteFromIndexModel(key, null);
             }
+
+            getProperties().remove(key);
+            updatedAt(System.currentTimeMillis());
+
             Mutator writer = getModel().clearProperty(this, key);
             Mutators.write(getTable(), writer);
-            getProperties().remove(key);
         }
         return value;
     }

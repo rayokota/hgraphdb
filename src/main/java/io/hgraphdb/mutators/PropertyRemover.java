@@ -1,15 +1,19 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.Serializer;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.util.Iterator;
+
+import static org.apache.hadoop.hbase.KeyValue.Type.Put;
 
 public class PropertyRemover implements Mutator {
 
@@ -25,8 +29,12 @@ public class PropertyRemover implements Mutator {
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        Delete delete = new Delete(Serializer.serializeWithSalt(element.id()));
+        byte[] idBytes = Serializer.serializeWithSalt(element.id());
+        Delete delete = new Delete(idBytes);
         delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key));
-        return IteratorUtils.of(delete);
+        Put put = new Put(idBytes);
+        put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
+                Serializer.serialize(((HBaseElement)element).updatedAt()));
+        return IteratorUtils.of(delete, put);
     }
 }
