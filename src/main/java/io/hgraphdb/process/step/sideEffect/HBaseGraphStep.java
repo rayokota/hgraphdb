@@ -2,7 +2,6 @@ package io.hgraphdb.process.step.sideEffect;
 
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.IndexType;
-import io.hgraphdb.OperationType;
 import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;

@@ -16,7 +16,6 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
-    private Cache<Tuple, List<Edge>> edgeCache;
+    private final Cache<Tuple, List<Edge>> edgeCache;
 
     public HBaseVertex(HBaseGraph graph, Object id) {
         this(graph, id, null, null, null, null, false);
@@ -59,11 +58,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     protected void invalidateEdgeCache() {
         edgeCache.invalidateAll();
-    }
-
-    @Override
-    public void load() {
-        super.load();
     }
 
     @Override

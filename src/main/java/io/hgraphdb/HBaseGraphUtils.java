@@ -30,7 +30,7 @@ import static io.hgraphdb.HBaseGraphConfiguration.Keys.*;
 
 public final class HBaseGraphUtils {
 
-    private static Map<String, Connection> connections = new ConcurrentHashMap<>();
+    private static final Map<String, Connection> connections = new ConcurrentHashMap<>();
 
     public static Connection getConnection(HBaseGraphConfiguration config) {
         Connection conn = connections.get(config.getGraphNamespace());

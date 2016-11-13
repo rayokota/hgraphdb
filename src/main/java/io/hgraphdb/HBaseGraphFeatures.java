@@ -39,7 +39,7 @@ public class HBaseGraphFeatures implements Graph.Features {
 
     public class HBaseGraphGraphFeatures implements GraphFeatures {
 
-        private VariableFeatures variableFeatures = new HBaseVariableFeatures();
+        private final VariableFeatures variableFeatures = new HBaseVariableFeatures();
 
         HBaseGraphGraphFeatures() {
         }

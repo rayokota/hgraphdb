@@ -4,7 +4,7 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 
 public class HBaseGraphNotFoundException extends HBaseGraphException {
 
-    private HBaseElement element;
+    private final HBaseElement element;
 
     public HBaseGraphNotFoundException(Element element) {
         this.element = (HBaseElement) element;

@@ -12,7 +12,6 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -39,11 +38,6 @@ public class HBaseEdge extends HBaseElement implements Edge {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
         this.inVertex = inVertex;
         this.outVertex = outVertex;
-    }
-
-    @Override
-    public void load() {
-        super.load();
     }
 
     @Override

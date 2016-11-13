@@ -13,8 +13,6 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.util.Iterator;
 
-import static org.apache.hadoop.hbase.KeyValue.Type.Put;
-
 public class PropertyRemover implements Mutator {
 
     private final HBaseGraph graph;

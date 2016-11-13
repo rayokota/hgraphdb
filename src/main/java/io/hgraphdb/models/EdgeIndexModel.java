@@ -23,7 +23,10 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.javatuples.Pair;
-import org.javatuples.*;
+import org.javatuples.Quartet;
+import org.javatuples.Quintet;
+import org.javatuples.Tuple;
+import org.javatuples.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
