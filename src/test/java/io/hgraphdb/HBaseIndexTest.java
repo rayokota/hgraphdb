@@ -71,6 +71,22 @@ public class HBaseIndexTest extends HBaseGraphTest {
     }
 
     @Test
+    public void testVertexIndexRangeNegative() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.addVertex(T.id, id(10), T.label, "a", "key1", -3);
+        graph.addVertex(T.id, id(11), T.label, "a", "key1", -2);
+        graph.addVertex(T.id, id(12), T.label, "a", "key1", -1);
+        graph.addVertex(T.id, id(13), T.label, "a", "key1", 0);
+        graph.addVertex(T.id, id(14), T.label, "a", "key1", 1);
+        graph.addVertex(T.id, id(15), T.label, "a", "key1", 2);
+
+        Iterator<Vertex> it = graph.allVertices("a", "key1", -2, 2);
+        assertEquals(4, count(it));
+    }
+
+    @Test
     public void testEdgeIndex() {
         assertEquals(0, count(graph.vertices()));
         Vertex v0 = graph.addVertex(T.id, id(0));
@@ -133,6 +149,29 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v16, "key1", 16);
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 12, 16);
+        assertEquals(4, count(it));
+    }
+
+    @Test
+    public void testEdgeIndexRangeNegative() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.EDGE, "b", "key1");
+        Vertex v10 = graph.addVertex(T.id, id(10));
+        Vertex v11 = graph.addVertex(T.id, id(11));
+        Vertex v12 = graph.addVertex(T.id, id(12));
+        Vertex v13 = graph.addVertex(T.id, id(13));
+        Vertex v14 = graph.addVertex(T.id, id(14));
+        Vertex v15 = graph.addVertex(T.id, id(15));
+        Vertex v16 = graph.addVertex(T.id, id(16));
+        v10.addEdge("b", v11, "key1", -3);
+        v10.addEdge("b", v12, "key1", -2);
+        v10.addEdge("b", v13, "key1", -1);
+        v10.addEdge("b", v14, "key1", 0);
+        v10.addEdge("b", v15, "key1", 1);
+        v10.addEdge("b", v16, "key1", 2);
+
+        Iterator<Edge> it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", -2, 2);
         assertEquals(4, count(it));
     }
 
