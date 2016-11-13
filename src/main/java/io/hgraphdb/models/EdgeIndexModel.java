@@ -35,7 +35,7 @@ import java.util.function.Predicate;
 
 public class EdgeIndexModel extends BaseModel {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(EdgeIndexModel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EdgeIndexModel.class);
 
     public EdgeIndexModel(HBaseGraph graph, Table table) {
         super(graph, table);

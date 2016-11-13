@@ -20,11 +20,15 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 public class VertexModel extends ElementModel {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VertexModel.class);
 
     public VertexModel(HBaseGraph graph, Table table) {
         super(graph, table);

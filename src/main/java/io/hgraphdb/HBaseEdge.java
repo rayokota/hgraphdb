@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class HBaseEdge extends HBaseElement implements Edge {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseEdge.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseEdge.class);
 
     private Vertex inVertex;
     private Vertex outVertex;

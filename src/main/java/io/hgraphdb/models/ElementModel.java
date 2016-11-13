@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public abstract class ElementModel extends BaseModel {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(ElementModel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElementModel.class);
 
     public ElementModel(HBaseGraph graph, Table table) {
         super(graph, table);

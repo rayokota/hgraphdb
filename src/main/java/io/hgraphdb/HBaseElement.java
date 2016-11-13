@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class HBaseElement implements Element {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseElement.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseElement.class);
 
     protected final HBaseGraph graph;
     protected final Object id;
@@ -161,9 +161,7 @@ public abstract class HBaseElement implements Element {
             }
         }
 
-        if (!key.equals(Constants.LABEL)) {
-            getProperties().put(key, value);
-        }
+        getProperties().put(key, value);
         updatedAt(System.currentTimeMillis());
 
         if (hasIndex) {

@@ -17,7 +17,7 @@ import java.util.Iterator;
 
 public final class HBaseBulkLoader {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseBulkLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseBulkLoader.class);
 
     private HBaseGraph graph;
     private BufferedMutator edgesMutator;

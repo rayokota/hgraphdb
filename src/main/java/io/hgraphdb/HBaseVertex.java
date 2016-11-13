@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HBaseVertex extends HBaseElement implements Vertex {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
     private Cache<Tuple, List<Edge>> edgeCache;
 

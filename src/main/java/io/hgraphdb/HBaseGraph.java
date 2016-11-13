@@ -97,7 +97,7 @@ import java.util.stream.Stream;
         reason = "Requires metaproperties")
 public class HBaseGraph implements Graph {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraph.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraph.class);
 
     static {
         TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class, TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(HBaseGraphStepStrategy.instance()));
