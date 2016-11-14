@@ -30,9 +30,9 @@ public class VertexIndexModel extends BaseModel {
         super(graph, table);
     }
 
-    public void writeVertexIndex(Vertex vertex) {
+    public void writeVertexIndex(Vertex vertex, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
-        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices);
+        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, ts);
         Mutators.write(table, writer);
     }
 
@@ -42,13 +42,13 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public void writeVertexIndex(Vertex vertex, IndexMetadata index) {
-        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, IteratorUtils.of(index));
+        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, IteratorUtils.of(index), null);
         Mutators.write(table, writer);
     }
 
-    public void deleteVertexIndex(Vertex vertex) {
+    public void deleteVertexIndex(Vertex vertex, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
-        VertexIndexRemover writer = new VertexIndexRemover(graph, vertex, indices);
+        VertexIndexRemover writer = new VertexIndexRemover(graph, vertex, indices, ts);
         Mutators.write(table, writer);
     }
 
@@ -118,6 +118,7 @@ public class VertexIndexModel extends BaseModel {
     public byte[] serializeForRead(String label, String key, Object value) {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, (byte) 0, Order.ASCENDING);  // isUnique flag (future)
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         Serializer.serialize(buffer, value);
         buffer.setLength(buffer.getPosition());
@@ -130,6 +131,7 @@ public class VertexIndexModel extends BaseModel {
     public byte[] serializeForWrite(Vertex vertex, String key) {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, vertex.label(), Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, (byte) 0, Order.ASCENDING);  // isUnique flag (future)
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         Serializer.serialize(buffer, vertex.value(key));
         Serializer.serialize(buffer, vertex.id());
@@ -144,6 +146,7 @@ public class VertexIndexModel extends BaseModel {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         String label = OrderedBytes.decodeString(buffer);
+        boolean isUnique = OrderedBytes.decodeInt8(buffer) == 1;  // isUnique flag (future)
         String key = OrderedBytes.decodeString(buffer);
         Object value = Serializer.deserialize(buffer);
         Object id = Serializer.deserialize(buffer);

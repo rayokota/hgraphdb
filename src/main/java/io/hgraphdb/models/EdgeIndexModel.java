@@ -44,16 +44,16 @@ public class EdgeIndexModel extends BaseModel {
         super(graph, table);
     }
 
-    public void writeEdgeEndpoints(Edge edge) {
+    public void writeEdgeEndpoints(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
         Mutator writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
         Mutators.write(table, indexWriter, writer);
     }
 
-    public void writeEdgeIndex(Edge edge) {
+    public void writeEdgeIndex(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
         Mutators.write(table, indexWriter);
     }
 
@@ -63,20 +63,20 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public void writeEdgeIndex(Edge edge, IndexMetadata index) {
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index));
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index), null);
         Mutators.write(table, indexWriter);
     }
 
     public void deleteEdgeEndpoints(Edge edge) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
+        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices, null);
         Mutator writer = new EdgeIndexRemover(graph, edge, Constants.CREATED_AT, null);
         Mutators.write(table, writer, indexWriter);
     }
 
-    public void deleteEdgeIndex(Edge edge) {
+    public void deleteEdgeIndex(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices);
+        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices, ts);
         Mutators.write(table, indexWriter);
     }
 
@@ -292,6 +292,7 @@ public class EdgeIndexModel extends BaseModel {
         Serializer.serializeWithSalt(buffer, vertex.id());
         if (direction != null) {
             OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
+            OrderedBytes.encodeInt8(buffer, (byte) 0, Order.ASCENDING);  // isUnique flag (future)
             if (key != null) {
                 OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
                 if (label != null) {
@@ -315,6 +316,7 @@ public class EdgeIndexModel extends BaseModel {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         Serializer.serializeWithSalt(buffer, direction == Direction.IN ? inVertexId : outVertexId);
         OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, (byte) 0, Order.ASCENDING);  // isUnique flag (future)
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, edge.label(), Order.ASCENDING);
         Serializer.serialize(buffer, key.equals(Constants.CREATED_AT) ? ((HBaseEdge) edge).createdAt() : edge.value(key));
@@ -332,6 +334,7 @@ public class EdgeIndexModel extends BaseModel {
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         Object vertexId1 = Serializer.deserializeWithSalt(buffer);
         Direction direction = OrderedBytes.decodeInt8(buffer) == 1 ? Direction.IN : Direction.OUT;
+        boolean isUnique = OrderedBytes.decodeInt8(buffer) == 1;  // isUnique flag (future)
         String key = OrderedBytes.decodeString(buffer);
         String label = OrderedBytes.decodeString(buffer);
         Object value = Serializer.deserialize(buffer);

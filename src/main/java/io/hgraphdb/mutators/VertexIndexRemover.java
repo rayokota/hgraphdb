@@ -23,11 +23,11 @@ public class VertexIndexRemover implements Mutator {
         this.ts = ts;
     }
 
-    public VertexIndexRemover(HBaseGraph graph, Vertex vertex, Iterator<IndexMetadata> indices) {
+    public VertexIndexRemover(HBaseGraph graph, Vertex vertex, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.vertex = vertex;
         this.keys = IteratorUtils.map(indices, IndexMetadata::propertyKey);
-        this.ts = null;
+        this.ts = ts;
     }
 
     @Override

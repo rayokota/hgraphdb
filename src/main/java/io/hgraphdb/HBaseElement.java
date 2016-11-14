@@ -56,6 +56,7 @@ public abstract class HBaseElement implements Element {
         this.updatedAt = updatedAt;
         this.properties = properties;
         this.propertiesFullyLoaded = propertiesFullyLoaded;
+        this.indexTs = System.currentTimeMillis();
     }
 
     public Table getTable() {
@@ -220,14 +221,21 @@ public abstract class HBaseElement implements Element {
 
     public abstract void writeToModel();
 
-    public abstract void writeToIndexModel();
+    // Write all indices with the given ts
+    public abstract void writeToIndexModel(Long ts);
 
+    // Write one index
     public abstract void writeToIndexModel(String key);
 
     public abstract void deleteFromModel();
 
+    // Delete all indices
     public abstract void deleteFromIndexModel();
 
+    // Delete all indices with the given ts
+    public abstract void deleteFromIndexModel(Long ts);
+
+    // Delete one index with the given ts
     public abstract void deleteFromIndexModel(String key, Long ts);
 
     public void removeStaleIndex() {

@@ -71,6 +71,7 @@ public class IndexMetadataModel extends BaseModel {
     public byte[] serialize(IndexMetadata.Key index) {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, index.label(), Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, (byte) 0, Order.ASCENDING);  // isUnique flag (future)
         OrderedBytes.encodeString(buffer, index.propertyKey(), Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, index.type() == IndexType.VERTEX ? (byte) 1 : (byte) 0, Order.ASCENDING);
         buffer.setLength(buffer.getPosition());
@@ -84,6 +85,7 @@ public class IndexMetadataModel extends BaseModel {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         String label = OrderedBytes.decodeString(buffer);
+        boolean isUnique = OrderedBytes.decodeInt8(buffer) == 1;  // isUnique flag (future)
         String propertyKey = OrderedBytes.decodeString(buffer);
         IndexType type = OrderedBytes.decodeInt8(buffer) == 1 ? IndexType.VERTEX : IndexType.EDGE;
         Cell stateCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.INDEX_STATE_BYTES);

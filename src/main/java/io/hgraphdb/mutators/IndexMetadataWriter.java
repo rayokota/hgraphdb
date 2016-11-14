@@ -7,6 +7,7 @@ import io.hgraphdb.IndexMetadata;
 import io.hgraphdb.Serializer;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.util.Iterator;
@@ -19,6 +20,11 @@ public class IndexMetadataWriter implements Creator, Mutator {
     public IndexMetadataWriter(HBaseGraph graph, IndexMetadata index) {
         this.graph = graph;
         this.index = index;
+    }
+
+    @Override
+    public Element getElement() {
+        return null;
     }
 
     @Override

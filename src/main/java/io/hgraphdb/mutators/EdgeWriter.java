@@ -20,6 +20,11 @@ public class EdgeWriter implements Creator {
     }
 
     @Override
+    public Edge getElement() {
+        return edge;
+    }
+
+    @Override
     public Put constructPut() {
         String label = edge.label();
         if (label == null) label = Edge.DEFAULT_LABEL;

@@ -24,11 +24,11 @@ public class EdgeIndexRemover implements Mutator {
         this.ts = ts;
     }
 
-    public EdgeIndexRemover(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices) {
+    public EdgeIndexRemover(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.edge = edge;
         this.keys = IteratorUtils.map(indices, IndexMetadata::propertyKey);
-        this.ts = null;
+        this.ts = ts;
     }
 
     @Override

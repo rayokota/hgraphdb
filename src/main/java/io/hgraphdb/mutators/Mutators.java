@@ -1,6 +1,7 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraphException;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
@@ -18,6 +19,10 @@ public class Mutators {
         try {
             boolean success = table.checkAndPut(row, Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES, null, put);
             if (!success) {
+                HBaseElement element = (HBaseElement) creator.getElement();
+                if (element != null) {
+                    element.deleteFromIndexModel(element.getIndexTs());
+                }
                 throw creator.alreadyExists();
             }
         } catch (IOException e) {

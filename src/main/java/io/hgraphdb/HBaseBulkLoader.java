@@ -67,7 +67,7 @@ public final class HBaseBulkLoader {
                     HBaseGraphUtils.propertiesToMap(keyValues));
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
-            VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices);
+            VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
             vertexIndicesMutator.mutate(IteratorUtils.list(writer.constructMutations()));
 
             Creator creator = new VertexWriter(graph, vertex);
@@ -92,7 +92,7 @@ public final class HBaseBulkLoader {
                     HBaseGraphUtils.propertiesToMap(keyValues), inVertex, outVertex);
 
             Iterator<IndexMetadata> indices = edge.getIndices(OperationType.WRITE);
-            EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices);
+            EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
             edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructMutations()));
 
             Mutator writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);

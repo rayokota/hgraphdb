@@ -18,17 +18,20 @@ public class EdgeIndexWriter implements Mutator {
     private final HBaseGraph graph;
     private final Edge edge;
     private final Iterator<String> keys;
+    private final Long ts;
 
     public EdgeIndexWriter(HBaseGraph graph, Edge edge, String key) {
         this.graph = graph;
         this.edge = edge;
         this.keys = IteratorUtils.of(key);
+        this.ts = null;
     }
 
-    public EdgeIndexWriter(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices) {
+    public EdgeIndexWriter(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.edge = edge;
         this.keys = IteratorUtils.map(indices, IndexMetadata::propertyKey);
+        this.ts = ts;
     }
 
     @Override
@@ -41,7 +44,9 @@ public class EdgeIndexWriter implements Mutator {
     }
 
     private Put constructPut(Direction direction, String key) {
-        Put put = new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, key));
+        Put put = ts != null
+                ? new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, key), ts)
+                : new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, key));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 Serializer.serialize(((HBaseEdge)edge).createdAt()));
         return put;

@@ -2,6 +2,7 @@ package io.hgraphdb;
 
 import io.hgraphdb.models.EdgeIndexModel;
 import io.hgraphdb.models.EdgeModel;
+import org.apache.jute.Index;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
@@ -136,13 +137,13 @@ public class HBaseEdge extends HBaseElement implements Edge {
         getModel().writeEdge(this);
     }
 
-    public void writeEdgeEndpoints() {
-        getIndexModel().writeEdgeEndpoints(this);
+    public void writeEdgeEndpoints(Long ts) {
+        getIndexModel().writeEdgeEndpoints(this, ts);
     }
 
     @Override
-    public void writeToIndexModel() {
-        getIndexModel().writeEdgeIndex(this);
+    public void writeToIndexModel(Long ts) {
+        getIndexModel().writeEdgeIndex(this, ts);
     }
 
     @Override
@@ -161,7 +162,12 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     @Override
     public void deleteFromIndexModel() {
-        getIndexModel().deleteEdgeIndex(this);
+        getIndexModel().deleteEdgeIndex(this, null);
+    }
+
+    @Override
+    public void deleteFromIndexModel(Long ts) {
+        getIndexModel().deleteEdgeIndex(this, ts);
     }
 
     @Override

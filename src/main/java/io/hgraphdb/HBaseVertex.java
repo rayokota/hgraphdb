@@ -70,7 +70,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
-        newEdge.writeEdgeEndpoints();
+        newEdge.writeEdgeEndpoints(newEdge.getIndexTs());
         newEdge.writeToModel();
 
         invalidateEdgeCache();
@@ -190,8 +190,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     }
 
     @Override
-    public void writeToIndexModel() {
-        getIndexModel().writeVertexIndex(this);
+    public void writeToIndexModel(Long ts) {
+        getIndexModel().writeVertexIndex(this, ts);
     }
 
     @Override
@@ -206,7 +206,12 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     @Override
     public void deleteFromIndexModel() {
-        getIndexModel().deleteVertexIndex(this);
+        getIndexModel().deleteVertexIndex(this, null);
+    }
+
+    @Override
+    public void deleteFromIndexModel(Long ts) {
+        getIndexModel().deleteVertexIndex(this, ts);
     }
 
     @Override

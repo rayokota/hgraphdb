@@ -20,6 +20,11 @@ public final class VertexWriter implements Creator {
     }
 
     @Override
+    public Vertex getElement() {
+        return vertex;
+    }
+
+    @Override
     public Put constructPut() {
         String label = vertex.label();
         if (label == null) label = Vertex.DEFAULT_LABEL;
