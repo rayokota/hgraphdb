@@ -68,10 +68,10 @@ public final class HBaseBulkLoader {
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
             VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
-            vertexIndicesMutator.mutate(IteratorUtils.list(writer.constructMutations()));
+            vertexIndicesMutator.mutate(IteratorUtils.list(writer.constructInsertions()));
 
             Creator creator = new VertexWriter(graph, vertex);
-            verticesMutator.mutate(creator.constructPut());
+            verticesMutator.mutate(IteratorUtils.list(creator.constructInsertions()));
 
             return vertex;
         } catch (IOException e) {
@@ -93,13 +93,13 @@ public final class HBaseBulkLoader {
 
             Iterator<IndexMetadata> indices = edge.getIndices(OperationType.WRITE);
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
-            edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructMutations()));
+            edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
 
-            Mutator writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
-            edgeIndicesMutator.mutate(IteratorUtils.list(writer.constructMutations()));
+            EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
+            edgeIndicesMutator.mutate(IteratorUtils.list(writer.constructInsertions()));
 
             Creator creator = new EdgeWriter(graph, edge);
-            edgesMutator.mutate(creator.constructPut());
+            edgesMutator.mutate(IteratorUtils.list(creator.constructInsertions()));
 
             return edge;
         } catch (IOException e) {

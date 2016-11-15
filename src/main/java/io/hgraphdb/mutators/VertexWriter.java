@@ -8,6 +8,9 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+
+import java.util.Iterator;
 
 public final class VertexWriter implements Creator {
 
@@ -25,7 +28,7 @@ public final class VertexWriter implements Creator {
     }
 
     @Override
-    public Put constructPut() {
+    public Iterator<Put> constructInsertions() {
         String label = vertex.label();
         if (label == null) label = Vertex.DEFAULT_LABEL;
         Put put = new Put(Serializer.serializeWithSalt(vertex.id()));
@@ -41,7 +44,7 @@ public final class VertexWriter implements Creator {
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
                 });
 
-        return put;
+        return IteratorUtils.of(put);
     }
 
     @Override

@@ -28,15 +28,17 @@ public class IndexMetadataWriter implements Creator, Mutator {
     }
 
     @Override
-    public Put constructPut() {
+    public Iterator<Put> constructInsertions() {
         Put put = new Put(graph.getIndexMetadataModel().serialize(index.key()));
+        put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UNIQUE_BYTES,
+                Serializer.serialize(index.isUnique()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.INDEX_STATE_BYTES,
                 Serializer.serialize(index.state().toString()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 Serializer.serialize(index.createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
                 Serializer.serialize(index.updatedAt()));
-        return put;
+        return IteratorUtils.of(put);
     }
 
     @Override

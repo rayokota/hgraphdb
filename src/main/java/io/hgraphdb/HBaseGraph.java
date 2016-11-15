@@ -457,7 +457,7 @@ public class HBaseGraph implements Graph {
             throw new HBaseGraphException("Index for " + indexKey.toString() + " already exists");
         }
         long now = System.currentTimeMillis();
-        IndexMetadata index = new IndexMetadata(type, label, propertyKey, State.CREATED, now, now);
+        IndexMetadata index = new IndexMetadata(type, label, propertyKey, isUnique, State.CREATED, now, now);
         if (oldIndex == null) {
             indexMetadataModel.createIndexMetadata(index);
         } else {

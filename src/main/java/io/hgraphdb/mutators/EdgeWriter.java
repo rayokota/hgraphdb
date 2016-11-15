@@ -8,6 +8,9 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+
+import java.util.Iterator;
 
 public class EdgeWriter implements Creator {
 
@@ -25,7 +28,7 @@ public class EdgeWriter implements Creator {
     }
 
     @Override
-    public Put constructPut() {
+    public Iterator<Put> constructInsertions() {
         String label = edge.label();
         if (label == null) label = Edge.DEFAULT_LABEL;
         Put put = new Put(Serializer.serializeWithSalt(edge.id()));
@@ -44,7 +47,7 @@ public class EdgeWriter implements Creator {
                     byte[] bytes = Serializer.serialize(entry.getValue());
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
                 });
-        return put;
+        return IteratorUtils.of(put);
     }
 
     @Override

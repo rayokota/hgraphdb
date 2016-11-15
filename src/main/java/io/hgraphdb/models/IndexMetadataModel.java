@@ -86,12 +86,14 @@ public class IndexMetadataModel extends BaseModel {
         String label = OrderedBytes.decodeString(buffer);
         String propertyKey = OrderedBytes.decodeString(buffer);
         IndexType type = OrderedBytes.decodeInt8(buffer) == 1 ? IndexType.VERTEX : IndexType.EDGE;
+        Cell uniqueCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.UNIQUE_BYTES);
+        boolean isUnique = Serializer.deserialize(CellUtil.cloneValue(uniqueCell));
         Cell stateCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.INDEX_STATE_BYTES);
         State state = State.valueOf(Serializer.deserialize(CellUtil.cloneValue(stateCell)));
         Cell createdAtCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
         Long createdAt = Serializer.deserialize(CellUtil.cloneValue(createdAtCell));
         Cell updatedAtCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES);
         Long updatedAt = Serializer.deserialize(CellUtil.cloneValue(updatedAtCell));
-        return new IndexMetadata(type, label, propertyKey, state, createdAt, updatedAt);
+        return new IndexMetadata(type, label, propertyKey, isUnique, state, createdAt, updatedAt);
     }
 }

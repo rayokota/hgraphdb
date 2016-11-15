@@ -1,6 +1,7 @@
 package io.hgraphdb.models;
 
 import io.hgraphdb.*;
+import io.hgraphdb.mutators.Creator;
 import io.hgraphdb.mutators.EdgeIndexRemover;
 import io.hgraphdb.mutators.EdgeIndexWriter;
 import io.hgraphdb.mutators.Mutator;
@@ -47,24 +48,24 @@ public class EdgeIndexModel extends BaseModel {
     public void writeEdgeEndpoints(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
-        Mutator writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
-        Mutators.write(table, indexWriter, writer);
+        EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
+        Mutators.create(table, indexWriter, writer);
     }
 
     public void writeEdgeIndex(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
-        Mutators.write(table, indexWriter);
+        Mutators.create(table, indexWriter);
     }
 
     public void writeEdgeIndex(Edge edge, String key) {
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key);
-        Mutators.write(table, indexWriter);
+        Mutators.create(table, indexWriter);
     }
 
     public void writeEdgeIndex(Edge edge, IndexMetadata index) {
         EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index), null);
-        Mutators.write(table, indexWriter);
+        Mutators.create(table, indexWriter);
     }
 
     public void deleteEdgeEndpoints(Edge edge) {

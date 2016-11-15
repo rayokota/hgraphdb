@@ -8,7 +8,8 @@ public class IndexMetadata {
     protected Long createdAt;
     protected Long updatedAt;
 
-    public IndexMetadata(IndexType type, String label, String propertyKey, State state, Long createdAt, Long updatedAt) {
+    public IndexMetadata(IndexType type, String label, String propertyKey,
+                         boolean isUnique, State state, Long createdAt, Long updatedAt) {
         this.key = new Key(type, label, propertyKey);
         this.state = state;
         this.createdAt = createdAt;
@@ -29,6 +30,14 @@ public class IndexMetadata {
 
     public String propertyKey() {
         return key.propertyKey();
+    }
+
+    public boolean isUnique() {
+        return isUnique;
+    }
+
+    public void isUnique(boolean isUnique) {
+        this.isUnique = isUnique;
     }
 
     public State state() {

@@ -33,17 +33,17 @@ public class VertexIndexModel extends BaseModel {
     public void writeVertexIndex(Vertex vertex, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
         VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, ts);
-        Mutators.write(table, writer);
+        Mutators.create(table, writer);
     }
 
     public void writeVertexIndex(Vertex vertex, String key) {
         VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, key);
-        Mutators.write(table, writer);
+        Mutators.create(table, writer);
     }
 
     public void writeVertexIndex(Vertex vertex, IndexMetadata index) {
         VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, IteratorUtils.of(index), null);
-        Mutators.write(table, writer);
+        Mutators.create(table, writer);
     }
 
     public void deleteVertexIndex(Vertex vertex, Long ts) {
