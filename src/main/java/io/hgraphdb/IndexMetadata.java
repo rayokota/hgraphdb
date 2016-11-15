@@ -3,6 +3,7 @@ package io.hgraphdb;
 public class IndexMetadata {
 
     private final Key key;
+    private boolean isUnique;
     private State state;
     protected Long createdAt;
     protected Long updatedAt;
