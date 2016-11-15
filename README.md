@@ -79,6 +79,11 @@ Once an index is created and data has been populated, it can be used as follows:
 		
 Note that the indices support range queries, where the start of the range is inclusive and the end of the range is exclusive.
 
+An index can also be specified as a unique index.  For a vertex index, this means only one node can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
+
+		graph.createIndex(IndexType.VERTEX, "person", "name", /* unique */ true);
+
+
 ## Using the Gremlin Console
 
 One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
@@ -132,21 +137,23 @@ HGraphDB uses a tall table schema.  The schema is created in the namespace speci
 
 ### Vertex Index Table
 
-| Row Key | Column: createdAt |
-|---|---|
-| [vertex label, property key, property value, vertex ID] | [createdAt value] |
+| Row Key | Column: createdAt | Column: vertexID |
+|---|---|---|
+| [vertex label, isUnique, property key, property value, vertex ID (if not unique)] | [createdAt value] | [vertex ID (if unique)] |
 	
 ### Edge Index Table
 
-| Row Key | Column: createdAt |
-|---|---|
-| [vertex1 ID, direction, property key, edge label, property value, vertex2 ID, edge ID] | [createdAt value] |
+| Row Key | Column: createdAt | Column: vertexID | Column: edgeID |
+|---|---|---|---|
+| [vertex1 ID, direction, isUnique, property key, edge label, property value, vertex2 ID (if not unique), edge ID (if not unique)] | [createdAt value] | [vertex2 ID (if unique)] | [edge ID (if unique)] |
 
 ### Index Metadata Table
 
-| Row Key | Column: createdAt | Column: state |
-|---|---|---|
-| [label, property key, index type] | [createdAt value] | [state value] |
+| Row Key | Column: createdAt | Column: isUnique | Column: state |
+|---|---|---|---|
+| [label, property key, index type] | [createdAt value] | [isUnique value] | [state value] |
+
+Note that in the index tables, if the index is a unique index, then the indexed IDs are stored in the column values; otherwise they are stored in the row key.  
 
 HGraphDB was designed to support the features mentioned [here](https://rayokota.wordpress.com/2016/11/10/hgraphdb-hbase-as-a-tinkerpop-graph-database/).
 
