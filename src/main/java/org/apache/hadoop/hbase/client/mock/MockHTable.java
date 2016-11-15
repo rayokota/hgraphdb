@@ -567,7 +567,9 @@ public class MockHTable implements HTableInterface {
             }
             NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new ConcurrentSkipListMap<byte[], NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
             for (KeyValue kv : put.getFamilyMap().get(family)) {
-                kv.updateLatestStamp(Bytes.toBytes(System.currentTimeMillis()));
+                long ts = put.getTimeStamp();
+                if (ts == HConstants.LATEST_TIMESTAMP) ts = System.currentTimeMillis();
+                kv.updateLatestStamp(Bytes.toBytes(ts));
                 try {
                     Thread.sleep(1);  // sleep for 1 millis so timestamps don't conflict
                 } catch (InterruptedException e) { }
@@ -663,7 +665,17 @@ public class MockHTable implements HTableInterface {
                 continue;
             }
             for (KeyValue kv : delete.getFamilyMap().get(family)) {
-                data.get(row).get(kv.getFamily()).remove(kv.getQualifier());
+                long ts = kv.getTimestamp();
+                if (ts == HConstants.LATEST_TIMESTAMP) {
+                    data.get(row).get(kv.getFamily()).remove(kv.getQualifier());
+                } else {
+                    NavigableMap<Long, byte[]> timestampsAndValues  = data.get(row).get(kv.getFamily()).get(kv.getQualifier());
+                    Map.Entry<Long, byte[]> timestampAndValue = timestampsAndValues.lastEntry();
+                    while (timestampAndValue != null && timestampAndValue.getKey() >= ts) {
+                        timestampsAndValues.pollLastEntry();
+                        timestampAndValue = timestampsAndValues.lastEntry();
+                    }
+                }
             }
             if (data.get(row).get(family).isEmpty()) {
                 data.get(row).remove(family);

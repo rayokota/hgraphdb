@@ -99,7 +99,7 @@ public final class HBaseBulkLoader {
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
             edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
 
-            EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
+            EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT, null);
             edgeIndicesMutator.mutate(IteratorUtils.list(writer.constructInsertions()));
 
             Creator creator = new EdgeWriter(graph, edge);

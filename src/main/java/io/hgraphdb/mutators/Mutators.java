@@ -1,8 +1,10 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseVertex;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
@@ -41,7 +43,11 @@ public class Mutators {
             if (!success) {
                 HBaseElement element = (HBaseElement) creator.getElement();
                 if (element != null) {
-                    element.deleteFromIndexModel(element.getIndexTs());
+                    if (element instanceof HBaseVertex) {
+                        ((HBaseVertex) element).deleteFromIndexModel(element.getIndexTs());
+                    } else if (element instanceof HBaseEdge) {
+                        ((HBaseEdge) element).deleteEdgeEndpoints(element.getIndexTs());
+                    }
                 }
                 throw creator.alreadyExists();
             }

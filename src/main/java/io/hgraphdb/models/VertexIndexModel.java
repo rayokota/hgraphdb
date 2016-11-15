@@ -30,9 +30,11 @@ public class VertexIndexModel extends BaseModel {
         super(graph, table);
     }
 
-    public void writeVertexIndex(Vertex vertex, Long ts) {
+    public void writeVertexIndex(Vertex vertex) {
+        long now = System.currentTimeMillis();
+        ((HBaseVertex) vertex).setIndexTs(now);
         Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
-        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, ts);
+        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, now);
         Mutators.create(table, writer);
     }
 
@@ -134,7 +136,9 @@ public class VertexIndexModel extends BaseModel {
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         Serializer.serialize(buffer, vertex.value(key));
-        Serializer.serialize(buffer, vertex.id());
+        if (!isUnique) {
+            Serializer.serialize(buffer, vertex.id());
+        }
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
         byte[] bytes = new byte[buffer.getRemaining()];

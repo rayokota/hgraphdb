@@ -227,7 +227,7 @@ public class HBaseGraph implements Graph {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
-        newVertex.writeToIndexModel(newVertex.getIndexTs());
+        newVertex.writeToIndexModel();
         newVertex.writeToModel();
 
         Vertex vertex = findOrCreateVertex(idValue);

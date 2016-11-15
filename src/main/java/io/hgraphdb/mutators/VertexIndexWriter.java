@@ -2,6 +2,7 @@ package io.hgraphdb.mutators;
 
 import com.google.common.collect.ImmutableMap;
 import io.hgraphdb.*;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -42,14 +43,13 @@ public class VertexIndexWriter implements Creator {
     }
 
     private Put constructPut(Map.Entry<String, Boolean> entry) {
+        long timestamp = ts != null ? ts : HConstants.LATEST_TIMESTAMP;
         boolean isUnique = entry.getValue();
-        Put put = ts != null
-                ? new Put(graph.getVertexIndexModel().serializeForWrite(vertex, isUnique, entry.getKey()), ts)
-                : new Put(graph.getVertexIndexModel().serializeForWrite(vertex, isUnique, entry.getKey()));
+        Put put = new Put(graph.getVertexIndexModel().serializeForWrite(vertex, isUnique, entry.getKey()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                Serializer.serialize(((HBaseVertex) vertex).createdAt()));
+                timestamp, Serializer.serialize(((HBaseVertex) vertex).createdAt()));
         if (isUnique) {
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, Serializer.serialize(vertex.id()));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp, Serializer.serialize(vertex.id()));
         }
         put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;

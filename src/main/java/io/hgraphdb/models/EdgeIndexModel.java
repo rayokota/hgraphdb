@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.util.*;
+import org.apache.hadoop.yarn.util.SystemClock;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -44,21 +45,25 @@ public class EdgeIndexModel extends BaseModel {
         super(graph, table);
     }
 
-    public void writeEdgeEndpoints(Edge edge, Long ts) {
+    public void writeEdgeEndpoints(Edge edge) {
+        long now = System.currentTimeMillis();
+        ((HBaseEdge) edge).setIndexTs(now);
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
-        EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, now);
+        EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT, now);
         Mutators.create(table, indexWriter, writer);
     }
 
-    public void writeEdgeIndex(Edge edge, Long ts) {
+    public void writeEdgeIndex(Edge edge) {
+        long now = System.currentTimeMillis();
+        ((HBaseEdge) edge).setIndexTs(now);
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, ts);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, now);
         Mutators.create(table, indexWriter);
     }
 
     public void writeEdgeIndex(Edge edge, String key) {
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key, null);
         Mutators.create(table, indexWriter);
     }
 
@@ -67,10 +72,10 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.create(table, indexWriter);
     }
 
-    public void deleteEdgeEndpoints(Edge edge) {
+    public void deleteEdgeEndpoints(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
-        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices, null);
-        Mutator writer = new EdgeIndexRemover(graph, edge, Constants.CREATED_AT, null);
+        EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices, ts);
+        Mutator writer = new EdgeIndexRemover(graph, edge, Constants.CREATED_AT, ts);
         Mutators.write(table, writer, indexWriter);
     }
 

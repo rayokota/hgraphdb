@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 import static org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils.count;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class HBaseIndexTest extends HBaseGraphTest {
 
@@ -44,6 +45,26 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = graph.allVertices("a", "key1", 11);
         assertEquals(2, count(it));
+    }
+
+    @Test
+    public void testUniqueVertexIndex() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.VERTEX, "a", "key1", true);
+        graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
+        Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
+        Vertex v = it.next();
+        assertEquals(id(10), v.id());
+
+        try {
+            graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
+            fail("should reject non-unique key");
+        } catch (HBaseGraphNotUniqueException x) { }
+
+        it = graph.allVertices("a", "key1", 11);
+        v = it.next();
+        assertEquals(id(10), v.id());
     }
 
     @Test
@@ -114,7 +135,6 @@ public class HBaseIndexTest extends HBaseGraphTest {
         assertEquals(2, count(it));
     }
 
-    @Ignore
     @Test
     public void testUniqueEdgeIndex() {
         assertEquals(0, count(graph.vertices()));
@@ -126,12 +146,14 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Vertex v13 = graph.addVertex(T.id, id(13));
 
         v10.addEdge("b", v11, "key1", 11);
+
         Iterator<Edge> it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         Edge e = it.next();
         assertEquals(id(11), e.inVertex().id());
 
         try {
             v10.addEdge("b", v12, "key1", 11);
+            fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException x) { }
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);

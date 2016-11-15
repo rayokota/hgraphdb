@@ -70,7 +70,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
-        newEdge.writeEdgeEndpoints(newEdge.getIndexTs());
+        newEdge.writeEdgeEndpoints();
         newEdge.writeToModel();
 
         invalidateEdgeCache();
@@ -190,28 +190,25 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     }
 
     @Override
-    public void writeToIndexModel(Long ts) {
-        getIndexModel().writeVertexIndex(this, ts);
+    public void deleteFromModel() {
+        getModel().deleteVertex(this);
+    }
+
+    public void writeToIndexModel() {
+        getIndexModel().writeVertexIndex(this);
+    }
+
+    public void deleteFromIndexModel() {
+        getIndexModel().deleteVertexIndex(this, null);
+    }
+
+    public void deleteFromIndexModel(Long ts) {
+        getIndexModel().deleteVertexIndex(this, ts);
     }
 
     @Override
     public void writeToIndexModel(String key) {
         getIndexModel().writeVertexIndex(this, key);
-    }
-
-    @Override
-    public void deleteFromModel() {
-        getModel().deleteVertex(this);
-    }
-
-    @Override
-    public void deleteFromIndexModel() {
-        getIndexModel().deleteVertexIndex(this, null);
-    }
-
-    @Override
-    public void deleteFromIndexModel(Long ts) {
-        getIndexModel().deleteVertexIndex(this, ts);
     }
 
     @Override

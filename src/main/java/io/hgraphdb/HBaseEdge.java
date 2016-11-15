@@ -136,37 +136,26 @@ public class HBaseEdge extends HBaseElement implements Edge {
         getModel().writeEdge(this);
     }
 
-    public void writeEdgeEndpoints(Long ts) {
-        getIndexModel().writeEdgeEndpoints(this, ts);
-    }
-
-    @Override
-    public void writeToIndexModel(Long ts) {
-        getIndexModel().writeEdgeIndex(this, ts);
-    }
-
-    @Override
-    public void writeToIndexModel(String key) {
-        getIndexModel().writeEdgeIndex(this, key);
-    }
-
     @Override
     public void deleteFromModel() {
         getModel().deleteEdge(this);
     }
 
+    public void writeEdgeEndpoints() {
+        getIndexModel().writeEdgeEndpoints(this);
+    }
+
     public void deleteEdgeEndpoints() {
-        getIndexModel().deleteEdgeEndpoints(this);
+        getIndexModel().deleteEdgeEndpoints(this, null);
+    }
+
+    public void deleteEdgeEndpoints(Long ts) {
+        getIndexModel().deleteEdgeEndpoints(this, ts);
     }
 
     @Override
-    public void deleteFromIndexModel() {
-        getIndexModel().deleteEdgeIndex(this, null);
-    }
-
-    @Override
-    public void deleteFromIndexModel(Long ts) {
-        getIndexModel().deleteEdgeIndex(this, ts);
+    public void writeToIndexModel(String key) {
+        getIndexModel().writeEdgeIndex(this, key);
     }
 
     @Override
