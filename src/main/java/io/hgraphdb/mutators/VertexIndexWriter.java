@@ -49,7 +49,7 @@ public class VertexIndexWriter implements Creator {
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 Serializer.serialize(((HBaseVertex) vertex).createdAt()));
         if (isUnique) {
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.ID_BYTES, Serializer.serialize(vertex.id()));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, Serializer.serialize(vertex.id()));
         }
         put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;

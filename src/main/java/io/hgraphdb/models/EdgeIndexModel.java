@@ -320,8 +320,8 @@ public class EdgeIndexModel extends BaseModel {
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, edge.label(), Order.ASCENDING);
         Serializer.serialize(buffer, key.equals(Constants.CREATED_AT) ? ((HBaseEdge) edge).createdAt() : edge.value(key));
-        Serializer.serialize(buffer, direction == Direction.IN ? outVertexId : inVertexId);
         if (!isUnique) {
+            Serializer.serialize(buffer, direction == Direction.IN ? outVertexId : inVertexId);
             Serializer.serialize(buffer, edge.id());
         }
         buffer.setLength(buffer.getPosition());
@@ -340,16 +340,19 @@ public class EdgeIndexModel extends BaseModel {
         String key = OrderedBytes.decodeString(buffer);
         String label = OrderedBytes.decodeString(buffer);
         Object value = Serializer.deserialize(buffer);
-        Object vertexId2 = Serializer.deserialize(buffer);
-        Cell createdAttsCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
-        Long createdAt = Serializer.deserialize(CellUtil.cloneValue(createdAttsCell));
+        Object vertexId2;
         Object edgeId;
         if (isUnique) {
-            Cell edgeIdCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.ID_BYTES);
+            Cell vertexId2Cell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES);
+            vertexId2 = Serializer.deserialize(CellUtil.cloneValue(vertexId2Cell));
+            Cell edgeIdCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES);
             edgeId = Serializer.deserialize(CellUtil.cloneValue(edgeIdCell));
         } else {
+            vertexId2 = Serializer.deserialize(buffer);
             edgeId = Serializer.deserialize(buffer);
         }
+        Cell createdAttsCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
+        Long createdAt = Serializer.deserialize(CellUtil.cloneValue(createdAttsCell));
         Map<String, Object> properties = new HashMap<>();
         properties.put(key, value);
         HBaseEdge newEdge;

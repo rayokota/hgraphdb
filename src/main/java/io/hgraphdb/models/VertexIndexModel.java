@@ -151,7 +151,7 @@ public class VertexIndexModel extends BaseModel {
         Object value = Serializer.deserialize(buffer);
         Object vertexId;
         if (isUnique) {
-            Cell vertexIdCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.ID_BYTES);
+            Cell vertexIdCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES);
             vertexId = Serializer.deserialize(CellUtil.cloneValue(vertexIdCell));
         } else {
             vertexId = Serializer.deserialize(buffer);

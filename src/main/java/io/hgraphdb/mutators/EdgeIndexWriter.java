@@ -1,7 +1,6 @@
 package io.hgraphdb.mutators;
 
 import com.google.common.collect.ImmutableMap;
-import com.sun.tools.internal.jxc.ap.Const;
 import io.hgraphdb.*;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -54,7 +53,9 @@ public class EdgeIndexWriter implements Creator {
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 Serializer.serialize(((HBaseEdge)edge).createdAt()));
         if (isUnique) {
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.ID_BYTES, Serializer.serialize(edge.id()));
+            Object vertexId = direction == Direction.IN ? edge.outVertex().id() : edge.inVertex().id();
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, Serializer.serialize(vertexId));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES, Serializer.serialize(edge.id()));
         }
         put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;

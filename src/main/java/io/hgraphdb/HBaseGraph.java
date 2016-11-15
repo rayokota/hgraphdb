@@ -450,6 +450,10 @@ public class HBaseGraph implements Graph {
         createIndex(type, label, propertyKey, false, false);
     }
 
+    public void createIndex(IndexType type, String label, String propertyKey, boolean isUnique) {
+        createIndex(type, label, propertyKey, isUnique, false);
+    }
+
     public void createIndex(IndexType type, String label, String propertyKey, boolean isUnique, boolean populate) {
         IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);

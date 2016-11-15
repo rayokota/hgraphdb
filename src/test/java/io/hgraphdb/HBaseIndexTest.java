@@ -2,6 +2,7 @@ package io.hgraphdb;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -111,6 +112,31 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         assertEquals(2, count(it));
+    }
+
+    @Ignore
+    @Test
+    public void testUniqueEdgeIndex() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(IndexType.EDGE, "b", "key1", true);
+        Vertex v10 = graph.addVertex(T.id, id(10));
+        Vertex v11 = graph.addVertex(T.id, id(11));
+        Vertex v12 = graph.addVertex(T.id, id(12));
+        Vertex v13 = graph.addVertex(T.id, id(13));
+
+        v10.addEdge("b", v11, "key1", 11);
+        Iterator<Edge> it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
+        Edge e = it.next();
+        assertEquals(id(11), e.inVertex().id());
+
+        try {
+            v10.addEdge("b", v12, "key1", 11);
+        } catch (HBaseGraphNotUniqueException x) { }
+
+        it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
+        e = it.next();
+        assertEquals(id(11), e.inVertex().id());
     }
 
     @Test
