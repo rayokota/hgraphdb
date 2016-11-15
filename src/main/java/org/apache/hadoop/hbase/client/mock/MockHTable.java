@@ -666,14 +666,17 @@ public class MockHTable implements HTableInterface {
             }
             for (KeyValue kv : delete.getFamilyMap().get(family)) {
                 long ts = kv.getTimestamp();
-                if (ts == HConstants.LATEST_TIMESTAMP) {
-                    data.get(row).get(kv.getFamily()).remove(kv.getQualifier());
+                if (kv.getTypeByte() == KeyValue.Type.DeleteColumn.getCode()) {
+                    if (ts == HConstants.LATEST_TIMESTAMP) {
+                        data.get(row).get(kv.getFamily()).remove(kv.getQualifier());
+                    } else {
+                        data.get(row).get(kv.getFamily()).get(kv.getQualifier()).subMap(0L, true, ts, true).clear();
+                    }
                 } else {
-                    NavigableMap<Long, byte[]> timestampsAndValues  = data.get(row).get(kv.getFamily()).get(kv.getQualifier());
-                    Map.Entry<Long, byte[]> timestampAndValue = timestampsAndValues.lastEntry();
-                    while (timestampAndValue != null && timestampAndValue.getKey() >= ts) {
-                        timestampsAndValues.pollLastEntry();
-                        timestampAndValue = timestampsAndValues.lastEntry();
+                    if (ts == HConstants.LATEST_TIMESTAMP) {
+                        data.get(row).get(kv.getFamily()).get(kv.getQualifier()).pollLastEntry();
+                    } else {
+                        data.get(row).get(kv.getFamily()).get(kv.getQualifier()).remove(ts);
                     }
                 }
             }

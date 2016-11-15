@@ -164,6 +164,11 @@ public class HBaseEdge extends HBaseElement implements Edge {
     }
 
     @Override
+    public void removeStaleIndices() {
+        deleteEdgeEndpoints(getIndexTs());
+    }
+
+    @Override
     public String toString() {
         return StringFactory.edgeString(this);
     }

@@ -37,10 +37,6 @@ public class IndexMetadata {
         return isUnique;
     }
 
-    public void isUnique(boolean isUnique) {
-        this.isUnique = isUnique;
-    }
-
     public State state() {
         return state;
     }

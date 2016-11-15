@@ -217,6 +217,11 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     }
 
     @Override
+    public void removeStaleIndices() {
+        deleteFromIndexModel(getIndexTs());
+    }
+
+    @Override
     public String toString() {
         return StringFactory.vertexString(this);
     }

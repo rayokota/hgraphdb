@@ -2,11 +2,8 @@ package io.hgraphdb.mutators;
 
 import com.google.common.collect.ImmutableMap;
 import io.hgraphdb.Constants;
-import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.IndexMetadata;
-import io.hgraphdb.Serializer;
-import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -48,13 +45,21 @@ public class EdgeIndexRemover implements Mutator {
     }
 
     private Delete constructDelete(Direction direction, Map.Entry<String, Boolean> entry) {
-        long timestamp = ts != null ? ts : HConstants.LATEST_TIMESTAMP;
         boolean isUnique = entry.getValue();
         Delete delete = new Delete(graph.getEdgeIndexModel().serializeForWrite(edge, direction, isUnique, entry.getKey()));
-        delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES, timestamp);
+        if (ts != null) {
+            delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES, ts);
+        } else {
+            delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
+        }
         if (isUnique) {
-            delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp);
-            delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES, timestamp);
+            if (ts != null) {
+                delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, ts);
+                delete.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES, ts);
+            } else {
+                delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES);
+                delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES);
+            }
         }
         return delete;
     }

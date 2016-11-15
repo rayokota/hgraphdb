@@ -222,12 +222,21 @@ public abstract class HBaseElement implements Element {
 
     public abstract void deleteFromModel();
 
-    // Write one index
+    /*
+     * Write one index.
+     * Used when setting properties.
+     */
     public abstract void writeToIndexModel(String key);
 
-    // Delete one index with the given ts
+    /*
+     * Remove one index with the given ts.
+     * Used when removing properties.
+     */
     public abstract void deleteFromIndexModel(String key, Long ts);
 
+    /*
+     * Remove one stale index using indexKey and indexTs.
+     */
     public void removeStaleIndex() {
         IndexMetadata.Key indexKey = getIndexKey();
         long ts = getIndexTs();
@@ -242,6 +251,11 @@ public abstract class HBaseElement implements Element {
             });
         }
     }
+
+    /*
+     * Remove all stale indices using indexTs.
+     */
+    public abstract void removeStaleIndices();
 
     @Override
     public boolean equals(final Object object) {
