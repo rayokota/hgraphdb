@@ -79,7 +79,7 @@ Once an index is created and data has been populated, it can be used as follows:
 		
 Note that the indices support range queries, where the start of the range is inclusive and the end of the range is exclusive.
 
-An index can also be specified as a unique index.  For a vertex index, this means only one node can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
+An index can also be specified as a unique index.  For a vertex index, this means only one vertex can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
 
 		graph.createIndex(IndexType.VERTEX, "person", "name", /* unique */ true);
 
