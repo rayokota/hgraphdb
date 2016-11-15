@@ -1,10 +1,6 @@
 package io.hgraphdb.models;
 
-import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphException;
-import io.hgraphdb.IndexType;
-import io.hgraphdb.OperationType;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.*;
 import io.hgraphdb.mutators.Creator;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
@@ -105,9 +101,10 @@ public class VertexModel extends ElementModel {
 
     public Iterator<Vertex> vertices(String label, String key, Object value) {
         ElementHelper.validateProperty(key, value);
-        if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label, key)) {
+        IndexMetadata index = graph.getIndex(OperationType.READ, IndexType.VERTEX, label, key);
+        if (index != null) {
             LOGGER.debug("Using vertex index for ({}, {})", label, key);
-            return graph.getVertexIndexModel().vertices(label, key, value);
+            return graph.getVertexIndexModel().vertices(label, index.isUnique(), key, value);
         }
         final VertexReader parser = new VertexReader(graph);
 
@@ -126,9 +123,10 @@ public class VertexModel extends ElementModel {
     public Iterator<Vertex> vertices(String label, String key, Object inclusiveFrom, Object exclusiveTo) {
         ElementHelper.validateProperty(key, inclusiveFrom);
         ElementHelper.validateProperty(key, exclusiveTo);
-        if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label, key)) {
+        IndexMetadata index = graph.getIndex(OperationType.READ, IndexType.VERTEX, label, key);
+        if (index != null) {
             LOGGER.debug("Using vertex index for ({}, {})", label, key);
-            return graph.getVertexIndexModel().vertices(label, key, inclusiveFrom, exclusiveTo);
+            return graph.getVertexIndexModel().vertices(label, index.isUnique(), key, inclusiveFrom, exclusiveTo);
         }
         final VertexReader parser = new VertexReader(graph);
 

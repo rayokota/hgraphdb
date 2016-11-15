@@ -152,7 +152,7 @@ public abstract class HBaseElement implements Element {
 
         // delete from index model before setting property
         Object oldValue = null;
-        boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
+        boolean hasIndex = hasIndex(OperationType.WRITE, key);
         if (hasIndex) {
             // only load old value if using index
             oldValue = getProperty(key);
@@ -177,7 +177,7 @@ public abstract class HBaseElement implements Element {
         V value = getProperty(key);
         if (value != null) {
             // delete from index model before removing property
-            boolean hasIndex = hasIndex(OperationType.WRITE, label, key);
+            boolean hasIndex = hasIndex(OperationType.WRITE, key);
             if (hasIndex) {
                 deleteFromIndexModel(key, null);
             }
@@ -211,7 +211,7 @@ public abstract class HBaseElement implements Element {
         this.updatedAt = updatedAt;
     }
 
-    public abstract boolean hasIndex(OperationType op, String... propertyKeys);
+    public abstract boolean hasIndex(OperationType op, String propertyKey);
 
     public abstract Iterator<IndexMetadata> getIndices(OperationType op);
 

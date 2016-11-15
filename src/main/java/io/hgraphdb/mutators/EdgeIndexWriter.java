@@ -1,8 +1,8 @@
 package io.hgraphdb.mutators;
 
 import com.google.common.collect.ImmutableMap;
+import com.sun.tools.internal.jxc.ap.Const;
 import io.hgraphdb.*;
-import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -47,12 +47,16 @@ public class EdgeIndexWriter implements Creator {
     }
 
     private Put constructPut(Direction direction, Map.Entry<String, Boolean> entry) {
+        boolean isUnique = entry.getValue();
         Put put = ts != null
-                ? new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, entry.getKey()), ts)
-                : new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, entry.getKey()));
+                ? new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, isUnique, entry.getKey()), ts)
+                : new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, isUnique, entry.getKey()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 Serializer.serialize(((HBaseEdge)edge).createdAt()));
-        put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(entry.getValue()));
+        if (isUnique) {
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.ID_BYTES, Serializer.serialize(edge.id()));
+        }
+        put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;
     }
 

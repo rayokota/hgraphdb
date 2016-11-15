@@ -11,6 +11,7 @@ public class IndexMetadata {
     public IndexMetadata(IndexType type, String label, String propertyKey,
                          boolean isUnique, State state, Long createdAt, Long updatedAt) {
         this.key = new Key(type, label, propertyKey);
+        this.isUnique = isUnique;
         this.state = state;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

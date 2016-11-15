@@ -2,7 +2,6 @@ package io.hgraphdb;
 
 import io.hgraphdb.models.EdgeIndexModel;
 import io.hgraphdb.models.EdgeModel;
-import org.apache.jute.Index;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
@@ -113,8 +112,8 @@ public class HBaseEdge extends HBaseElement implements Edge {
     }
 
     @Override
-    public boolean hasIndex(OperationType op, String... propertyKeys) {
-        return graph.hasIndex(op, IndexType.EDGE, label, propertyKeys);
+    public boolean hasIndex(OperationType op, String propertyKey) {
+        return graph.hasIndex(op, IndexType.EDGE, label, propertyKey);
     }
 
     @Override

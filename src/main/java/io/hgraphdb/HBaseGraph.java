@@ -486,12 +486,13 @@ public class HBaseGraph implements Graph {
                 config.getIndexStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
-    public boolean hasIndex(IndexType type, String label, String... propertyKeys ) {
-        return hasIndex(OperationType.READ, type, label, propertyKeys);
+    public boolean hasIndex(OperationType op, IndexType type, String label, String propertyKey ) {
+        return getIndex(op, type, label, propertyKey) != null;
     }
 
-    public boolean hasIndex(OperationType op, IndexType type, String label, String... propertyKeys ) {
-        return getIndices(op, type, label, propertyKeys).hasNext();
+    public IndexMetadata getIndex(OperationType op, IndexType type, String label, String propertyKey) {
+        Iterator<IndexMetadata> indices = getIndices(op, type, label, propertyKey);
+        return indices.hasNext() ? indices.next() : null;
     }
 
     public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, String... propertyKeys) {

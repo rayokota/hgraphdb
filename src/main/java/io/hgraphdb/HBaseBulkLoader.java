@@ -1,6 +1,10 @@
 package io.hgraphdb;
 
-import io.hgraphdb.mutators.*;
+import io.hgraphdb.mutators.Creator;
+import io.hgraphdb.mutators.EdgeIndexWriter;
+import io.hgraphdb.mutators.EdgeWriter;
+import io.hgraphdb.mutators.VertexIndexWriter;
+import io.hgraphdb.mutators.VertexWriter;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;

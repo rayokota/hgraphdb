@@ -2,6 +2,7 @@ package io.hgraphdb.process.step.sideEffect;
 
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.IndexType;
+import io.hgraphdb.OperationType;
 import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
@@ -50,7 +51,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
             // find a vertex by label and key/value
             for (final HasContainer hasContainer : hasContainers) {
                 if (Compare.eq == hasContainer.getBiPredicate() && !hasContainer.getKey().equals(T.label.getAccessor())) {
-                    if (graph.hasIndex(IndexType.VERTEX, label.get(), hasContainer.getKey())) {
+                    if (graph.hasIndex(OperationType.READ, IndexType.VERTEX, label.get(), hasContainer.getKey())) {
                         return IteratorUtils.stream(graph.allVertices(label.get(), hasContainer.getKey(), hasContainer.getValue()))
                                 .filter(vertex -> HasContainer.testAll(vertex, hasContainers)).iterator();
                     }
