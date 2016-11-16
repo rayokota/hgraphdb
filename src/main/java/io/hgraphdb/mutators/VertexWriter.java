@@ -3,7 +3,7 @@ package io.hgraphdb.mutators;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseVertex;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -31,16 +31,16 @@ public final class VertexWriter implements Creator {
     public Iterator<Put> constructInsertions() {
         String label = vertex.label();
         if (label == null) label = Vertex.DEFAULT_LABEL;
-        Put put = new Put(Serializer.serializeWithSalt(vertex.id()));
+        Put put = new Put(ValueUtils.serializeWithSalt(vertex.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.LABEL_BYTES,
-                Serializer.serialize(label));
+                ValueUtils.serialize(label));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                Serializer.serialize(((HBaseVertex)vertex).createdAt()));
+                ValueUtils.serialize(((HBaseVertex)vertex).createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                Serializer.serialize(((HBaseVertex)vertex).updatedAt()));
+                ValueUtils.serialize(((HBaseVertex)vertex).updatedAt()));
         ((HBaseVertex) vertex).getProperties().entrySet().stream()
                 .forEach(entry -> {
-                    byte[] bytes = Serializer.serialize(entry.getValue());
+                    byte[] bytes = ValueUtils.serialize(entry.getValue());
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
                 });
 

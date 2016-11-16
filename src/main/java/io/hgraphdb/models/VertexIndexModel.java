@@ -60,18 +60,18 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(String label, boolean isUnique, String key, Object value) {
-        byte[] valueBytes = Serializer.serialize(value);
+        byte[] valueBytes = ValueUtils.serialize(value);
         return vertices(getVertexIndexScan(label, isUnique, key, value), vertex -> {
-            byte[] propValueBytes = Serializer.serialize(vertex.getProperty(key));
+            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
         });
     }
 
     public Iterator<Vertex> vertices(String label, boolean isUnique, String key, Object inclusiveFrom, Object exclusiveTo) {
-        byte[] fromBytes = Serializer.serialize(inclusiveFrom);
-        byte[] toBytes = Serializer.serialize(exclusiveTo);
+        byte[] fromBytes = ValueUtils.serialize(inclusiveFrom);
+        byte[] toBytes = ValueUtils.serialize(exclusiveTo);
         return vertices(getVertexIndexScan(label, isUnique, key, inclusiveFrom, exclusiveTo), vertex -> {
-            byte[] propValueBytes = Serializer.serialize(vertex.getProperty(key));
+            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
                     && Bytes.compareTo(propValueBytes, toBytes) < 0;
         });
@@ -122,7 +122,7 @@ public class VertexIndexModel extends BaseModel {
         OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
-        Serializer.serialize(buffer, value);
+        ValueUtils.serialize(buffer, value);
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
         byte[] bytes = new byte[buffer.getRemaining()];
@@ -135,9 +135,9 @@ public class VertexIndexModel extends BaseModel {
         OrderedBytes.encodeString(buffer, vertex.label(), Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
-        Serializer.serialize(buffer, vertex.value(key));
+        ValueUtils.serialize(buffer, vertex.value(key));
         if (!isUnique) {
-            Serializer.serialize(buffer, vertex.id());
+            ValueUtils.serialize(buffer, vertex.id());
         }
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
@@ -152,16 +152,16 @@ public class VertexIndexModel extends BaseModel {
         String label = OrderedBytes.decodeString(buffer);
         boolean isUnique = OrderedBytes.decodeInt8(buffer) == 1;
         String key = OrderedBytes.decodeString(buffer);
-        Object value = Serializer.deserialize(buffer);
+        Object value = ValueUtils.deserialize(buffer);
         Object vertexId;
         if (isUnique) {
             Cell vertexIdCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES);
-            vertexId = Serializer.deserialize(CellUtil.cloneValue(vertexIdCell));
+            vertexId = ValueUtils.deserialize(CellUtil.cloneValue(vertexIdCell));
         } else {
-            vertexId = Serializer.deserialize(buffer);
+            vertexId = ValueUtils.deserialize(buffer);
         }
         Cell createdAtCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
-        Long createdAt = Serializer.deserialize(CellUtil.cloneValue(createdAtCell));
+        Long createdAt = ValueUtils.deserialize(CellUtil.cloneValue(createdAtCell));
         Map<String, Object> properties = new HashMap<>();
         properties.put(key, value);
         HBaseVertex newVertex = new HBaseVertex(graph, vertexId, label, createdAt, null, properties, false);

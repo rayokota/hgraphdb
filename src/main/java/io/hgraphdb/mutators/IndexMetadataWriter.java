@@ -4,7 +4,7 @@ import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
 import io.hgraphdb.IndexMetadata;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.tinkerpop.gremlin.structure.Element;
@@ -31,13 +31,13 @@ public class IndexMetadataWriter implements Creator, Mutator {
     public Iterator<Put> constructInsertions() {
         Put put = new Put(graph.getIndexMetadataModel().serialize(index.key()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UNIQUE_BYTES,
-                Serializer.serialize(index.isUnique()));
+                ValueUtils.serialize(index.isUnique()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.INDEX_STATE_BYTES,
-                Serializer.serialize(index.state().toString()));
+                ValueUtils.serialize(index.state().toString()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                Serializer.serialize(index.createdAt()));
+                ValueUtils.serialize(index.createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                Serializer.serialize(index.updatedAt()));
+                ValueUtils.serialize(index.updatedAt()));
         return IteratorUtils.of(put);
     }
 
@@ -51,9 +51,9 @@ public class IndexMetadataWriter implements Creator, Mutator {
     public Iterator<Mutation> constructMutations() {
         Put put = new Put(graph.getIndexMetadataModel().serialize(index.key()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.INDEX_STATE_BYTES,
-                Serializer.serialize(index.state().toString()));
+                ValueUtils.serialize(index.state().toString()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                Serializer.serialize(index.updatedAt()));
+                ValueUtils.serialize(index.updatedAt()));
         return IteratorUtils.of(put);
     }
 }

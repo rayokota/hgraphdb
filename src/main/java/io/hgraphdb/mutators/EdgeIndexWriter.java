@@ -51,11 +51,11 @@ public class EdgeIndexWriter implements Creator {
         boolean isUnique = entry.getValue();
         Put put = new Put(graph.getEdgeIndexModel().serializeForWrite(edge, direction, isUnique, entry.getKey()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                timestamp, Serializer.serialize(((HBaseEdge)edge).createdAt()));
+                timestamp, ValueUtils.serialize(((HBaseEdge)edge).createdAt()));
         if (isUnique) {
             Object vertexId = direction == Direction.IN ? edge.outVertex().id() : edge.inVertex().id();
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp, Serializer.serialize(vertexId));
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES, timestamp, Serializer.serialize(edge.id()));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp, ValueUtils.serialize(vertexId));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.EDGE_ID_BYTES, timestamp, ValueUtils.serialize(edge.id()));
         }
         put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;

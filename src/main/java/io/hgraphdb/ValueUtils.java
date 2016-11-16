@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
-public final class Serializer {
+public final class ValueUtils {
 
     public static final int DEFAULT_NUM_BUCKETS = 256;
 

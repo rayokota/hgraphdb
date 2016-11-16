@@ -3,7 +3,7 @@ package io.hgraphdb.models;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.PropertyRemover;
 import io.hgraphdb.mutators.PropertyWriter;
 import io.hgraphdb.readers.ElementReader;
@@ -40,7 +40,7 @@ public abstract class ElementModel extends BaseModel {
     public void load(Element element) {
         LOGGER.trace("Executing Get, type: {}, id: {}", getClass().getSimpleName(), element.id());
 
-        Get get = new Get(Serializer.serializeWithSalt(element.id()));
+        Get get = new Get(ValueUtils.serializeWithSalt(element.id()));
 
         try {
             Result result = table.get(get);
@@ -74,7 +74,7 @@ public abstract class ElementModel extends BaseModel {
     protected Scan getPropertyScan(String label) {
         Scan scan = new Scan();
         SingleColumnValueFilter valueFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
-                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(Serializer.serialize(label)));
+                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(ValueUtils.serialize(label)));
         valueFilter.setFilterIfMissing(true);
         scan.setFilter(valueFilter);
         return scan;
@@ -92,7 +92,7 @@ public abstract class ElementModel extends BaseModel {
     protected Scan getPropertyScan(String label, byte[] key, byte[] val) {
         Scan scan = new Scan();
         SingleColumnValueFilter labelFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
-                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(Serializer.serialize(label)));
+                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(ValueUtils.serialize(label)));
         labelFilter.setFilterIfMissing(true);
         SingleColumnValueFilter valueFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
                 key, CompareFilter.CompareOp.EQUAL, new BinaryComparator(val));
@@ -105,7 +105,7 @@ public abstract class ElementModel extends BaseModel {
     protected Scan getPropertyScan(String label, byte[] key, byte[] inclusiveFromValue, byte[] exclusiveToValue) {
         Scan scan = new Scan();
         SingleColumnValueFilter labelFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
-                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(Serializer.serialize(label)));
+                Constants.LABEL_BYTES, CompareFilter.CompareOp.EQUAL, new BinaryComparator(ValueUtils.serialize(label)));
         labelFilter.setFilterIfMissing(true);
         SingleColumnValueFilter fromValueFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
                 key, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(inclusiveFromValue));

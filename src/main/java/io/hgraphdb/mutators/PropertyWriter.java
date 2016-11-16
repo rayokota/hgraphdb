@@ -3,7 +3,7 @@ package io.hgraphdb.mutators;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -28,11 +28,11 @@ public class PropertyWriter implements Mutator {
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        byte[] bytes = Serializer.serialize(value);
-        Put put = new Put(Serializer.serializeWithSalt(element.id()));
+        byte[] bytes = ValueUtils.serialize(value);
+        Put put = new Put(ValueUtils.serializeWithSalt(element.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key), bytes);
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                Serializer.serialize(((HBaseElement)element).updatedAt()));
+                ValueUtils.serialize(((HBaseElement)element).updatedAt()));
         return IteratorUtils.of(put);
     }
 }

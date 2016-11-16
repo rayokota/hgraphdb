@@ -3,7 +3,7 @@ package io.hgraphdb.mutators;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
@@ -27,12 +27,12 @@ public class PropertyRemover implements Mutator {
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        byte[] idBytes = Serializer.serializeWithSalt(element.id());
+        byte[] idBytes = ValueUtils.serializeWithSalt(element.id());
         Delete delete = new Delete(idBytes);
         delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key));
         Put put = new Put(idBytes);
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                Serializer.serialize(((HBaseElement)element).updatedAt()));
+                ValueUtils.serialize(((HBaseElement)element).updatedAt()));
         return IteratorUtils.of(delete, put);
     }
 }

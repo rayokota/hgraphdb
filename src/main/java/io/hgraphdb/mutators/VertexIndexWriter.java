@@ -47,9 +47,9 @@ public class VertexIndexWriter implements Creator {
         boolean isUnique = entry.getValue();
         Put put = new Put(graph.getVertexIndexModel().serializeForWrite(vertex, isUnique, entry.getKey()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                timestamp, Serializer.serialize(((HBaseVertex) vertex).createdAt()));
+                timestamp, ValueUtils.serialize(((HBaseVertex) vertex).createdAt()));
         if (isUnique) {
-            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp, Serializer.serialize(vertex.id()));
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES, timestamp, ValueUtils.serialize(vertex.id()));
         }
         put.setAttribute(Mutators.IS_UNIQUE, Bytes.toBytes(isUnique));
         return put;

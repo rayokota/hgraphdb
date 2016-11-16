@@ -2,7 +2,7 @@ package io.hgraphdb.models;
 
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.Creator;
 import io.hgraphdb.mutators.EdgeRemover;
 import io.hgraphdb.mutators.EdgeWriter;
@@ -58,7 +58,7 @@ public class EdgeModel extends ElementModel {
     public Iterator<Edge> edges(Object fromId, int limit) {
         final EdgeReader parser = new EdgeReader(graph);
 
-        Scan scan = fromId != null ? new Scan(Serializer.serializeWithSalt(fromId)) : new Scan();
+        Scan scan = fromId != null ? new Scan(ValueUtils.serializeWithSalt(fromId)) : new Scan();
         scan.setFilter(new PageFilter(limit));
         ResultScanner scanner = null;
         try {
@@ -73,7 +73,7 @@ public class EdgeModel extends ElementModel {
         ElementHelper.validateProperty(key, value);
         final EdgeReader parser = new EdgeReader(graph);
 
-        byte[] val = Serializer.serialize(value);
+        byte[] val = ValueUtils.serialize(value);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(keyBytes, val);
         ResultScanner scanner = null;

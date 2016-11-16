@@ -1,7 +1,7 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.Serializer;
+import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -21,7 +21,7 @@ public class EdgeRemover implements Mutator {
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        Delete delete = new Delete(Serializer.serializeWithSalt(edge.id()));
+        Delete delete = new Delete(ValueUtils.serializeWithSalt(edge.id()));
         return IteratorUtils.of(delete);
     }
 }

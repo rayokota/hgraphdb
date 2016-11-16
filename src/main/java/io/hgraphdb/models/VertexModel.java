@@ -59,7 +59,7 @@ public class VertexModel extends ElementModel {
     public Iterator<Vertex> vertices(Object fromId, int limit) {
         final VertexReader parser = new VertexReader(graph);
 
-        Scan scan = fromId != null ? new Scan(Serializer.serializeWithSalt(fromId)) : new Scan();
+        Scan scan = fromId != null ? new Scan(ValueUtils.serializeWithSalt(fromId)) : new Scan();
         scan.setFilter(new PageFilter(limit));
         ResultScanner scanner = null;
         try {
@@ -87,7 +87,7 @@ public class VertexModel extends ElementModel {
         ElementHelper.validateProperty(key, value);
         final VertexReader parser = new VertexReader(graph);
 
-        byte[] val = Serializer.serialize(value);
+        byte[] val = ValueUtils.serialize(value);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(keyBytes, val);
         ResultScanner scanner = null;
@@ -108,7 +108,7 @@ public class VertexModel extends ElementModel {
         }
         final VertexReader parser = new VertexReader(graph);
 
-        byte[] val = Serializer.serialize(value);
+        byte[] val = ValueUtils.serialize(value);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(label, keyBytes, val);
         ResultScanner scanner = null;
@@ -130,8 +130,8 @@ public class VertexModel extends ElementModel {
         }
         final VertexReader parser = new VertexReader(graph);
 
-        byte[] fromVal = Serializer.serialize(inclusiveFrom);
-        byte[] toVal = Serializer.serialize(exclusiveTo);
+        byte[] fromVal = ValueUtils.serialize(inclusiveFrom);
+        byte[] toVal = ValueUtils.serialize(exclusiveTo);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(label, keyBytes, fromVal, toVal);
         ResultScanner scanner = null;

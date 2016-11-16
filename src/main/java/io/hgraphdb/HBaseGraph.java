@@ -282,7 +282,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
-        ByteBuffer key = ByteBuffer.wrap(Serializer.serialize(id));
+        ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Vertex cachedVertex = vertexCache.getIfPresent(key);
         if (cachedVertex != null && !((HBaseVertex) cachedVertex).isDeleted()) {
             return cachedVertex;
@@ -369,7 +369,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
-        ByteBuffer key = ByteBuffer.wrap(Serializer.serialize(id));
+        ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Edge cachedEdge = edgeCache.getIfPresent(key);
         if (cachedEdge != null && !((HBaseEdge) cachedEdge).isDeleted()) {
             return cachedEdge;
@@ -606,9 +606,29 @@ public class HBaseGraph implements Graph {
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, HBaseVertex inVertex, HBaseVertex outVertex) {
+        if (!configuration().getUseSchema() || inVertex == null || outVertex == null) return;
+        VertexLabel inVertexLabelMetadata = vertexLabels.get(inVertex.label());
+        VertexLabel outVertexLabelMetadata = vertexLabels.get(outVertex.label());
+        if (inVertexLabelMetadata == null) {
+            throw new HBaseGraphNotValidException("Vertex label " + inVertex.label() + " has not been defined");
+        }
+        if (outVertexLabelMetadata == null) {
+            throw new HBaseGraphNotValidException("Vertex label " + outVertex.label() + " has not been defined");
+        }
+        EdgeLabel labelMetadata = edgeLabels.get(new Triplet<>(label, outVertex.label(), inVertex.label()));
+        if (labelMetadata == null) {
+            throw new HBaseGraphNotValidException("Edge label " + label + " with inVertex " + inVertex.label()
+                    + " and outVertex " + outVertex.label() + " has not been defined");
+        }
+        /*
+        if (labelMetadata.idType()) {
+
+        }
+        */
     }
 
     public void validateVertex(String label, Object id, Map<String, Object> properties) {
+        if (!configuration().getUseSchema()) return;
     }
 
     @Override
