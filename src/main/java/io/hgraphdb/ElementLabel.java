@@ -9,11 +9,13 @@ public abstract class ElementLabel {
     private String label;
     private ValueType idType;
     private Map<String, ValueType> propertyTypes;
+    protected Long createdAt;
 
-    public ElementLabel(String label, ValueType idType, Object... propertyKeysAndTypes) {
+    public ElementLabel(String label, ValueType idType, Long createdAt, Map<String, ValueType> propertyTypes) {
         this.label = label;
         this.idType = idType;
-        this.propertyTypes = HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes);
+        this.propertyTypes = propertyTypes;
+        this.createdAt = createdAt;
     }
 
     public String label() {
@@ -26,6 +28,10 @@ public abstract class ElementLabel {
 
     public Map<String, ValueType> propertyTypes() {
         return propertyTypes;
+    }
+
+    public Long createdAt() {
+        return createdAt;
     }
 
     @Override

@@ -1,13 +1,15 @@
 package io.hgraphdb;
 
+import java.util.Map;
+
 public class EdgeLabel extends ElementLabel {
 
     private String outVertexLabel;
     private String inVertexLabel;
 
     public EdgeLabel(String label, String outVertexLabel, String inVertexLabel, ValueType idType,
-                     Object... propertyKeysAndTypes) {
-        super(label, idType, propertyKeysAndTypes);
+                     Long createdAt, Map<String, ValueType> propertyTypes) {
+        super(label, idType, createdAt, propertyTypes);
         this.outVertexLabel = outVertexLabel;
         this.inVertexLabel = inVertexLabel;
     }
@@ -22,12 +24,12 @@ public class EdgeLabel extends ElementLabel {
 
     @Override
     public String toString() {
-        return "edgeLabel{" +
-                "label='" + label() + '\'' +
-                ", idType=" + idType() +
-                ", outVertexLabel=" + outVertexLabel() +
-                ", inVertexLabel=" + inVertexLabel() +
-                ", propertyTypes=" + propertyTypes() +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append("LABEL EDGE:{" + outVertexLabel + " - " + label() + " -> " + inVertexLabel
+                + "}(ID: " + idType());
+        propertyTypes().entrySet().forEach(entry ->
+                sb.append(", ").append(entry.getKey()).append(": ").append(entry.getValue().toString()));
+        sb.append(")");
+        return sb.toString();
     }
 }

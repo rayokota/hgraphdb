@@ -7,11 +7,7 @@ import com.google.common.cache.RemovalListener;
 import io.hgraphdb.HBaseGraphConfiguration.InstanceType;
 import io.hgraphdb.IndexMetadata.Key;
 import io.hgraphdb.IndexMetadata.State;
-import io.hgraphdb.models.EdgeIndexModel;
-import io.hgraphdb.models.EdgeModel;
-import io.hgraphdb.models.IndexMetadataModel;
-import io.hgraphdb.models.VertexIndexModel;
-import io.hgraphdb.models.VertexModel;
+import io.hgraphdb.models.*;
 import io.hgraphdb.process.strategy.optimization.HBaseGraphStepStrategy;
 import org.apache.commons.configuration.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -112,8 +108,10 @@ public class HBaseGraph implements Graph {
     private final Connection connection;
     private final EdgeModel edgeModel;
     private final EdgeIndexModel edgeIndexModel;
+    private final EdgeLabelModel edgeLabelModel;
     private final VertexModel vertexModel;
     private final VertexIndexModel vertexIndexModel;
+    private final VertexLabelModel vertexLabelModel;
     private final IndexMetadataModel indexMetadataModel;
     private Cache<ByteBuffer, Edge> edgeCache;
     private Cache<ByteBuffer, Vertex> vertexCache;
@@ -172,8 +170,10 @@ public class HBaseGraph implements Graph {
             String ns = config.getGraphNamespace();
             this.edgeModel = new EdgeModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGES)));
             this.edgeIndexModel = new EdgeIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_INDICES)));
+            this.edgeLabelModel = new EdgeLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_LABELS)));
             this.vertexModel = new VertexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTICES)));
             this.vertexIndexModel = new VertexIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_INDICES)));
+            this.vertexLabelModel = new VertexLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_LABELS)));
             this.indexMetadataModel = new IndexMetadataModel(this, connection.getTable(TableName.valueOf(ns, Constants.INDEX_METADATA)));
 
             this.edgeCache = CacheBuilder.<ByteBuffer, Edge>newBuilder()
@@ -187,9 +187,9 @@ public class HBaseGraph implements Graph {
                     .removalListener((RemovalListener<ByteBuffer, Vertex>) notif -> ((HBaseVertex) notif.getValue()).setCached(false))
                     .build();
 
-            refreshIndices();
-            executor.scheduleAtFixedRate(this::refreshIndices,
-                    config.getIndexCacheRefreshSecs(), config.getIndexCacheRefreshSecs(), TimeUnit.SECONDS);
+            refreshSchema();
+            executor.scheduleAtFixedRate(this::refreshSchema,
+                    config.getSchemaCacheRefreshSecs(), config.getSchemaCacheRefreshSecs(), TimeUnit.SECONDS);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -205,12 +205,18 @@ public class HBaseGraph implements Graph {
 
     public EdgeIndexModel getEdgeIndexModel() { return edgeIndexModel; }
 
+    public EdgeLabelModel getEdgeLabelModel() { return edgeLabelModel; }
+
     public VertexModel getVertexModel() {
         return vertexModel;
     }
 
     public VertexIndexModel getVertexIndexModel() {
         return vertexIndexModel;
+    }
+
+    public VertexLabelModel getVertexLabelModel() {
+        return vertexLabelModel;
     }
 
     public IndexMetadataModel getIndexMetadataModel() {
@@ -440,26 +446,27 @@ public class HBaseGraph implements Graph {
     }
 
     @VisibleForTesting
-    protected void refreshIndices() {
-        Map<Key, IndexMetadata> map = new ConcurrentHashMap<>();
+    protected void refreshSchema() {
+        Map<Key, IndexMetadata> newIndices = new ConcurrentHashMap<>();
         for (Iterator<IndexMetadata> it = getIndexMetadataModel().indices(); it.hasNext(); ) {
             final IndexMetadata index = it.next();
-            map.put(index.key(), index);
+            newIndices.put(index.key(), index);
         }
-        indices = map;
-    }
-
-    @VisibleForTesting
-    protected void refreshLabels() {
-        Map<Key, IndexMetadata> map = new ConcurrentHashMap<>();
-        // TODO
-        /*
-        for (Iterator<IndexMetadata> it = getIndexMetadataModel().indices(); it.hasNext(); ) {
-            final IndexMetadata index = it.next();
-            map.put(index.key(), index);
+        indices = newIndices;
+        if (configuration().getUseSchema()) {
+            Map<Triplet<String, String, String>, EdgeLabel> newEdgeLabels = new ConcurrentHashMap<>();
+            for (Iterator<EdgeLabel> it = getEdgeLabelModel().labels(); it.hasNext(); ) {
+                final EdgeLabel label = it.next();
+                newEdgeLabels.put(new Triplet<>(label.label(), label.outVertexLabel(), label.inVertexLabel()), label);
+            }
+            edgeLabels = newEdgeLabels;
+            Map<String, VertexLabel> newVertexLabels = new ConcurrentHashMap<>();
+            for (Iterator<VertexLabel> it = getVertexLabelModel().labels(); it.hasNext(); ) {
+                final VertexLabel label = it.next();
+                newVertexLabels.put(label.label(), label);
+            }
+            vertexLabels = newVertexLabels;
         }
-        indices = map;
-        */
     }
 
     public void createIndex(IndexType type, String label, String propertyKey) {
@@ -503,7 +510,7 @@ public class HBaseGraph implements Graph {
                     }
                     updateIndex(index.key(), State.ACTIVE);
                 },
-                config.getIndexStateChangeDelaySecs(), TimeUnit.SECONDS);
+                config.getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
     public boolean hasIndex(OperationType op, IndexType type, String label, String propertyKey ) {
@@ -580,54 +587,56 @@ public class HBaseGraph implements Graph {
     }
 
     public void createEdgeLabel(String label, String outVertexLabel, String inVertexLabel, ValueType idType,
-                                Integer ttl, Object... propertyKeysAndTypes) {
+                                Object... propertyKeysAndTypes) {
         if (!config.getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
-        refreshLabels();
+        refreshSchema();
         if (vertexLabels.get(outVertexLabel) == null) {
             throw new HBaseGraphException("Out vertex label " + outVertexLabel + " does not exist");
         }
         if (vertexLabels.get(inVertexLabel) == null) {
             throw new HBaseGraphException("In vertex label " + inVertexLabel + " does not exist");
         }
-        EdgeLabel edgeLabel = new EdgeLabel(label, outVertexLabel, inVertexLabel, idType, ttl, propertyKeysAndTypes);
-        // TODO save to model
+        EdgeLabel edgeLabel = new EdgeLabel(label, outVertexLabel, inVertexLabel, idType,
+                System.currentTimeMillis(), HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes));
+        edgeLabelModel.createLabel(edgeLabel);
         edgeLabels.put(new Triplet<>(label, outVertexLabel, inVertexLabel), edgeLabel);
     }
 
-    public void createVertexLabel(String label, ValueType idType, Integer ttl, Object... propertyKeysAndTypes) {
+    public void createVertexLabel(String label, ValueType idType, Object... propertyKeysAndTypes) {
         if (!config.getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
-        VertexLabel vertexLabel = new VertexLabel(label, idType, ttl, propertyKeysAndTypes);
-        // TODO save to model
+        VertexLabel vertexLabel = new VertexLabel(label, idType,
+                System.currentTimeMillis(), HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes));
+        vertexLabelModel.createLabel(vertexLabel);
         vertexLabels.put(label, vertexLabel);
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
-        if (!configuration().getUseSchema() || inVertex == null || outVertex == null) return;
+        if (!configuration().getUseSchema() ||  label == null || inVertex == null || outVertex == null) return;
         VertexLabel inVertexLabelMetadata = vertexLabels.get(inVertex.label());
         VertexLabel outVertexLabelMetadata = vertexLabels.get(outVertex.label());
         if (inVertexLabelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label " + inVertex.label() + " has not been defined");
+            throw new HBaseGraphNotValidException("Vertex label '" + inVertex.label() + "' has not been defined");
         }
         if (outVertexLabelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label " + outVertex.label() + " has not been defined");
+            throw new HBaseGraphNotValidException("Vertex label '" + outVertex.label() + "' has not been defined");
         }
         EdgeLabel labelMetadata = edgeLabels.get(new Triplet<>(label, outVertex.label(), inVertex.label()));
         if (labelMetadata == null) {
-            throw new HBaseGraphNotValidException("Edge label " + label + " with inVertex " + inVertex.label()
-                    + " and outVertex " + outVertex.label() + " has not been defined");
+            throw new HBaseGraphNotValidException("Edge label '" + label + "' with inVertex '" + inVertex.label()
+                    + "' and outVertex '" + outVertex.label() + "' has not been defined");
         }
         validateTypes(labelMetadata, id, properties);
     }
 
     public void validateVertex(String label, Object id, Map<String, Object> properties) {
-        if (!configuration().getUseSchema()) return;
+        if (!configuration().getUseSchema() || label == null) return;
         VertexLabel labelMetadata = vertexLabels.get(label);
         if (labelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label " + label + " has not been defined");
+            throw new HBaseGraphNotValidException("Vertex label '" + label + "' has not been defined");
         }
         validateTypes(labelMetadata, id, properties);
     }
@@ -635,17 +644,19 @@ public class HBaseGraph implements Graph {
     private void validateTypes(ElementLabel labelMetadata, Object id, Map<String, Object> properties) {
         ValueType idType = labelMetadata.idType();
         if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
-            throw new HBaseGraphNotValidException("ID " + id + " not of type " + idType);
+            throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
         Map<String, ValueType> propertyTypes = labelMetadata.propertyTypes();
         properties.entrySet().stream().forEach(entry -> {
             String propertyName = entry.getKey();
-            ValueType propertyType = propertyTypes.get(entry.getKey());
-            if (propertyType == null) {
-                throw new HBaseGraphNotValidException("Property " + propertyName + " has not been defined");
-            }
-            if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(entry.getValue())) {
-                throw new HBaseGraphNotValidException("Property " + propertyName + " not of type " + propertyType);
+            if (!Graph.Hidden.isHidden(propertyName)) {
+                ValueType propertyType = propertyTypes.get(entry.getKey());
+                if (propertyType == null) {
+                    throw new HBaseGraphNotValidException("Property '" + propertyName + "' has not been defined");
+                }
+                if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(entry.getValue())) {
+                    throw new HBaseGraphNotValidException("Property '" + propertyName + "' not of type " + propertyType);
+                }
             }
         });
     }

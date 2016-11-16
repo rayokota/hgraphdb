@@ -1,17 +1,20 @@
 package io.hgraphdb;
 
+import java.util.Map;
+
 public class VertexLabel extends ElementLabel {
 
-    public VertexLabel(String label, ValueType idType, Object... propertyKeysAndTypes) {
-        super(label, idType, propertyKeysAndTypes);
+    public VertexLabel(String label, ValueType idType, Long createdAt, Map<String, ValueType> propertyTypes) {
+        super(label, idType, createdAt, propertyTypes);
     }
 
     @Override
     public String toString() {
-        return "vertexLabel{" +
-                "label='" + label() + '\'' +
-                ", idType=" + idType() +
-                ", propertyTypes=" + propertyTypes() +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append("LABEL VERTEX:" + label() + " (ID: " + idType());
+        propertyTypes().entrySet().forEach(entry ->
+                sb.append(", ").append(entry.getKey()).append(": ").append(entry.getValue().toString()));
+        sb.append(")");
+        return sb.toString();
     }
 }

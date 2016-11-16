@@ -43,8 +43,7 @@ public class IndexMetadataWriter implements Creator, Mutator {
 
     @Override
     public RuntimeException alreadyExists() {
-        return new HBaseGraphException("Index for (" + index.label() + ", " + index.propertyKey() + ") of type "
-                + index.type() + " already exists");
+        return new HBaseGraphException(index.toString() + " already exists");
     }
 
     @Override

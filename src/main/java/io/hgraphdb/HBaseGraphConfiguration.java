@@ -38,10 +38,10 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
         public static final String USE_SCHEMA                      = "gremlin.hbase.useSchema";
 
-        /* How often to refresh the index cache */
-        public static final String INDEX_CACHE_REFRESH_SECS        = "gremlin.hbase.indexCacheRefreshSecs";
-        /* How long to wait before an index state change is propagated to other index caches */
-        public static final String INDEX_STATE_CHANGE_DELAY_SECS   = "gremlin.hbase.indexStateChangeDelaySecs";
+        /* How often to refresh the schema cache */
+        public static final String SCHEMA_CACHE_REFRESH_SECS       = "gremlin.hbase.schemaCacheRefreshSecs";
+        /* How long to wait before a schema state change is propagated to other schema caches */
+        public static final String SCHEMA_STATE_CHANGE_DELAY_SECS  = "gremlin.hbase.schemaStateChangeDelaySecs";
         /* How old stale indices have to be in order to delete */
         public static final String STALE_INDEX_EXPIRY_MS           = "gremlin.hbase.staleIndexExpiryMs";
 
@@ -192,21 +192,21 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         return this;
     }
 
-    public int getIndexCacheRefreshSecs() {
-        return conf.getInt(Keys.INDEX_CACHE_REFRESH_SECS, 1);
+    public int getSchemaCacheRefreshSecs() {
+        return conf.getInt(Keys.SCHEMA_CACHE_REFRESH_SECS, 1);
     }
 
-    public HBaseGraphConfiguration setIndexCacheRefreshSecs(int indexCacheRefreshSecs) {
-        conf.setProperty(Keys.INDEX_CACHE_REFRESH_SECS, indexCacheRefreshSecs);
+    public HBaseGraphConfiguration setSchemaCacheRefreshSecs(int indexCacheRefreshSecs) {
+        conf.setProperty(Keys.SCHEMA_CACHE_REFRESH_SECS, indexCacheRefreshSecs);
         return this;
     }
 
-    public int getIndexStateChangeDelaySecs() {
-        return conf.getInt(Keys.INDEX_STATE_CHANGE_DELAY_SECS, 2);
+    public int getSchemaStateChangeDelaySecs() {
+        return conf.getInt(Keys.SCHEMA_STATE_CHANGE_DELAY_SECS, 2);
     }
 
-    public HBaseGraphConfiguration setIndexStateChangeDelaySecs(int indexStateChangeDelaySecs) {
-        conf.setProperty(Keys.INDEX_STATE_CHANGE_DELAY_SECS, indexStateChangeDelaySecs);
+    public HBaseGraphConfiguration setSchemaStateChangeDelaySecs(int indexStateChangeDelaySecs) {
+        conf.setProperty(Keys.SCHEMA_STATE_CHANGE_DELAY_SECS, indexStateChangeDelaySecs);
         return this;
     }
 
