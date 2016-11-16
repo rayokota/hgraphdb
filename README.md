@@ -92,7 +92,7 @@ By default HGraphDB does not use a schema.  Schema management can be enabled by 
 		...
 		graph.createEdgeLabel("writes", "author", "book", /* id type */ ValueType.STRING, "since", ValueType.DATE);   
 		
-Whenever vertices or edges are added, they will be validated against the schema.    
+Whenever vertices or edges are added to the graph, they will first be validated against the schema.    
 
 ## Using the Gremlin Console
 
