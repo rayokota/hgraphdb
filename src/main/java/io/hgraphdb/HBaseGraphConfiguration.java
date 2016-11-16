@@ -33,6 +33,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String RELATIONSHIP_CACHE_MAX_SIZE     = "gremlin.hbase.relationshipCacheMaxSize";
         public static final String RELATIONSHIP_CACHE_TTL_SECS     = "gremlin.hbase.relationshipCacheTtlSecs";
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
+        public static final String USE_SCHEMA                      = "gremlin.hbase.useSchema";
 
         /* How often to refresh the index cache */
         public static final String INDEX_CACHE_REFRESH_SECS        = "gremlin.hbase.indexCacheRefreshSecs";
@@ -158,6 +159,15 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration setLazyLoading(boolean lazyLoading) {
         conf.setProperty(Keys.LAZY_LOADING, lazyLoading);
+        return this;
+    }
+
+    public boolean getUseSchema() {
+        return conf.getBoolean(Keys.USE_SCHEMA, false);
+    }
+
+    public HBaseGraphConfiguration setUseSchema(boolean useSchema) {
+        conf.setProperty(Keys.USE_SCHEMA, useSchema);
         return this;
     }
 

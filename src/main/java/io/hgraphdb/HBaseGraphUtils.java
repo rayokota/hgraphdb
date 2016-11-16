@@ -179,4 +179,22 @@ public final class HBaseGraphUtils {
         }
         return props;
     }
+
+    public static Map<String, ValueType> propertyKeysAndTypesToMap(Object... keyTypes) {
+        Map<String, ValueType> props = new HashMap<>();
+        for (int i = 0; i < keyTypes.length; i = i + 2) {
+            Object key = keyTypes[i];
+            if (key.equals(T.id) || key.equals(T.label)) continue;
+            String keyStr = key.toString();
+            Object type = keyTypes[i + 1];
+            ValueType valueType;
+            if (type instanceof ValueType) {
+                valueType = (ValueType) type;
+            } else {
+                valueType = ValueType.valueOf(type.toString().toUpperCase());
+            }
+            props.put(keyStr, valueType);
+        }
+        return props;
+    }
 }

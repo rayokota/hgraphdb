@@ -24,6 +24,7 @@ import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
+import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,6 +118,8 @@ public class HBaseGraph implements Graph {
     private Cache<ByteBuffer, Edge> edgeCache;
     private Cache<ByteBuffer, Vertex> vertexCache;
     private Map<Key, IndexMetadata> indices = new ConcurrentHashMap<>();
+    private Map<String, VertexLabel> vertexLabels = new ConcurrentHashMap<>();
+    private Map<Triplet<String, String, String>, EdgeLabel> edgeLabels = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public static HBaseGraph open(final Configuration properties) throws HBaseGraphException {
@@ -446,6 +449,19 @@ public class HBaseGraph implements Graph {
         indices = map;
     }
 
+    @VisibleForTesting
+    protected void refreshLabels() {
+        Map<Key, IndexMetadata> map = new ConcurrentHashMap<>();
+        // TODO
+        /*
+        for (Iterator<IndexMetadata> it = getIndexMetadataModel().indices(); it.hasNext(); ) {
+            final IndexMetadata index = it.next();
+            map.put(index.key(), index);
+        }
+        indices = map;
+        */
+    }
+
     public void createIndex(IndexType type, String label, String propertyKey) {
         createIndex(type, label, propertyKey, false, false);
     }
@@ -561,6 +577,38 @@ public class HBaseGraph implements Graph {
         oldIndex.updatedAt(System.currentTimeMillis());
         indexMetadataModel.writeIndexMetadata(oldIndex);
         indices.put(indexKey, oldIndex);
+    }
+
+    public void createEdgeLabel(String label, String outVertexLabel, String inVertexLabel, ValueType idType,
+                                Integer ttl, Object... propertyKeysAndTypes) {
+        if (!config.getUseSchema()) {
+            throw new HBaseGraphException("Schema not enabled");
+        }
+        refreshLabels();
+        if (vertexLabels.get(outVertexLabel) == null) {
+            throw new HBaseGraphException("Out vertex label " + outVertexLabel + " does not exist");
+        }
+        if (vertexLabels.get(inVertexLabel) == null) {
+            throw new HBaseGraphException("In vertex label " + inVertexLabel + " does not exist");
+        }
+        EdgeLabel edgeLabel = new EdgeLabel(label, outVertexLabel, inVertexLabel, idType, ttl, propertyKeysAndTypes);
+        // TODO save to model
+        edgeLabels.put(new Triplet<>(label, outVertexLabel, inVertexLabel), edgeLabel);
+    }
+
+    public void createVertexLabel(String label, ValueType idType, Integer ttl, Object... propertyKeysAndTypes) {
+        if (!config.getUseSchema()) {
+            throw new HBaseGraphException("Schema not enabled");
+        }
+        VertexLabel vertexLabel = new VertexLabel(label, idType, ttl, propertyKeysAndTypes);
+        // TODO save to model
+        vertexLabels.put(label, vertexLabel);
+    }
+
+    public void validateEdge(String label, Object id, Map<String, Object> properties, HBaseVertex inVertex, HBaseVertex outVertex) {
+    }
+
+    public void validateVertex(String label, Object id, Map<String, Object> properties) {
     }
 
     @Override
