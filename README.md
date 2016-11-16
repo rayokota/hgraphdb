@@ -48,6 +48,7 @@ A few things to note from the above example :
 	- java.time.LocalTime
 	- java.time.LocalDateTime
 	- java.time.Duration
+	- java.util.UUID
 	- byte arrays
 	- Enum instances
 	- [Kryo](https://github.com/EsotericSoftware/kryo)-serializable instances

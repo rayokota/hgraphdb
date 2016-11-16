@@ -18,10 +18,55 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 public final class ValueUtils {
 
     public static final int DEFAULT_NUM_BUCKETS = 256;
+
+    public static ValueType getValueType(Object o) {
+        if (o == null) {
+            return ValueType.NULL;
+        } else if (o instanceof Boolean) {
+            return ValueType.BOOLEAN;
+        } else if (o instanceof String) {
+            return ValueType.STRING;
+        } else if (o instanceof Byte) {
+            return ValueType.BYTE;
+        } else if (o instanceof Short) {
+            return ValueType.SHORT;
+        } else if (o instanceof Integer) {
+            return ValueType.INT;
+        } else if (o instanceof Long) {
+            return ValueType.LONG;
+        } else if (o instanceof Float) {
+            return ValueType.FLOAT;
+        } else if (o instanceof Double) {
+            return ValueType.DOUBLE;
+        } else if (o instanceof BigDecimal) {
+            return ValueType.DECIMAL;
+        } else if (o instanceof LocalDate) {
+            return ValueType.DATE;
+        } else if (o instanceof LocalTime) {
+            return ValueType.TIME;
+        } else if (o instanceof LocalDateTime) {
+            return ValueType.TIMESTAMP;
+        } else if (o instanceof Duration) {
+            return ValueType.INTERVAL;
+        } else if (o instanceof byte[]) {
+            return ValueType.BINARY;
+        } else if (o instanceof Enum) {
+            return ValueType.ENUM;
+        } else if (o instanceof UUID) {
+            return ValueType.UUID;
+        } else if (o instanceof KryoSerializable) {
+            return ValueType.KRYO_SERIALIZABLE;
+        } else if (o instanceof Serializable) {
+            return ValueType.SERIALIZABLE;
+        } else {
+            throw new IllegalArgumentException("Unexpected data of type : " + o.getClass().getName());
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] target) {
@@ -75,6 +120,10 @@ public final class ValueUtils {
                 } catch (ClassNotFoundException cnfe) {
                     throw new RuntimeException("Unexpected error deserializing enum.", cnfe);
                 }
+            case UUID:
+                long mostSignificantBits = OrderedBytes.decodeInt64(buffer);
+                long leastSignificantBits = OrderedBytes.decodeInt64(buffer);
+                return (T) new UUID(mostSignificantBits, leastSignificantBits);
             case KRYO_SERIALIZABLE:
                 try {
                     byte[] blob = OrderedBytes.decodeBlobVar(buffer);
@@ -121,78 +170,85 @@ public final class ValueUtils {
 
     public static void serialize(PositionedByteRange buffer, Object o) {
         final Order order = Order.ASCENDING;
-        if (o == null) {
-            OrderedBytes.encodeInt8(buffer, ValueType.NULL.getCode(), order);
-        } else if (o instanceof Boolean) {
-            OrderedBytes.encodeInt8(buffer, ValueType.BOOLEAN.getCode(), order);
-            OrderedBytes.encodeInt8(buffer, (Boolean) o ? (byte) 1 : (byte) 0, order);
-        } else if (o instanceof String) {
-            OrderedBytes.encodeInt8(buffer, ValueType.STRING.getCode(), order);
-            OrderedBytes.encodeString(buffer, (String) o, order);
-        } else if (o instanceof Byte) {
-            OrderedBytes.encodeInt8(buffer, ValueType.BYTE.getCode(), order);
-            OrderedBytes.encodeInt8(buffer, (Byte) o, order);
-        } else if (o instanceof Short) {
-            OrderedBytes.encodeInt8(buffer, ValueType.SHORT.getCode(), order);
-            OrderedBytes.encodeInt16(buffer, (Short) o, order);
-        } else if (o instanceof Integer) {
-            OrderedBytes.encodeInt8(buffer, ValueType.INT.getCode(), order);
-            OrderedBytes.encodeInt32(buffer, (Integer) o, order);
-        } else if (o instanceof Long) {
-            OrderedBytes.encodeInt8(buffer, ValueType.LONG.getCode(), order);
-            OrderedBytes.encodeInt64(buffer, (Long) o, order);
-        } else if (o instanceof Float) {
-            OrderedBytes.encodeInt8(buffer, ValueType.FLOAT.getCode(), order);
-            OrderedBytes.encodeFloat32(buffer, (Float) o, order);
-        } else if (o instanceof Double) {
-            OrderedBytes.encodeInt8(buffer, ValueType.DOUBLE.getCode(), order);
-            OrderedBytes.encodeFloat64(buffer, (Double) o, order);
-        } else if (o instanceof BigDecimal) {
-            OrderedBytes.encodeInt8(buffer, ValueType.DECIMAL.getCode(), order);
-            OrderedBytes.encodeNumeric(buffer, (BigDecimal) o, order);
-        } else if (o instanceof LocalDate) {
-            OrderedBytes.encodeInt8(buffer, ValueType.DATE.getCode(), order);
-            OrderedBytes.encodeInt64(buffer, ((LocalDate) o).toEpochDay(), order);
-        } else if (o instanceof LocalTime) {
-            OrderedBytes.encodeInt8(buffer, ValueType.TIME.getCode(), order);
-            OrderedBytes.encodeInt64(buffer, ((LocalTime) o).toNanoOfDay(), order);
-        } else if (o instanceof LocalDateTime) {
-            OrderedBytes.encodeInt8(buffer, ValueType.TIMESTAMP.getCode(), order);
-            OrderedBytes.encodeInt64(buffer, ((LocalDateTime) o).toEpochSecond(ZoneOffset.UTC), order);
-        } else if (o instanceof Duration) {
-            OrderedBytes.encodeInt8(buffer, ValueType.INTERVAL.getCode(), order);
-            OrderedBytes.encodeInt64(buffer, ((Duration) o).toNanos(), order);
-        } else if (o instanceof byte[]) {
-            OrderedBytes.encodeInt8(buffer, ValueType.BINARY.getCode(), order);
-            OrderedBytes.encodeBlobVar(buffer, (byte[]) o, order);
-        } else if (o instanceof Enum) {
-            OrderedBytes.encodeInt8(buffer, ValueType.ENUM.getCode(), order);
-            OrderedBytes.encodeString(buffer, o.getClass().getName(), order);
-            OrderedBytes.encodeString(buffer, o.toString(), order);
-        } else if (o instanceof KryoSerializable) {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(32);
-                Output output = new Output(baos);
-                new Kryo().writeClassAndObject(output, o);
-                output.close();
-                OrderedBytes.encodeInt8(buffer, ValueType.KRYO_SERIALIZABLE.getCode(), order);
-                OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
-            } catch (KryoException io) {
-                throw new RuntimeException("Unexpected error serializing object.", io);
-            }
-        } else if (o instanceof Serializable) {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(32);
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(o);
-                oos.close();
-                OrderedBytes.encodeInt8(buffer, ValueType.SERIALIZABLE.getCode(), order);
-                OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
-            } catch (IOException io) {
-                throw new RuntimeException("Unexpected error serializing object.", io);
-            }
-        } else {
-            throw new IllegalArgumentException("Unexpected data of type : " + o.getClass().getName());
+        ValueType type = getValueType(o);
+        OrderedBytes.encodeInt8(buffer, type.getCode(), order);
+        switch (type) {
+            case NULL:
+                break;
+            case BOOLEAN:
+                OrderedBytes.encodeInt8(buffer, (Boolean) o ? (byte) 1 : (byte) 0, order);
+                break;
+            case STRING:
+                OrderedBytes.encodeString(buffer, (String) o, order);
+                break;
+            case BYTE:
+                OrderedBytes.encodeInt8(buffer, (Byte) o, order);
+                break;
+            case SHORT:
+                OrderedBytes.encodeInt16(buffer, (Short) o, order);
+                break;
+            case INT:
+                OrderedBytes.encodeInt32(buffer, (Integer) o, order);
+                break;
+            case LONG:
+                OrderedBytes.encodeInt64(buffer, (Long) o, order);
+                break;
+            case FLOAT:
+                OrderedBytes.encodeFloat32(buffer, (Float) o, order);
+                break;
+            case DOUBLE:
+                OrderedBytes.encodeFloat64(buffer, (Double) o, order);
+                break;
+            case DECIMAL:
+                OrderedBytes.encodeNumeric(buffer, (BigDecimal) o, order);
+                break;
+            case DATE:
+                OrderedBytes.encodeInt64(buffer, ((LocalDate) o).toEpochDay(), order);
+                break;
+            case TIME:
+                OrderedBytes.encodeInt64(buffer, ((LocalTime) o).toNanoOfDay(), order);
+                break;
+            case TIMESTAMP:
+                OrderedBytes.encodeInt64(buffer, ((LocalDateTime) o).toEpochSecond(ZoneOffset.UTC), order);
+                break;
+            case INTERVAL:
+                OrderedBytes.encodeInt64(buffer, ((Duration) o).toNanos(), order);
+                break;
+            case BINARY:
+                OrderedBytes.encodeBlobVar(buffer, (byte[]) o, order);
+                break;
+            case ENUM:
+                OrderedBytes.encodeString(buffer, o.getClass().getName(), order);
+                OrderedBytes.encodeString(buffer, o.toString(), order);
+                break;
+            case UUID:
+                OrderedBytes.encodeInt64(buffer, ((UUID) o).getMostSignificantBits(), order);
+                OrderedBytes.encodeInt64(buffer, ((UUID) o).getLeastSignificantBits(), order);
+                break;
+            case KRYO_SERIALIZABLE:
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream(32);
+                    Output output = new Output(baos);
+                    new Kryo().writeClassAndObject(output, o);
+                    output.close();
+                    OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
+                } catch (KryoException io) {
+                    throw new RuntimeException("Unexpected error serializing object.", io);
+                }
+                break;
+            case SERIALIZABLE:
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream(32);
+                    ObjectOutputStream oos = new ObjectOutputStream(baos);
+                    oos.writeObject(o);
+                    oos.close();
+                    OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
+                } catch (IOException io) {
+                    throw new RuntimeException("Unexpected error serializing object.", io);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected data of type : " + o.getClass().getName());
         }
     }
 

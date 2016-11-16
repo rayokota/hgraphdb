@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Iterator;
+import java.util.UUID;
 
 import static org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils.count;
 import static org.junit.Assert.*;
@@ -36,6 +37,7 @@ public class HBaseElementTest extends HBaseGraphTest {
                 IndexType.VERTEX,
                 (byte) 'a', (byte) 'b', 'c', 'd',
                 "str1", "str2",
+                new UUID(1L, 2L), new UUID(3L, 4L),
                 new KryoObject(ValueType.BINARY), new KryoObject(ValueType.BOOLEAN),
                 new GenericObject("str3"), new GenericObject("str4"),
         };
@@ -51,6 +53,7 @@ public class HBaseElementTest extends HBaseGraphTest {
                 IndexType.EDGE,
                 (byte) 'e', (byte) 'f', 'g', 'h',
                 "str5", "str6",
+                new UUID(5L, 6L), new UUID(7L, 8L),
                 new KryoObject(ValueType.DATE), new KryoObject(ValueType.TIME),
                 new GenericObject("str7"), new GenericObject("str8"),
         };

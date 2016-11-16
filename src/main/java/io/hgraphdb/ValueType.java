@@ -37,7 +37,8 @@ public enum ValueType {
     ENUM(16),
     KRYO_SERIALIZABLE(17),
     SERIALIZABLE(18),
-    ANY(19);
+    UUID(19),
+    ANY(20);
 
     private final byte code;
 
@@ -88,6 +89,8 @@ public enum ValueType {
             case 18:
                 return SERIALIZABLE;
             case 19:
+                return UUID;
+            case 20:
                 return ANY;
             default:
                 return null;
