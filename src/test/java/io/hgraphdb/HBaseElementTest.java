@@ -36,7 +36,7 @@ public class HBaseElementTest extends HBaseGraphTest {
                 IndexType.VERTEX,
                 (byte) 'a', (byte) 'b', 'c', 'd',
                 "str1", "str2",
-                new KryoObject(Serializer.Type.BINARY), new KryoObject(Serializer.Type.BOOLEAN),
+                new KryoObject(ValueType.BINARY), new KryoObject(ValueType.BOOLEAN),
                 new GenericObject("str3"), new GenericObject("str4"),
         };
 
@@ -51,7 +51,7 @@ public class HBaseElementTest extends HBaseGraphTest {
                 IndexType.EDGE,
                 (byte) 'e', (byte) 'f', 'g', 'h',
                 "str5", "str6",
-                new KryoObject(Serializer.Type.DATE), new KryoObject(Serializer.Type.TIME),
+                new KryoObject(ValueType.DATE), new KryoObject(ValueType.TIME),
                 new GenericObject("str7"), new GenericObject("str8"),
         };
 
@@ -100,12 +100,12 @@ public class HBaseElementTest extends HBaseGraphTest {
     }
 
     private static class KryoObject implements KryoSerializable {
-        private Serializer.Type id;
+        private ValueType id;
 
         public KryoObject() {
         }
 
-        public KryoObject(Serializer.Type id) {
+        public KryoObject(ValueType id) {
             this.id = id;
         }
 
@@ -114,7 +114,7 @@ public class HBaseElementTest extends HBaseGraphTest {
         }
 
         public void read(Kryo kryo, Input input) {
-            id = Serializer.Type.valueOf(input.readByte());
+            id = ValueType.valueOf(input.readByte());
         }
 
         @Override

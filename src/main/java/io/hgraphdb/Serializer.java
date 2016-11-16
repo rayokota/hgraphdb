@@ -23,80 +23,6 @@ public final class Serializer {
 
     public static final int DEFAULT_NUM_BUCKETS = 256;
 
-    public enum Type {
-        NULL(1),
-        BOOLEAN(2),
-        STRING(3),
-        BYTE(4),
-        SHORT(5),
-        INT(6),
-        LONG(7),
-        FLOAT(8),
-        DOUBLE(9),
-        DECIMAL(10),
-        /**
-         * 32-bit integer representing the number of DAYS since Unix epoch,
-         * i.e. January 1, 1970 00:00:00 UTC. The value is absolute and
-         * is time-zone independent. Negative values represents dates before
-         * epoch.
-         */
-        DATE(11),
-        /**
-         * 32-bit integer representing time of the day in milliseconds.
-         * The value is absolute and is time-zone independent.
-         */
-        TIME(12),
-        /**
-         * 64-bit integer representing the number of milliseconds since epoch,
-         * i.e. January 1, 1970 00:00:00 UTC. Negative values represent dates
-         * before epoch.
-         */
-        TIMESTAMP(13),
-        /**
-         * A value representing a period of time between two instants.
-         */
-        INTERVAL(14),
-        BINARY(15),
-        ENUM(16),
-        KRYO_SERIALIZABLE(17),
-        SERIALIZABLE(18);
-
-        private final byte code;
-
-        Type(int code) {
-            this.code = (byte) code;
-        }
-
-        public byte getCode() {
-            return code;
-        }
-
-        public static Type valueOf(int typeCode) {
-            switch (typeCode) {
-                case 1: return NULL;
-                case 2: return BOOLEAN;
-                case 3: return STRING;
-                case 4: return BYTE;
-                case 5: return SHORT;
-                case 6: return INT;
-                case 7: return LONG;
-                case 8: return FLOAT;
-                case 9: return DOUBLE;
-                case 10: return DECIMAL;
-                case 11: return DATE;
-                case 12: return TIME;
-                case 13: return TIMESTAMP;
-                case 14: return INTERVAL;
-                case 15: return BINARY;
-                case 16: return ENUM;
-                case 17: return KRYO_SERIALIZABLE;
-                case 18: return SERIALIZABLE;
-                default: return null;
-            }
-        }
-
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] target) {
         if (target == null) return null;
@@ -106,7 +32,7 @@ public final class Serializer {
 
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(PositionedByteRange buffer) {
-        Type type = Type.valueOf(OrderedBytes.decodeInt8(buffer));
+        ValueType type = ValueType.valueOf(OrderedBytes.decodeInt8(buffer));
 
         switch (type) {
             case NULL:
@@ -196,51 +122,51 @@ public final class Serializer {
     public static void serialize(PositionedByteRange buffer, Object o) {
         final Order order = Order.ASCENDING;
         if (o == null) {
-            OrderedBytes.encodeInt8(buffer, Type.NULL.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.NULL.getCode(), order);
         } else if (o instanceof Boolean) {
-            OrderedBytes.encodeInt8(buffer, Type.BOOLEAN.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.BOOLEAN.getCode(), order);
             OrderedBytes.encodeInt8(buffer, (Boolean) o ? (byte) 1 : (byte) 0, order);
         } else if (o instanceof String) {
-            OrderedBytes.encodeInt8(buffer, Type.STRING.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.STRING.getCode(), order);
             OrderedBytes.encodeString(buffer, (String) o, order);
         } else if (o instanceof Byte) {
-            OrderedBytes.encodeInt8(buffer, Type.BYTE.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.BYTE.getCode(), order);
             OrderedBytes.encodeInt8(buffer, (Byte) o, order);
         } else if (o instanceof Short) {
-            OrderedBytes.encodeInt8(buffer, Type.SHORT.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.SHORT.getCode(), order);
             OrderedBytes.encodeInt16(buffer, (Short) o, order);
         } else if (o instanceof Integer) {
-            OrderedBytes.encodeInt8(buffer, Type.INT.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.INT.getCode(), order);
             OrderedBytes.encodeInt32(buffer, (Integer) o, order);
         } else if (o instanceof Long) {
-            OrderedBytes.encodeInt8(buffer, Type.LONG.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.LONG.getCode(), order);
             OrderedBytes.encodeInt64(buffer, (Long) o, order);
         } else if (o instanceof Float) {
-            OrderedBytes.encodeInt8(buffer, Type.FLOAT.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.FLOAT.getCode(), order);
             OrderedBytes.encodeFloat32(buffer, (Float) o, order);
         } else if (o instanceof Double) {
-            OrderedBytes.encodeInt8(buffer, Type.DOUBLE.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.DOUBLE.getCode(), order);
             OrderedBytes.encodeFloat64(buffer, (Double) o, order);
         } else if (o instanceof BigDecimal) {
-            OrderedBytes.encodeInt8(buffer, Type.DECIMAL.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.DECIMAL.getCode(), order);
             OrderedBytes.encodeNumeric(buffer, (BigDecimal) o, order);
         } else if (o instanceof LocalDate) {
-            OrderedBytes.encodeInt8(buffer, Type.DATE.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.DATE.getCode(), order);
             OrderedBytes.encodeInt64(buffer, ((LocalDate) o).toEpochDay(), order);
         } else if (o instanceof LocalTime) {
-            OrderedBytes.encodeInt8(buffer, Type.TIME.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.TIME.getCode(), order);
             OrderedBytes.encodeInt64(buffer, ((LocalTime) o).toNanoOfDay(), order);
         } else if (o instanceof LocalDateTime) {
-            OrderedBytes.encodeInt8(buffer, Type.TIMESTAMP.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.TIMESTAMP.getCode(), order);
             OrderedBytes.encodeInt64(buffer, ((LocalDateTime) o).toEpochSecond(ZoneOffset.UTC), order);
         } else if (o instanceof Duration) {
-            OrderedBytes.encodeInt8(buffer, Type.INTERVAL.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.INTERVAL.getCode(), order);
             OrderedBytes.encodeInt64(buffer, ((Duration) o).toNanos(), order);
         } else if (o instanceof byte[]) {
-            OrderedBytes.encodeInt8(buffer, Type.BINARY.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.BINARY.getCode(), order);
             OrderedBytes.encodeBlobVar(buffer, (byte[]) o, order);
         } else if (o instanceof Enum) {
-            OrderedBytes.encodeInt8(buffer, Type.ENUM.getCode(), order);
+            OrderedBytes.encodeInt8(buffer, ValueType.ENUM.getCode(), order);
             OrderedBytes.encodeString(buffer, o.getClass().getName(), order);
             OrderedBytes.encodeString(buffer, o.toString(), order);
         } else if (o instanceof KryoSerializable) {
@@ -249,7 +175,7 @@ public final class Serializer {
                 Output output = new Output(baos);
                 new Kryo().writeClassAndObject(output, o);
                 output.close();
-                OrderedBytes.encodeInt8(buffer, Type.KRYO_SERIALIZABLE.getCode(), order);
+                OrderedBytes.encodeInt8(buffer, ValueType.KRYO_SERIALIZABLE.getCode(), order);
                 OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
             } catch (KryoException io) {
                 throw new RuntimeException("Unexpected error serializing object.", io);
@@ -260,7 +186,7 @@ public final class Serializer {
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(o);
                 oos.close();
-                OrderedBytes.encodeInt8(buffer, Type.SERIALIZABLE.getCode(), order);
+                OrderedBytes.encodeInt8(buffer, ValueType.SERIALIZABLE.getCode(), order);
                 OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
             } catch (IOException io) {
                 throw new RuntimeException("Unexpected error serializing object.", io);
