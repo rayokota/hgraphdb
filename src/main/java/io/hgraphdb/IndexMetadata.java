@@ -103,7 +103,7 @@ public class IndexMetadata {
 
         @Override
         public String toString() {
-            return "INDEX " + type + ":" + label + "(" + propertyKey() + ")";
+            return type + " INDEX " + " " + label + "(" + propertyKey() + ")";
         }
 
         @Override

@@ -25,8 +25,8 @@ public class EdgeLabel extends ElementLabel {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("LABEL EDGE:{" + outVertexLabel + " - " + label() + " -> " + inVertexLabel
-                + "}(ID: " + idType());
+        sb.append("EDGE LABEL [" + outVertexLabel + " - " + label() + " -> " + inVertexLabel
+                + "](ID: " + idType());
         propertyTypes().entrySet().forEach(entry ->
                 sb.append(", ").append(entry.getKey()).append(": ").append(entry.getValue().toString()));
         sb.append(")");

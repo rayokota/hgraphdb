@@ -84,6 +84,15 @@ An index can also be specified as a unique index.  For a vertex index, this mean
 
 		graph.createIndex(IndexType.VERTEX, "person", "name", /* unique */ true);
 
+## Schema Management
+
+By default HGraphDB does not use a schema.  Schema management can be enabled by calling `HBaseGraphConfiguration.useSchema(true)`.  Once schema management is enabled, the schema for vertex and edge labels can be defined.
+
+		graph.createVertexLabel("author", /* id type */ ValueType.STRING, "age", /* prop type */ ValueType.INT);
+		...
+		graph.createEdgeLabel("writes", "author", "book", /* id type */ValueType.STRING, "key2", ValueType.LONG, "since", ValueType.DATE);   
+		
+Whenever vertices or edges are added, they will be validated against the schema.    
 
 ## Using the Gremlin Console
 

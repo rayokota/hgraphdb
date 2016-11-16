@@ -11,7 +11,7 @@ public class VertexLabel extends ElementLabel {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("LABEL VERTEX:" + label() + " (ID: " + idType());
+        sb.append("VERTEX LABEL " + label() + "(ID: " + idType());
         propertyTypes().entrySet().forEach(entry ->
                 sb.append(", ").append(entry.getKey()).append(": ").append(entry.getValue().toString()));
         sb.append(")");

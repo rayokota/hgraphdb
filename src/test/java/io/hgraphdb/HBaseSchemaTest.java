@@ -78,7 +78,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         Vertex v3 = graph.addVertex(T.id, id(12), T.label, "c", "key2", 12);
         Vertex v4 = graph.addVertex(T.id, id(13), T.label, "d", "key3", 13);
 
-        graph.createEdgeLabel("knows", "a", "b", ValueType.STRING, "key2", ValueType.LONG, "when", ValueType.STRING);
+        graph.createEdgeLabel("knows", "a", "b", ValueType.STRING, "since", ValueType.DATE);
 
         try {
             graph.addEdge(v3, v4, "foo", "blah", 11);
@@ -105,12 +105,12 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         }
 
         try {
-            graph.addEdge(v1, v2, "knows", "when", 11);
+            graph.addEdge(v1, v2, "knows", "since", 11);
             fail("Edge should be invalid");
         } catch (HBaseGraphNotValidException e) {
         }
 
-        graph.addEdge(v1, v2, "knows", "when", "11");
+        graph.addEdge(v1, v2, "knows", "since", LocalDate.now());
 
         Iterator<Edge> it = v1.edges(Direction.OUT, "knows");
         assertEquals(1, count(it));
