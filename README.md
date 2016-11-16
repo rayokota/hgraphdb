@@ -90,7 +90,7 @@ By default HGraphDB does not use a schema.  Schema management can be enabled by 
 
 		graph.createVertexLabel("author", /* id type */ ValueType.STRING, "age", /* prop type */ ValueType.INT);
 		...
-		graph.createEdgeLabel("writes", "author", "book", /* id type */ValueType.STRING, "key2", ValueType.LONG, "since", ValueType.DATE);   
+		graph.createEdgeLabel("writes", "author", "book", /* id type */ ValueType.STRING, "since", ValueType.DATE);   
 		
 Whenever vertices or edges are added, they will be validated against the schema.    
 
