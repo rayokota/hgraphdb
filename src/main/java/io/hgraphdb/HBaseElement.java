@@ -38,15 +38,6 @@ public abstract class HBaseElement implements Element {
                            String label,
                            Long createdAt,
                            Long updatedAt,
-                           Map<String, Object> properties) {
-        this(graph, id, label, createdAt, updatedAt, properties, properties != null);
-    }
-
-    protected HBaseElement(HBaseGraph graph,
-                           Object id,
-                           String label,
-                           Long createdAt,
-                           Long updatedAt,
                            Map<String, Object> properties,
                            boolean propertiesFullyLoaded) {
         this.graph = graph;

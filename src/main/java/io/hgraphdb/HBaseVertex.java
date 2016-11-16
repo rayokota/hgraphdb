@@ -39,6 +39,8 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                        Map<String, Object> properties, boolean propertiesFullyLoaded) {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
 
+        graph.validateVertex(label, id, properties);
+
         this.edgeCache = CacheBuilder.<Tuple, List<Edge>>newBuilder()
                 .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
                 .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)

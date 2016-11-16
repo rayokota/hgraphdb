@@ -6,8 +6,8 @@ public class EdgeLabel extends ElementLabel {
     private String inVertexLabel;
 
     public EdgeLabel(String label, String outVertexLabel, String inVertexLabel, ValueType idType,
-                     Integer ttl, Object... propertyKeysAndTypes) {
-        super(label, idType, ttl, propertyKeysAndTypes);
+                     Object... propertyKeysAndTypes) {
+        super(label, idType, propertyKeysAndTypes);
         this.outVertexLabel = outVertexLabel;
         this.inVertexLabel = inVertexLabel;
     }
@@ -22,13 +22,12 @@ public class EdgeLabel extends ElementLabel {
 
     @Override
     public String toString() {
-        return "EdgeLabel{" +
+        return "edgeLabel{" +
                 "label='" + label() + '\'' +
+                ", idType=" + idType() +
                 ", outVertexLabel=" + outVertexLabel() +
                 ", inVertexLabel=" + inVertexLabel() +
-                ", idType=" + idType() +
-                ", ttl=" + ttl() +
-                ", propertyKeys=" + propertyKeys() +
+                ", propertyTypes=" + propertyTypes() +
                 '}';
     }
 }

@@ -3,6 +3,7 @@ package io.hgraphdb;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.util.Iterator;
@@ -26,6 +27,8 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String INSTANCE_TYPE                   = "gremlin.hbase.instanceType";
         public static final String GRAPH_NAMESPACE                 = "gremlin.hbase.namespace";
         public static final String CREATE_TABLES                   = "gremlin.hbase.createTables";
+        public static final String EDGE_TABLE_TTL                  = "gremlin.hbase.edgeTableTTL";
+        public static final String VERTEX_TABLE_TTL                = "gremlin.hbase.vertexTableTTL";
         public static final String REGION_COUNT                    = "gremlin.hbase.regionCount";
         public static final String COMPRESSION_ALGO                = "gremlin.hbase.compression";
         public static final String GLOBAL_CACHE_MAX_SIZE           = "gremlin.hbase.globalCacheMaxSize";
@@ -96,6 +99,24 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration setCreateTables(boolean create) {
         conf.setProperty(Keys.CREATE_TABLES, create);
+        return this;
+    }
+
+    public int getEdgeTableTTL() {
+        return conf.getInt(Keys.EDGE_TABLE_TTL, HConstants.FOREVER);
+    }
+
+    public HBaseGraphConfiguration setEdgeTableTTL(int ttl) {
+        conf.setProperty(Keys.EDGE_TABLE_TTL, ttl);
+        return this;
+    }
+
+    public int getVertexTableTTL() {
+        return conf.getInt(Keys.VERTEX_TABLE_TTL, HConstants.FOREVER);
+    }
+
+    public HBaseGraphConfiguration setVertexTableTTL(int ttl) {
+        conf.setProperty(Keys.VERTEX_TABLE_TTL, ttl);
         return this;
     }
 

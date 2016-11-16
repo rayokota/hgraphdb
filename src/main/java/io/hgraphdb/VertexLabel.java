@@ -2,17 +2,16 @@ package io.hgraphdb;
 
 public class VertexLabel extends ElementLabel {
 
-    public VertexLabel(String label, ValueType idType, Integer ttl, Object... propertyKeysAndTypes) {
-        super(label, idType, ttl, propertyKeysAndTypes);
+    public VertexLabel(String label, ValueType idType, Object... propertyKeysAndTypes) {
+        super(label, idType, propertyKeysAndTypes);
     }
 
     @Override
     public String toString() {
-        return "VertexLabel{" +
+        return "vertexLabel{" +
                 "label='" + label() + '\'' +
                 ", idType=" + idType() +
-                ", ttl=" + ttl() +
-                ", propertyKeys=" + propertyKeys() +
+                ", propertyTypes=" + propertyTypes() +
                 '}';
     }
 }

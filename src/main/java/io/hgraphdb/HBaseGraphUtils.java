@@ -1,11 +1,7 @@
 package io.hgraphdb;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.NamespaceDescriptor;
-import org.apache.hadoop.hbase.NamespaceNotFoundException;
-import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
@@ -93,14 +89,14 @@ public final class HBaseGraphUtils {
     }
 
     private static void createTables(HBaseGraphConfiguration config, Admin admin) throws IOException {
-        createTable(config, admin, Constants.EDGES);
-        createTable(config, admin, Constants.EDGE_INDICES);
-        createTable(config, admin, Constants.VERTICES);
-        createTable(config, admin, Constants.VERTEX_INDICES);
-        createTable(config, admin, Constants.INDEX_METADATA);
+        createTable(config, admin, Constants.EDGES, config.getEdgeTableTTL());
+        createTable(config, admin, Constants.EDGE_INDICES, config.getEdgeTableTTL());
+        createTable(config, admin, Constants.VERTICES, config.getVertexTableTTL());
+        createTable(config, admin, Constants.VERTEX_INDICES, config.getVertexTableTTL());
+        createTable(config, admin, Constants.INDEX_METADATA, HConstants.FOREVER);
     }
 
-    private static void createTable(HBaseGraphConfiguration config, Admin admin, String name) throws IOException {
+    private static void createTable(HBaseGraphConfiguration config, Admin admin, String name, int ttl) throws IOException {
         TableName tableName = TableName.valueOf(config.getGraphNamespace(), name);
         if (admin.tableExists(tableName)) return;
         HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
@@ -111,7 +107,8 @@ public final class HBaseGraphUtils {
                 .setMaxVersions(1)
                 .setMinVersions(0)
                 .setBlocksize(32768)
-                .setBlockCacheEnabled(true);
+                .setBlockCacheEnabled(true)
+                .setTimeToLive(ttl);
         tableDescriptor.addFamily(columnDescriptor);
         int regionCount = config.getRegionCount();
         admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);

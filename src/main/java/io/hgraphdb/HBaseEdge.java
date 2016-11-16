@@ -28,14 +28,15 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     public HBaseEdge(HBaseGraph graph, Object id, String label, Long createdAt, Long updatedAt, Map<String, Object> properties,
                      Vertex inVertex, Vertex outVertex) {
-        super(graph, id, label, createdAt, updatedAt, properties);
-        this.inVertex = inVertex;
-        this.outVertex = outVertex;
+        this(graph, id, label, createdAt, updatedAt, properties, properties != null, inVertex, outVertex);
     }
 
     public HBaseEdge(HBaseGraph graph, Object id, String label, Long createdAt, Long updatedAt, Map<String, Object> properties,
                      boolean propertiesFullyLoaded, Vertex inVertex, Vertex outVertex) {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
+
+        graph.validateEdge(label, id, properties, inVertex, outVertex);
+
         this.inVertex = inVertex;
         this.outVertex = outVertex;
     }

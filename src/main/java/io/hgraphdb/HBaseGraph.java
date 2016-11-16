@@ -605,7 +605,7 @@ public class HBaseGraph implements Graph {
         vertexLabels.put(label, vertexLabel);
     }
 
-    public void validateEdge(String label, Object id, Map<String, Object> properties, HBaseVertex inVertex, HBaseVertex outVertex) {
+    public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
         if (!configuration().getUseSchema() || inVertex == null || outVertex == null) return;
         VertexLabel inVertexLabelMetadata = vertexLabels.get(inVertex.label());
         VertexLabel outVertexLabelMetadata = vertexLabels.get(outVertex.label());
@@ -620,15 +620,34 @@ public class HBaseGraph implements Graph {
             throw new HBaseGraphNotValidException("Edge label " + label + " with inVertex " + inVertex.label()
                     + " and outVertex " + outVertex.label() + " has not been defined");
         }
-        /*
-        if (labelMetadata.idType()) {
-
-        }
-        */
+        validateTypes(labelMetadata, id, properties);
     }
 
     public void validateVertex(String label, Object id, Map<String, Object> properties) {
         if (!configuration().getUseSchema()) return;
+        VertexLabel labelMetadata = vertexLabels.get(label);
+        if (labelMetadata == null) {
+            throw new HBaseGraphNotValidException("Vertex label " + label + " has not been defined");
+        }
+        validateTypes(labelMetadata, id, properties);
+    }
+
+    private void validateTypes(ElementLabel labelMetadata, Object id, Map<String, Object> properties) {
+        ValueType idType = labelMetadata.idType();
+        if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
+            throw new HBaseGraphNotValidException("ID " + id + " not of type " + idType);
+        }
+        Map<String, ValueType> propertyTypes = labelMetadata.propertyTypes();
+        properties.entrySet().stream().forEach(entry -> {
+            String propertyName = entry.getKey();
+            ValueType propertyType = propertyTypes.get(entry.getKey());
+            if (propertyType == null) {
+                throw new HBaseGraphNotValidException("Property " + propertyName + " has not been defined");
+            }
+            if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(entry.getValue())) {
+                throw new HBaseGraphNotValidException("Property " + propertyName + " not of type " + propertyType);
+            }
+        });
     }
 
     @Override

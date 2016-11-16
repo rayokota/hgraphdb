@@ -8,14 +8,12 @@ public abstract class ElementLabel {
 
     private String label;
     private ValueType idType;
-    private Integer ttl;
-    private Map<String, ValueType> propertyKeys;
+    private Map<String, ValueType> propertyTypes;
 
-    public ElementLabel(String label, ValueType idType, Integer ttl, Object... propertyKeysAndTypes) {
+    public ElementLabel(String label, ValueType idType, Object... propertyKeysAndTypes) {
         this.label = label;
         this.idType = idType;
-        this.ttl = ttl;
-        this.propertyKeys = HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes);
+        this.propertyTypes = HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes);
     }
 
     public String label() {
@@ -26,12 +24,8 @@ public abstract class ElementLabel {
         return idType;
     }
 
-    public int ttl() {
-        return ttl;
-    }
-
-    public List<String> propertyKeys() {
-        return propertyKeys();
+    public Map<String, ValueType> propertyTypes() {
+        return propertyTypes;
     }
 
     @Override
