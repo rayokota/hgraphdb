@@ -227,7 +227,7 @@ public class HBaseGraph implements Graph {
     }
 
     public boolean isLazyLoading() {
-        return config.isLazyLoading();
+        return configuration().isLazyLoading();
     }
 
     @Override
@@ -513,7 +513,7 @@ public class HBaseGraph implements Graph {
                     }
                     updateIndex(index.key(), State.ACTIVE);
                 },
-                config.getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
+                configuration().getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
     public boolean hasIndex(OperationType op, ElementType type, String label, String propertyKey ) {
@@ -589,16 +589,8 @@ public class HBaseGraph implements Graph {
         indices.put(indexKey, oldIndex);
     }
 
-    public LabelMetadata validateLabel(ElementType type, String label) {
-        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
-        if (labelMetadata == null) {
-            throw new HBaseGraphNotValidException(type + " LABEL " + label + " does not exist");
-        }
-        return labelMetadata;
-    }
-
     public void connectLabels(String outVertexLabel, String edgeLabel, String inVertexLabel) {
-        if (!config.getUseSchema()) {
+        if (!configuration().getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
         refreshSchema();
@@ -612,7 +604,7 @@ public class HBaseGraph implements Graph {
     }
 
     public void createLabel(ElementType type, String label, ValueType idType, Object... propertyKeysAndTypes) {
-        if (!config.getUseSchema()) {
+        if (!configuration().getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
         long now = System.currentTimeMillis();
@@ -623,13 +615,21 @@ public class HBaseGraph implements Graph {
     }
 
     public void updateLabel(ElementType type, String label, String propertyKey, ValueType propertyType) {
-        if (!config.getUseSchema()) {
+        if (!configuration().getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
         refreshSchema();
         LabelMetadata labelMetadata = validateLabel(type, label);
         labelMetadataModel.addPropertyMetadata(labelMetadata, propertyKey, propertyType);
         labelMetadata.propertyTypes().put(propertyKey, propertyType);
+    }
+
+    private LabelMetadata validateLabel(ElementType type, String label) {
+        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+        if (labelMetadata == null) {
+            throw new HBaseGraphNotValidException(type + " LABEL " + label + " does not exist");
+        }
+        return labelMetadata;
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
@@ -662,6 +662,7 @@ public class HBaseGraph implements Graph {
     }
 
     public void validateProperty(ElementType type, String label, String propertyKey, Object value) {
+        if (!configuration().getUseSchema()) return;
         LabelMetadata labelMetadata = validateLabel(type, label);
         validateProperty(labelMetadata, propertyKey, value);
     }
