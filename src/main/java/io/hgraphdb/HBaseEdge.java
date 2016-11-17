@@ -114,12 +114,12 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     @Override
     public boolean hasIndex(OperationType op, String propertyKey) {
-        return graph.hasIndex(op, IndexType.EDGE, label, propertyKey);
+        return graph.hasIndex(op, ElementType.EDGE, label, propertyKey);
     }
 
     @Override
     public Iterator<IndexMetadata> getIndices(OperationType op) {
-        return graph.getIndices(op, IndexType.EDGE, label, getPropertyKeys());
+        return graph.getIndices(op, ElementType.EDGE, label, getPropertyKeys());
     }
 
     @Override

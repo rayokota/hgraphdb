@@ -8,7 +8,7 @@ public class IndexMetadata {
     protected Long createdAt;
     protected Long updatedAt;
 
-    public IndexMetadata(IndexType type, String label, String propertyKey,
+    public IndexMetadata(ElementType type, String label, String propertyKey,
                          boolean isUnique, State state, Long createdAt, Long updatedAt) {
         this.key = new Key(type, label, propertyKey);
         this.isUnique = isUnique;
@@ -21,7 +21,7 @@ public class IndexMetadata {
         return key;
     }
 
-    public IndexType type() {
+    public ElementType type() {
         return key.type();
     }
 
@@ -79,17 +79,17 @@ public class IndexMetadata {
     }
 
     public static class Key {
-        private final IndexType type;
+        private final ElementType type;
         private final String label;
         private final String propertyKey;
 
-        public Key(IndexType type, String label, String propertyKey) {
+        public Key(ElementType type, String label, String propertyKey) {
             this.type = type;
             this.label = label;
             this.propertyKey = propertyKey;
         }
 
-        public IndexType type() {
+        public ElementType type() {
             return type;
         }
 

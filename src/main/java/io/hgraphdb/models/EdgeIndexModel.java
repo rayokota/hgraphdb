@@ -94,7 +94,7 @@ public class EdgeIndexModel extends BaseModel {
         if (edges != null) {
             return edges;
         }
-        IndexMetadata index = graph.getIndex(OperationType.READ, IndexType.EDGE, label, key);
+        IndexMetadata index = graph.getIndex(OperationType.READ, ElementType.EDGE, label, key);
         final boolean useIndex = !key.equals(Constants.CREATED_AT) && index != null;
         if (useIndex) {
             LOGGER.debug("Using edge index for ({}, {})", label, key);
@@ -117,7 +117,7 @@ public class EdgeIndexModel extends BaseModel {
         if (edges != null) {
             return edges;
         }
-        IndexMetadata index = graph.getIndex(OperationType.READ, IndexType.EDGE, label, key);
+        IndexMetadata index = graph.getIndex(OperationType.READ, ElementType.EDGE, label, key);
         final boolean useIndex = !key.equals(Constants.CREATED_AT) && index != null;
         if (useIndex) {
             LOGGER.debug("Using edge index for ({}, {})", label, key);
@@ -357,7 +357,7 @@ public class EdgeIndexModel extends BaseModel {
         }
         HBaseEdge edge = (HBaseEdge) graph.findOrCreateEdge(edgeId);
         edge.copyFrom(newEdge);
-        edge.setIndexKey(new IndexMetadata.Key(IndexType.EDGE, label, key));
+        edge.setIndexKey(new IndexMetadata.Key(ElementType.EDGE, label, key));
         edge.setIndexTs(createdAttsCell.getTimestamp());
         return edge;
     }

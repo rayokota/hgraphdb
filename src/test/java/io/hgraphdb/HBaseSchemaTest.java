@@ -1,6 +1,5 @@
 package io.hgraphdb;
 
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.junit.Test;
 
@@ -28,7 +27,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     public void testVertexIndex() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
 
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
@@ -66,7 +65,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     public void testEdgeIndex() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
 
         graph.createVertexLabel("a", ValueType.STRING, "key0", ValueType.INT);
         graph.createVertexLabel("b", ValueType.STRING, "key1", ValueType.INT);

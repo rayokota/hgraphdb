@@ -20,7 +20,6 @@ import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
-import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -475,15 +474,15 @@ public class HBaseGraph implements Graph {
         }
     }
 
-    public void createIndex(IndexType type, String label, String propertyKey) {
+    public void createIndex(ElementType type, String label, String propertyKey) {
         createIndex(type, label, propertyKey, false, false);
     }
 
-    public void createIndex(IndexType type, String label, String propertyKey, boolean isUnique) {
+    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique) {
         createIndex(type, label, propertyKey, isUnique, false);
     }
 
-    public void createIndex(IndexType type, String label, String propertyKey, boolean isUnique, boolean populate) {
+    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate) {
         IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex != null && oldIndex.state() != State.DROPPED) {
@@ -509,7 +508,7 @@ public class HBaseGraph implements Graph {
 
         executor.schedule(
                 () -> {
-                    if (index.type() == IndexType.VERTEX) {
+                    if (index.type() == ElementType.VERTEX) {
                         allVertices().forEachRemaining(vertex -> vertexIndexModel.writeVertexIndex(vertex, index));
                     } else {
                         allEdges().forEachRemaining(edge -> edgeIndexModel.writeEdgeIndex(edge, index));
@@ -519,20 +518,20 @@ public class HBaseGraph implements Graph {
                 config.getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
-    public boolean hasIndex(OperationType op, IndexType type, String label, String propertyKey ) {
+    public boolean hasIndex(OperationType op, ElementType type, String label, String propertyKey ) {
         return getIndex(op, type, label, propertyKey) != null;
     }
 
-    public IndexMetadata getIndex(OperationType op, IndexType type, String label, String propertyKey) {
+    public IndexMetadata getIndex(OperationType op, ElementType type, String label, String propertyKey) {
         Iterator<IndexMetadata> indices = getIndices(op, type, label, propertyKey);
         return indices.hasNext() ? indices.next() : null;
     }
 
-    public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, String... propertyKeys) {
+    public Iterator<IndexMetadata> getIndices(OperationType op, ElementType type, String label, String... propertyKeys) {
         return getIndices(op, type, label, Arrays.asList(propertyKeys));
     }
 
-    public Iterator<IndexMetadata> getIndices(OperationType op, IndexType type, String label, Collection<String> propertyKeys) {
+    public Iterator<IndexMetadata> getIndices(OperationType op, ElementType type, String label, Collection<String> propertyKeys) {
         return indices.values().stream()
                 .filter(index -> isIndexActive(op, index)
                         && index.type().equals(type)

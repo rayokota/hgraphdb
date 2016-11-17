@@ -1,6 +1,6 @@
 package io.hgraphdb;
 
-public enum IndexType {
+public enum ElementType {
     EDGE,
     VERTEX
 }

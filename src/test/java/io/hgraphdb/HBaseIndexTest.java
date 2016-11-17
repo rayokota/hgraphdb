@@ -35,7 +35,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Vertex> it = graph.allVertices("a", "key1", 1);
         assertEquals(2, count(it));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
         graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
         graph.addVertex(T.id, id(11), T.label, "a", "key1", 12);
         graph.addVertex(T.id, id(12), T.label, "a", "key2", 12);
@@ -50,7 +50,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testUniqueVertexIndex() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1", true);
+        graph.createIndex(ElementType.VERTEX, "a", "key1", true);
         graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
         Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
         Vertex v = it.next();
@@ -79,7 +79,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Vertex> it = graph.allVertices("a", "key1", 1, 4);
         assertEquals(3, count(it));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
         graph.addVertex(T.id, id(10), T.label, "a", "key1", 10);
         graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
         graph.addVertex(T.id, id(12), T.label, "a", "key1", 12);
@@ -95,7 +95,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testVertexIndexRangeNegative() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
         graph.addVertex(T.id, id(10), T.label, "a", "key1", -3);
         graph.addVertex(T.id, id(11), T.label, "a", "key1", -2);
         graph.addVertex(T.id, id(12), T.label, "a", "key1", -1);
@@ -121,7 +121,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Edge> it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 1);
         assertEquals(2, count(it));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1");
         Vertex v10 = graph.addVertex(T.id, id(10));
         Vertex v11 = graph.addVertex(T.id, id(11));
         Vertex v12 = graph.addVertex(T.id, id(12));
@@ -138,7 +138,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testUniqueEdgeIndex() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1", true);
+        graph.createIndex(ElementType.EDGE, "b", "key1", true);
         Vertex v10 = graph.addVertex(T.id, id(10));
         Vertex v11 = graph.addVertex(T.id, id(11));
         Vertex v12 = graph.addVertex(T.id, id(12));
@@ -180,7 +180,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Edge> it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
         assertEquals(4, count(it));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1");
         Vertex v10 = graph.addVertex(T.id, id(10));
         Vertex v11 = graph.addVertex(T.id, id(11));
         Vertex v12 = graph.addVertex(T.id, id(12));
@@ -203,7 +203,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testEdgeIndexRangeNegative() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1");
         Vertex v10 = graph.addVertex(T.id, id(10));
         Vertex v11 = graph.addVertex(T.id, id(11));
         Vertex v12 = graph.addVertex(T.id, id(12));
@@ -226,7 +226,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testIndexRemoval() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1");
         Vertex v0 = graph.addVertex(T.id, id(0));
         Vertex v1 = graph.addVertex(T.id, id(1));
         Vertex v2 = graph.addVertex(T.id, id(2));
@@ -253,7 +253,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     @Test
     public void testVertexIndexModifyingProperty() {
         assertEquals(0, count(graph.vertices()));
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
         Vertex v = graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
 
         Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
@@ -285,7 +285,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testEdgeIndexModifyingProperty() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1");
         HBaseVertex v10 = (HBaseVertex) graph.addVertex(T.id, id(10));
         HBaseVertex v11 = (HBaseVertex) graph.addVertex(T.id, id(11));
         Edge e = v10.addEdge("b", v11, "key1", 11);
@@ -319,7 +319,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testGremlinVertexIndex() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
         graph.addVertex(T.id, id(0), T.label, "a", "key1", 0);
         graph.addVertex(T.id, id(1), T.label, "a", "key1", 1);
         graph.addVertex(T.id, id(2), T.label, "a", "key1", 2);
@@ -336,8 +336,8 @@ public class HBaseIndexTest extends HBaseGraphTest {
     public void testIndexExample() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(IndexType.VERTEX, "a", "key1");
-        graph.createIndex(IndexType.EDGE, "knows", "since");
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.EDGE, "knows", "since");
         Vertex v0 = graph.addVertex(T.id, id(0), T.label, "person", "name", "John");
         Vertex v1 = graph.addVertex(T.id, id(1), T.label, "person", "name", "Kierkegaard");
         Vertex v2 = graph.addVertex(T.id, id(2), T.label, "person", "name", "Barth");

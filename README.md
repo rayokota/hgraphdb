@@ -63,9 +63,9 @@ Two types of indices are supported by HGraphDB:
 
 An index is created as follows:
 
-		graph.createIndex(IndexType.VERTEX, "person", "name");
+		graph.createIndex(ElementType.VERTEX, "person", "name");
 		...
-		graph.createIndex(IndexType.EDGE, "knows", "since");
+		graph.createIndex(ElementType.EDGE, "knows", "since");
 
 Indices should be created before the relevant data is populated.  A future [enhancement](#future) will allow for index creation after data population.
 
@@ -82,7 +82,7 @@ Note that the indices support range queries, where the start of the range is inc
 
 An index can also be specified as a unique index.  For a vertex index, this means only one vertex can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
 
-		graph.createIndex(IndexType.VERTEX, "person", "name", /* unique */ true);
+		graph.createIndex(ElementType.VERTEX, "person", "name", /* unique */ true);
 
 ## Schema Management
 

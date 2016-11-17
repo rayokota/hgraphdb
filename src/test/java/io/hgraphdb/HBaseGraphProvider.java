@@ -63,47 +63,47 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
         if (graphData.equals(LoadGraphWith.GraphData.GRATEFUL)) {
             if (pick) {
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "artist", "name");
+                    graph.createIndex(ElementType.VERTEX, "artist", "name");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "song", "name");
+                    graph.createIndex(ElementType.VERTEX, "song", "name");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "song", "songType");
+                    graph.createIndex(ElementType.VERTEX, "song", "songType");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "song", "performances");
+                    graph.createIndex(ElementType.VERTEX, "song", "performances");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "followedBy", "weight");
+                    graph.createIndex(ElementType.EDGE, "followedBy", "weight");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "sungBy", "weight");
+                    graph.createIndex(ElementType.EDGE, "sungBy", "weight");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "writtenBy", "weight");
+                    graph.createIndex(ElementType.EDGE, "writtenBy", "weight");
             } // else no indices
         } else if (graphData.equals(LoadGraphWith.GraphData.MODERN)) {
             if (pick) {
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "person", "name");
+                    graph.createIndex(ElementType.VERTEX, "person", "name");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "person", "age");
+                    graph.createIndex(ElementType.VERTEX, "person", "age");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "software", "name");
+                    graph.createIndex(ElementType.VERTEX, "software", "name");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "software", "lang");
+                    graph.createIndex(ElementType.VERTEX, "software", "lang");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "created", "weight");
+                    graph.createIndex(ElementType.EDGE, "created", "weight");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "knows", "weight");
+                    graph.createIndex(ElementType.EDGE, "knows", "weight");
             } // else no indices
         } else if (graphData.equals(LoadGraphWith.GraphData.CLASSIC)) {
             if (pick) {
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "vertex", "name");
+                    graph.createIndex(ElementType.VERTEX, "vertex", "name");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "vertex", "age");
+                    graph.createIndex(ElementType.VERTEX, "vertex", "age");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.VERTEX, "vertex", "lang");
+                    graph.createIndex(ElementType.VERTEX, "vertex", "lang");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "created", "weight");
+                    graph.createIndex(ElementType.EDGE, "created", "weight");
                 if (random.nextBoolean())
-                    graph.createIndex(IndexType.EDGE, "knows", "weight");
+                    graph.createIndex(ElementType.EDGE, "knows", "weight");
             } // else no indices
         } else {
             //throw new RuntimeException("Could not load graph with " + graphData);

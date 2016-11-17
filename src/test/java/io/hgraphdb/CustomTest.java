@@ -264,14 +264,14 @@ public class CustomTest extends AbstractGremlinProcessTest {
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void shouldReadWriteModern() throws Exception {
         try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            ((HBaseGraph)graph).createIndex(IndexType.EDGE, "knows", "weight");
+            ((HBaseGraph)graph).createIndex(ElementType.EDGE, "knows", "weight");
             final GraphWriter writer = graph.io(ioBuilderToTest).writer().create();
             writer.writeGraph(os, graph);
 
             final Configuration configuration = graphProvider.newGraphConfiguration("readGraph", this.getClass(), name.getMethodName(), LoadGraphWith.GraphData.MODERN);
             graphProvider.clear(configuration);
             final Graph g1 = graphProvider.openTestGraph(configuration);
-            ((HBaseGraph)g1).createIndex(IndexType.EDGE, "knows", "weight");
+            ((HBaseGraph)g1).createIndex(ElementType.EDGE, "knows", "weight");
             final GraphReader reader = graph.io(ioBuilderToTest).reader().create();
             //((HBaseGraph) graph).dump();
             //((HBaseGraph) g1).dump();

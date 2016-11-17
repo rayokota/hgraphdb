@@ -167,7 +167,7 @@ public class VertexIndexModel extends BaseModel {
         HBaseVertex newVertex = new HBaseVertex(graph, vertexId, label, createdAt, null, properties, false);
         HBaseVertex vertex = (HBaseVertex) graph.findOrCreateVertex(vertexId);
         vertex.copyFrom(newVertex);
-        vertex.setIndexKey(new IndexMetadata.Key(IndexType.VERTEX, label, key));
+        vertex.setIndexKey(new IndexMetadata.Key(ElementType.VERTEX, label, key));
         vertex.setIndexTs(createdAtCell.getTimestamp());
         return vertex;
     }
