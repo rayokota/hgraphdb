@@ -58,11 +58,8 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         conf = new PropertiesConfiguration();
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
         if (config != null) {
-            Iterator<String> keys = config.getKeys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                conf.setProperty(key.replace("..", "."), config.getProperty(key));
-            }
+            config.getKeys().forEachRemaining(key ->
+                    conf.setProperty(key.replace("..", "."), config.getProperty(key)));
         }
     }
 

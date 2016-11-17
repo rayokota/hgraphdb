@@ -222,14 +222,14 @@ public class EdgeIndexModel extends BaseModel {
     private void applyEdgeLabelsRowFilter(Scan scan, Vertex vertex, Direction direction, String key, String... labels) {
         FilterList rowFilters = new FilterList(FilterList.Operator.MUST_PASS_ONE);
         if (labels.length > 0) {
-            for (String label : labels) {
+            Arrays.stream(labels).forEach(label -> {
                 if (direction == Direction.BOTH) {
                     applyEdgeLabelRowFilter(rowFilters, vertex, Direction.IN, key, label);
                     applyEdgeLabelRowFilter(rowFilters, vertex, Direction.OUT, key, label);
                 } else {
                     applyEdgeLabelRowFilter(rowFilters, vertex, direction, key, label);
                 }
-            }
+            });
         } else {
             if (direction == Direction.BOTH) {
                 applyEdgeLabelRowFilter(rowFilters, vertex, Direction.IN, key, null);
