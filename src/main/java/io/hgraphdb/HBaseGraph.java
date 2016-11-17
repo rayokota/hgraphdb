@@ -169,12 +169,17 @@ public class HBaseGraph implements Graph {
 
             String ns = config.getGraphNamespace();
             this.edgeModel = new EdgeModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGES)));
-            this.edgeIndexModel = new EdgeIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_INDICES)));
-            this.edgeLabelModel = new EdgeLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_LABELS)));
             this.vertexModel = new VertexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTICES)));
+            this.edgeIndexModel = new EdgeIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_INDICES)));
             this.vertexIndexModel = new VertexIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_INDICES)));
-            this.vertexLabelModel = new VertexLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_LABELS)));
             this.indexMetadataModel = new IndexMetadataModel(this, connection.getTable(TableName.valueOf(ns, Constants.INDEX_METADATA)));
+            if (config.getUseSchema()) {
+                this.edgeLabelModel = new EdgeLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_LABELS)));
+                this.vertexLabelModel = new VertexLabelModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_LABELS)));
+            } else {
+                this.edgeLabelModel = null;
+                this.vertexLabelModel = null;
+            }
 
             this.edgeCache = CacheBuilder.<ByteBuffer, Edge>newBuilder()
                     .maximumSize(config.getElementCacheMaxSize())
@@ -615,7 +620,7 @@ public class HBaseGraph implements Graph {
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
-        if (!configuration().getUseSchema() ||  label == null || inVertex == null || outVertex == null) return;
+        if (!configuration().getUseSchema() || label == null || inVertex == null || outVertex == null) return;
         VertexLabel inVertexLabelMetadata = vertexLabels.get(inVertex.label());
         VertexLabel outVertexLabelMetadata = vertexLabels.get(outVertex.label());
         if (inVertexLabelMetadata == null) {
