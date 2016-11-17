@@ -1,20 +1,19 @@
 package io.hgraphdb;
 
-public class IndexMetadata {
+import java.util.Map;
+
+public class LabelMetadata {
 
     private final Key key;
-    private boolean isUnique;
-    private State state;
+    private ValueType idType;
+    private Map<String, ValueType> propertyTypes;
     protected Long createdAt;
-    protected Long updatedAt;
 
-    public IndexMetadata(ElementType type, String label, String propertyKey,
-                         boolean isUnique, State state, Long createdAt, Long updatedAt) {
-        this.key = new Key(type, label, propertyKey);
-        this.isUnique = isUnique;
-        this.state = state;
+    public LabelMetadata(ElementType type, String label, ValueType idType, Long createdAt, Map<String, ValueType> propertyTypes) {
+        this.key = new Key(type, label);
+        this.idType = idType;
+        this.propertyTypes = propertyTypes;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public Key key() {
@@ -29,32 +28,16 @@ public class IndexMetadata {
         return key.label();
     }
 
-    public String propertyKey() {
-        return key.propertyKey();
+    public ValueType idType() {
+        return idType;
     }
 
-    public boolean isUnique() {
-        return isUnique;
-    }
-
-    public State state() {
-        return state;
-    }
-
-    public void state(State state) {
-        this.state = state;
+    public Map<String, ValueType> propertyTypes() {
+        return propertyTypes;
     }
 
     public Long createdAt() {
         return createdAt;
-    }
-
-    public Long updatedAt() {
-        return updatedAt;
-    }
-
-    public void updatedAt(Long updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     @Override
@@ -67,7 +50,7 @@ public class IndexMetadata {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IndexMetadata that = (IndexMetadata) o;
+        LabelMetadata that = (LabelMetadata) o;
 
         return key.equals(that.key);
     }
@@ -80,12 +63,10 @@ public class IndexMetadata {
     public static class Key {
         private final ElementType type;
         private final String label;
-        private final String propertyKey;
 
-        public Key(ElementType type, String label, String propertyKey) {
+        public Key(ElementType type, String label) {
             this.type = type;
             this.label = label;
-            this.propertyKey = propertyKey;
         }
 
         public ElementType type() {
@@ -96,13 +77,9 @@ public class IndexMetadata {
             return label;
         }
 
-        public String propertyKey() {
-            return propertyKey;
-        }
-
         @Override
         public String toString() {
-            return type + " INDEX " + " " + label + "(" + propertyKey() + ")";
+            return type + " LABEL " + " " + label;
         }
 
         @Override
@@ -113,24 +90,14 @@ public class IndexMetadata {
             Key key = (Key) o;
 
             if (type != key.type) return false;
-            if (!label.equals(key.label)) return false;
-            return propertyKey.equals(key.propertyKey);
+            return (label.equals(key.label));
         }
 
         @Override
         public int hashCode() {
             int result = type.hashCode();
             result = 31 * result + label.hashCode();
-            result = 31 * result + propertyKey.hashCode();
             return result;
         }
-    }
-
-    public enum State {
-        CREATED,
-        BUILDING,
-        ACTIVE,
-        INACTIVE, // an intermediate state to wait for clients to stop using an index
-        DROPPED
     }
 }

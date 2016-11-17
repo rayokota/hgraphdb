@@ -10,11 +10,11 @@ public class Constants {
      */
     public static final String EDGES = "edges";
     public static final String EDGE_INDICES = "edgeIndices";
-    public static final String EDGE_LABELS = "edgeLabels";
     public static final String VERTICES = "vertices";
     public static final String VERTEX_INDICES = "vertexIndices";
-    public static final String VERTEX_LABELS = "vertexLabels";
     public static final String INDEX_METADATA = "indexMetadata";
+    public static final String LABEL_METADATA = "labelMetadata";
+    public static final String LABEL_CONNECTIONS = "labelConnections";
 
     /**
      * Default column family

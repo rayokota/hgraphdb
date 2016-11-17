@@ -2,7 +2,7 @@ package io.hgraphdb.models;
 
 import io.hgraphdb.*;
 import io.hgraphdb.mutators.*;
-import io.hgraphdb.readers.VertexLabelReader;
+import io.hgraphdb.readers.LabelMetadataReader;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -19,25 +19,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class VertexLabelModel extends BaseModel {
+public class LabelMetadataModel extends BaseModel {
 
-    public VertexLabelModel(HBaseGraph graph, Table table) {
+    public LabelMetadataModel(HBaseGraph graph, Table table) {
         super(graph, table);
     }
 
-    public void createLabel(VertexLabel label) {
-        Creator creator = new VertexLabelWriter(graph, label);
+    public void createLabelMetadata(LabelMetadata label) {
+        Creator creator = new LabelMetadataWriter(graph, label);
         Mutators.create(table, creator);
     }
 
-    public void deleteLabel(VertexLabel label) {
-        Mutator writer = new VertexLabelRemover(graph, label);
+    public void deleteLabelMetadata(LabelMetadata label) {
+        Mutator writer = new LabelMetadataRemover(graph, label);
         Mutators.write(table, writer);
     }
 
-    public VertexLabel label(String label) {
-        final VertexLabelReader parser = new VertexLabelReader(graph);
-        Get get = new Get(serialize(label));
+    public LabelMetadata label(LabelMetadata.Key labelKey) {
+        final LabelMetadataReader parser = new LabelMetadataReader(graph);
+        Get get = new Get(serialize(labelKey));
         try {
             Result result = table.get(get);
             return parser.parse(result);
@@ -46,20 +46,21 @@ public class VertexLabelModel extends BaseModel {
         }
     }
 
-    public Iterator<VertexLabel> labels() {
-        final VertexLabelReader parser = new VertexLabelReader(graph);
+    public Iterator<LabelMetadata> labels() {
+        final LabelMetadataReader parser = new LabelMetadataReader(graph);
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(new Scan());
-            return IteratorUtils.<Result, VertexLabel>map(scanner.iterator(), parser::parse);
+            return IteratorUtils.<Result, LabelMetadata>map(scanner.iterator(), parser::parse);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
     }
 
-    public byte[] serialize(String label) {
+    public byte[] serialize(LabelMetadata.Key label) {
         PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
-        OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
+        OrderedBytes.encodeString(buffer, label.label(), Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, label.type() == ElementType.VERTEX ? (byte) 1 : (byte) 0, Order.ASCENDING);
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
         byte[] bytes = new byte[buffer.getRemaining()];
@@ -67,10 +68,11 @@ public class VertexLabelModel extends BaseModel {
         return bytes;
     }
 
-    public VertexLabel deserialize(Result result) {
+    public LabelMetadata deserialize(Result result) {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
         String label = OrderedBytes.decodeString(buffer);
+        ElementType type = OrderedBytes.decodeInt8(buffer) == 1 ? ElementType.VERTEX : ElementType.EDGE;
 
         ValueType idType = null;
         Long createdAt = null;
@@ -78,14 +80,14 @@ public class VertexLabelModel extends BaseModel {
         for (Cell cell : result.listCells()) {
             String key = Bytes.toString(CellUtil.cloneQualifier(cell));
             if (!Graph.Hidden.isHidden(key)) {
-                ValueType type = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
-                props.put(key, type);
+                ValueType propType = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
+                props.put(key, propType);
             } else if (key.equals(Constants.VERTEX_ID)) {
                 idType = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
             } else if (key.equals(Constants.CREATED_AT)) {
                 createdAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             }
         }
-        return new VertexLabel(label, idType, createdAt, props);
+        return new LabelMetadata(type, label, idType, createdAt, props);
     }
 }

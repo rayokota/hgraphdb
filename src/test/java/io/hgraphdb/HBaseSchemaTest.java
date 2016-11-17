@@ -24,7 +24,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     }
 
     @Test
-    public void testVertexIndex() {
+    public void testVertexLabel() {
         assertEquals(0, count(graph.vertices()));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1");
@@ -35,7 +35,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         } catch (HBaseGraphNotValidException e) {
         }
 
-        graph.createVertexLabel("b", ValueType.LONG, "key2", ValueType.LONG);
+        graph.createLabel(ElementType.VERTEX, "b", ValueType.LONG, "key2", ValueType.LONG);
 
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
@@ -62,22 +62,23 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     }
 
     @Test
-    public void testEdgeIndex() {
+    public void testEdgeLabel() {
         assertEquals(0, count(graph.vertices()));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1");
 
-        graph.createVertexLabel("a", ValueType.STRING, "key0", ValueType.INT);
-        graph.createVertexLabel("b", ValueType.STRING, "key1", ValueType.INT);
-        graph.createVertexLabel("c", ValueType.STRING, "key2", ValueType.INT);
-        graph.createVertexLabel("d", ValueType.STRING, "key3", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "a", ValueType.STRING, "key0", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "b", ValueType.STRING, "key1", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "c", ValueType.STRING, "key2", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "d", ValueType.STRING, "key3", ValueType.INT);
 
         Vertex v1 = graph.addVertex(T.id, id(10), T.label, "a", "key0", 10);
         Vertex v2 = graph.addVertex(T.id, id(11), T.label, "b", "key1", 11);
         Vertex v3 = graph.addVertex(T.id, id(12), T.label, "c", "key2", 12);
         Vertex v4 = graph.addVertex(T.id, id(13), T.label, "d", "key3", 13);
 
-        graph.createEdgeLabel("knows", "a", "b", ValueType.STRING, "since", ValueType.DATE);
+        graph.createLabel(ElementType.EDGE, "knows", ValueType.STRING, "since", ValueType.DATE);
+        graph.connectLabels("a", "knows", "b");
 
         try {
             graph.addEdge(v3, v4, "foo", "blah", 11);

@@ -1,7 +1,6 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.*;
-import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Element;
@@ -9,12 +8,12 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.util.Iterator;
 
-public class VertexLabelWriter implements Creator {
+public class LabelMetadataWriter implements Creator {
 
     private final HBaseGraph graph;
-    private final VertexLabel label;
+    private final LabelMetadata label;
 
-    public VertexLabelWriter(HBaseGraph graph, VertexLabel label) {
+    public LabelMetadataWriter(HBaseGraph graph, LabelMetadata label) {
         this.graph = graph;
         this.label = label;
     }
@@ -26,7 +25,7 @@ public class VertexLabelWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        Put put = new Put(graph.getVertexLabelModel().serialize(label.label()));
+        Put put = new Put(graph.getLabelMetadataModel().serialize(label.key()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
                 ValueUtils.serialize(label.createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES,
