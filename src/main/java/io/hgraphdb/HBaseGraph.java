@@ -164,14 +164,21 @@ public class HBaseGraph implements Graph {
             }
 
             String ns = config.getGraphNamespace();
-            this.edgeModel = new EdgeModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGES)));
-            this.vertexModel = new VertexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTICES)));
-            this.edgeIndexModel = new EdgeIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.EDGE_INDICES)));
-            this.vertexIndexModel = new VertexIndexModel(this, connection.getTable(TableName.valueOf(ns, Constants.VERTEX_INDICES)));
-            this.indexMetadataModel = new IndexMetadataModel(this, connection.getTable(TableName.valueOf(ns, Constants.INDEX_METADATA)));
+            this.edgeModel = new EdgeModel(this,
+                    connection.getTable(HBaseGraphUtils.getTableName(config, Constants.EDGES)));
+            this.vertexModel = new VertexModel(this,
+                    connection.getTable(HBaseGraphUtils.getTableName(config, Constants.VERTICES)));
+            this.edgeIndexModel = new EdgeIndexModel(this,
+                    connection.getTable(HBaseGraphUtils.getTableName(config, Constants.EDGE_INDICES)));
+            this.vertexIndexModel = new VertexIndexModel(this,
+                    connection.getTable(HBaseGraphUtils.getTableName(config, Constants.VERTEX_INDICES)));
+            this.indexMetadataModel = new IndexMetadataModel(this,
+                    connection.getTable(HBaseGraphUtils.getTableName(config, Constants.INDEX_METADATA)));
             if (config.getUseSchema()) {
-                this.labelMetadataModel = new LabelMetadataModel(this, connection.getTable(TableName.valueOf(ns, Constants.LABEL_METADATA)));
-                this.labelConnectionModel = new LabelConnectionModel(this, connection.getTable(TableName.valueOf(ns, Constants.LABEL_CONNECTIONS)));
+                this.labelMetadataModel = new LabelMetadataModel(this,
+                        connection.getTable(HBaseGraphUtils.getTableName(config, Constants.LABEL_METADATA)));
+                this.labelConnectionModel = new LabelConnectionModel(this,
+                        connection.getTable(HBaseGraphUtils.getTableName(config, Constants.LABEL_CONNECTIONS)));
             } else {
                 this.labelMetadataModel = null;
                 this.labelConnectionModel = null;

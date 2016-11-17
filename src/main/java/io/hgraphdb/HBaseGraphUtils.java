@@ -63,6 +63,15 @@ public final class HBaseGraphUtils {
         return conn;
     }
 
+    public static TableName getTableName(HBaseGraphConfiguration config, String name) {
+        String ns = config.getGraphNamespace();
+        String tablePrefix = config.getGraphTablePrefix();
+        if (!tablePrefix.isEmpty()) {
+            name = tablePrefix + "_" + name;
+        }
+        return TableName.valueOf(ns, name);
+    }
+
     public static void createTables(HBaseGraphConfiguration config, Connection conn) {
         if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) return;
         Admin admin = null;
@@ -97,7 +106,7 @@ public final class HBaseGraphUtils {
     }
 
     private static void createTable(HBaseGraphConfiguration config, Admin admin, String name, int ttl) throws IOException {
-        TableName tableName = TableName.valueOf(config.getGraphNamespace(), name);
+        TableName tableName = getTableName(config, name);
         if (admin.tableExists(tableName)) return;
         HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
         HColumnDescriptor columnDescriptor = new HColumnDescriptor(DEFAULT_FAMILY)
@@ -137,7 +146,7 @@ public final class HBaseGraphUtils {
     }
 
     private static void dropTable(HBaseGraphConfiguration config, Admin admin, String name) throws IOException {
-        TableName tableName = TableName.valueOf(config.getGraphNamespace(), name);
+        TableName tableName = getTableName(config, name);
         if (!admin.tableExists(tableName)) return;
         if (admin.isTableEnabled(tableName)) {
             admin.disableTable(tableName);

@@ -5,6 +5,7 @@ import io.hgraphdb.mutators.EdgeIndexWriter;
 import io.hgraphdb.mutators.EdgeWriter;
 import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.mutators.VertexWriter;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
@@ -39,16 +40,17 @@ public final class HBaseBulkLoader {
                     }
             };
 
-            String ns = graph.configuration().getGraphNamespace();
+
+            HBaseGraphConfiguration config = graph.configuration();
 
             BufferedMutatorParams edgesMutatorParams =
-                    new BufferedMutatorParams(TableName.valueOf(ns, Constants.EDGES)).listener(listener);
+                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.EDGES)).listener(listener);
             BufferedMutatorParams edgeIndicesMutatorParams =
-                    new BufferedMutatorParams(TableName.valueOf(ns, Constants.EDGE_INDICES)).listener(listener);
+                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.EDGE_INDICES)).listener(listener);
             BufferedMutatorParams verticesMutatorParams =
-                    new BufferedMutatorParams(TableName.valueOf(ns, Constants.VERTICES)).listener(listener);
+                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.VERTICES)).listener(listener);
             BufferedMutatorParams vertexIndicesMutatorParams =
-                    new BufferedMutatorParams(TableName.valueOf(ns, Constants.VERTEX_INDICES)).listener(listener);
+                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.VERTEX_INDICES)).listener(listener);
 
             edgesMutator = graph.connection().getBufferedMutator(edgesMutatorParams);
             edgeIndicesMutator = graph.connection().getBufferedMutator(edgeIndicesMutatorParams);
