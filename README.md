@@ -185,7 +185,7 @@ If schema management is enabled, two additional tables are used:
 
 | Row Key | Column: createdAt 
 |---|---|---|---|---|---|
-| [out vertex label, edge label, in vertex label] | [createdAt value] |
+| [from vertex label, edge label, to vertex label] | [createdAt value] |
 
 HGraphDB was designed to support the features mentioned [here](https://rayokota.wordpress.com/2016/11/10/hgraphdb-hbase-as-a-tinkerpop-graph-database/).
 
