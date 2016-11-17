@@ -5,8 +5,6 @@ import io.hgraphdb.mutators.EdgeIndexWriter;
 import io.hgraphdb.mutators.EdgeWriter;
 import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.mutators.VertexWriter;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
 import org.apache.tinkerpop.gremlin.structure.Edge;

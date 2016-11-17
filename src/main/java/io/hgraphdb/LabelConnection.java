@@ -1,7 +1,5 @@
 package io.hgraphdb;
 
-import java.util.Map;
-
 public class LabelConnection {
 
     private String outVertexLabel;

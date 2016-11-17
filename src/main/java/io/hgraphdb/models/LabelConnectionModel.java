@@ -1,11 +1,15 @@
 package io.hgraphdb.models;
 
-import io.hgraphdb.*;
+import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.LabelConnection;
+import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.Creator;
-import io.hgraphdb.mutators.Mutator;
-import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.mutators.LabelConnectionRemover;
 import io.hgraphdb.mutators.LabelConnectionWriter;
+import io.hgraphdb.mutators.Mutator;
+import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.LabelConnectionReader;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -14,14 +18,15 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.util.*;
-import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.hadoop.hbase.util.Order;
+import org.apache.hadoop.hbase.util.OrderedBytes;
+import org.apache.hadoop.hbase.util.PositionedByteRange;
+import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
+import org.apache.hadoop.hbase.util.SimplePositionedMutableByteRange;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 public class LabelConnectionModel extends BaseModel {
 
