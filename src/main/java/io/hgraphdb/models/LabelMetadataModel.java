@@ -88,7 +88,7 @@ public class LabelMetadataModel extends BaseModel {
             if (!Graph.Hidden.isHidden(key)) {
                 ValueType propType = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
                 props.put(key, propType);
-            } else if (key.equals(Constants.VERTEX_ID)) {
+            } else if (key.equals(Constants.ELEMENT_ID)) {
                 idType = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
             } else if (key.equals(Constants.CREATED_AT)) {
                 createdAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));

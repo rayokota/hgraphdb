@@ -85,6 +85,40 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     }
 
     @Test
+    public void testEdgeLabelAddProperty() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createLabel(ElementType.VERTEX, "a", ValueType.STRING, "key0", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "b", ValueType.STRING, "key1", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "c", ValueType.STRING, "key2", ValueType.INT);
+        graph.createLabel(ElementType.VERTEX, "d", ValueType.STRING, "key3", ValueType.INT);
+
+        Vertex v1 = graph.addVertex(T.id, id(10), T.label, "a", "key0", 10);
+        Vertex v2 = graph.addVertex(T.id, id(11), T.label, "b", "key1", 11);
+        Vertex v3 = graph.addVertex(T.id, id(12), T.label, "c", "key2", 12);
+        Vertex v4 = graph.addVertex(T.id, id(13), T.label, "d", "key3", 13);
+
+        graph.createLabel(ElementType.EDGE, "knows", ValueType.STRING, "since", ValueType.DATE);
+        graph.connectLabels("a", "knows", "b");
+
+        Edge e = graph.addEdge(v1, v2, "knows", "since", LocalDate.now());
+
+        Iterator<Edge> it = v1.edges(Direction.OUT, "knows");
+        assertEquals(1, count(it));
+
+        try {
+            e.property("key3", "hi");
+        } catch (HBaseGraphNotValidException x) {
+        }
+
+        graph.updateLabel(ElementType.EDGE, "knows", "key3", ValueType.STRING);
+        e.property("key3", "hi");
+
+        it = v1.edges(Direction.OUT, "knows");
+        assertEquals(1, count(it));
+    }
+
+    @Test
     public void testEdgeLabel() {
         assertEquals(0, count(graph.vertices()));
 

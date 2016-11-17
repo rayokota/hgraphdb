@@ -88,9 +88,17 @@ An index can also be specified as a unique index.  For a vertex index, this mean
 
 By default HGraphDB does not use a schema.  Schema management can be enabled by calling `HBaseGraphConfiguration.useSchema(true)`.  Once schema management is enabled, the schema for vertex and edge labels can be defined.
 
-		graph.createVertexLabel("author", /* id type */ ValueType.STRING, "age", /* prop type */ ValueType.INT);
-		...
-		graph.createEdgeLabel("writes", "author", "book", /* id type */ ValueType.STRING, "since", ValueType.DATE);   
+		graph.createLabel("author", /* id */ ValueType.STRING, "age", ValueType.INT);
+		graph.createLabel("book", /* id */ ValueType.STRING, "publisher", ValueType.STRING);
+		graph.createLabel("writes", /* id */ ValueType.STRING, "since", ValueType.DATE);   
+	
+Edge labels must be explicitly connected to vertex labels before edges are added to the graph.
+
+		graph.connectLabels("author", "writes", "books"); 
+
+Additional properties can be added to labels at a later time; otherwise labels cannot be changed.
+
+		graph.updateLabel("author", "height", ValueType.DOUBLE);
 		
 Whenever vertices or edges are added to the graph, they will first be validated against the schema.    
 
@@ -161,9 +169,23 @@ HGraphDB uses a tall table schema.  The schema is created in the namespace speci
 
 | Row Key | Column: createdAt | Column: isUnique | Column: state |
 |---|---|---|---|
-| [label, property key, index type] | [createdAt value] | [isUnique value] | [state value] |
+| [label, property key, element type] | [createdAt value] | [isUnique value] | [state value] |
 
 Note that in the index tables, if the index is a unique index, then the indexed IDs are stored in the column values; otherwise they are stored in the row key.  
+
+If schema management is enabled, two additional tables are used:
+
+### Label Metadata Table
+
+| Row Key | Column: id | Column: createdAt | Column: [property1 key] | Column: [property2 key] | ... |
+|---|---|---|---|---|---|
+| [label, element type] | [id type] | [createdAt value] | [property1 type] | [property2 type] |...|
+
+### Label Connections Table
+
+| Row Key | Column: createdAt 
+|---|---|---|---|---|---|
+| [out vertex label, edge label, in vertex label] | [createdAt value] |
 
 HGraphDB was designed to support the features mentioned [here](https://rayokota.wordpress.com/2016/11/10/hgraphdb-hbase-as-a-tinkerpop-graph-database/).
 

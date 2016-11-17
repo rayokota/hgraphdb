@@ -31,6 +31,7 @@ public class Constants {
     public static final String CREATED_AT = Graph.Hidden.hide("c");
     public static final String UPDATED_AT = Graph.Hidden.hide("u");
     public static final String UNIQUE = Graph.Hidden.hide("q");
+    public static final String ELEMENT_ID = Graph.Hidden.hide("i");
     public static final String EDGE_ID = Graph.Hidden.hide("e");
     public static final String VERTEX_ID = Graph.Hidden.hide("v");
     public static final String INDEX_STATE = Graph.Hidden.hide("x");
@@ -41,6 +42,7 @@ public class Constants {
     public static final byte[] CREATED_AT_BYTES = Bytes.toBytes(CREATED_AT);
     public static final byte[] UPDATED_AT_BYTES = Bytes.toBytes(UPDATED_AT);
     public static final byte[] UNIQUE_BYTES = Bytes.toBytes(UNIQUE);
+    public static final byte[] ELEMENT_ID_BYTES = Bytes.toBytes(ELEMENT_ID);
     public static final byte[] EDGE_ID_BYTES = Bytes.toBytes(EDGE_ID);
     public static final byte[] VERTEX_ID_BYTES = Bytes.toBytes(VERTEX_ID);
     public static final byte[] INDEX_STATE_BYTES = Bytes.toBytes(INDEX_STATE);

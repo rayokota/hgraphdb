@@ -589,20 +589,22 @@ public class HBaseGraph implements Graph {
         indices.put(indexKey, oldIndex);
     }
 
+    public LabelMetadata validateLabel(ElementType type, String label) {
+        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+        if (labelMetadata == null) {
+            throw new HBaseGraphNotValidException(type + " LABEL " + label + " does not exist");
+        }
+        return labelMetadata;
+    }
+
     public void connectLabels(String outVertexLabel, String edgeLabel, String inVertexLabel) {
         if (!config.getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
         refreshSchema();
-        if (labels.get(new LabelMetadata.Key(ElementType.VERTEX, outVertexLabel)) == null) {
-            throw new HBaseGraphException("Out vertex label " + outVertexLabel + " does not exist");
-        }
-        if (labels.get(new LabelMetadata.Key(ElementType.EDGE, edgeLabel)) == null) {
-            throw new HBaseGraphException("Edge label " + edgeLabel + " does not exist");
-        }
-        if (labels.get(new LabelMetadata.Key(ElementType.VERTEX, inVertexLabel)) == null) {
-            throw new HBaseGraphException("In vertex label " + inVertexLabel + " does not exist");
-        }
+        validateLabel(ElementType.VERTEX, outVertexLabel);
+        validateLabel(ElementType.EDGE, edgeLabel);
+        validateLabel(ElementType.VERTEX, inVertexLabel);
         long now = System.currentTimeMillis();
         LabelConnection labelConnection = new LabelConnection(outVertexLabel, edgeLabel, inVertexLabel, now);
         labelConnectionModel.createLabelConnection(labelConnection);
@@ -625,25 +627,16 @@ public class HBaseGraph implements Graph {
             throw new HBaseGraphException("Schema not enabled");
         }
         refreshSchema();
-        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+        LabelMetadata labelMetadata = validateLabel(type, label);
         labelMetadataModel.addPropertyMetadata(labelMetadata, propertyKey, propertyType);
         labelMetadata.propertyTypes().put(propertyKey, propertyType);
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
         if (!configuration().getUseSchema() || label == null || inVertex == null || outVertex == null) return;
-        LabelMetadata inVertexLabelMetadata = labels.get(new LabelMetadata.Key(ElementType.VERTEX, inVertex.label()));
-        LabelMetadata outVertexLabelMetadata = labels.get(new LabelMetadata.Key(ElementType.VERTEX, outVertex.label()));
-        if (inVertexLabelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label '" + inVertex.label() + "' has not been defined");
-        }
-        if (outVertexLabelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label '" + outVertex.label() + "' has not been defined");
-        }
-        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(ElementType.EDGE, label));
-        if (labelMetadata == null) {
-            throw new HBaseGraphNotValidException("Edge label '" + label + "' has not been defined");
-        }
+        LabelMetadata inVertexLabelMetadata = validateLabel(ElementType.VERTEX, inVertex.label());
+        LabelMetadata labelMetadata = validateLabel(ElementType.EDGE, label);
+        LabelMetadata outVertexLabelMetadata = validateLabel(ElementType.VERTEX, outVertex.label());
         LabelConnection labelConnection = new LabelConnection(outVertex.label(), label, inVertex.label(), null);
         if (!labelConnections.contains(labelConnection)) {
             throw new HBaseGraphNotValidException("Edge label '" + label + "' has not been connected with inVertex '" + inVertex.label()
@@ -654,10 +647,7 @@ public class HBaseGraph implements Graph {
 
     public void validateVertex(String label, Object id, Map<String, Object> properties) {
         if (!configuration().getUseSchema() || label == null) return;
-        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(ElementType.VERTEX, label));
-        if (labelMetadata == null) {
-            throw new HBaseGraphNotValidException("Vertex label '" + label + "' has not been defined");
-        }
+        LabelMetadata labelMetadata = validateLabel(ElementType.VERTEX, label);
         validateTypes(labelMetadata, id, properties);
     }
 
@@ -671,8 +661,8 @@ public class HBaseGraph implements Graph {
         });
     }
 
-    public void validateProperty(String label, ElementType type, String propertyKey, Object value) {
-        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+    public void validateProperty(ElementType type, String label, String propertyKey, Object value) {
+        LabelMetadata labelMetadata = validateLabel(type, label);
         validateProperty(labelMetadata, propertyKey, value);
     }
 

@@ -142,7 +142,7 @@ public abstract class HBaseElement implements Element {
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
 
-        graph.validateProperty(label, getElementType(), key, value);
+        graph.validateProperty(getElementType(), label, key, value);
 
         // delete from index model before setting property
         Object oldValue = null;

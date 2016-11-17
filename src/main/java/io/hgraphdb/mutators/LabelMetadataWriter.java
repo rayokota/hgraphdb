@@ -30,7 +30,7 @@ public class LabelMetadataWriter implements Creator {
                 ValueUtils.serialize(label.createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
                 ValueUtils.serialize(label.updatedAt()));
-        put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.VERTEX_ID_BYTES,
+        put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.ELEMENT_ID_BYTES,
                 ValueUtils.serialize(label.idType().getCode()));
         label.propertyTypes().entrySet().forEach(entry -> {
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()),
