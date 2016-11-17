@@ -26,6 +26,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String GRAPH_CLASS                     = "gremlin.graph";
         public static final String INSTANCE_TYPE                   = "gremlin.hbase.instanceType";
         public static final String GRAPH_NAMESPACE                 = "gremlin.hbase.namespace";
+        public static final String GRAPH_TABLE_PREFIX              = "gremlin.hbase.tablePrefix";
         public static final String CREATE_TABLES                   = "gremlin.hbase.createTables";
         public static final String EDGE_TABLE_TTL                  = "gremlin.hbase.edgeTableTTL";
         public static final String VERTEX_TABLE_TTL                = "gremlin.hbase.vertexTableTTL";
@@ -78,11 +79,25 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration setGraphNamespace(String name) {
         if (!isValidGraphName(name)) {
-            throw new IllegalArgumentException("Invalid graph name."
+            throw new IllegalArgumentException("Invalid graph namespace."
                     + " Only alphanumerics and underscores are allowed");
         }
 
         conf.setProperty(Keys.GRAPH_NAMESPACE, name);
+        return this;
+    }
+
+    public String getGraphTablePrefix() {
+        return conf.getString(Keys.GRAPH_TABLE_PREFIX, "");
+    }
+
+    public HBaseGraphConfiguration setGraphTablePrefix(String name) {
+        if (!isValidGraphName(name)) {
+            throw new IllegalArgumentException("Invalid graph table prefix."
+                    + " Only alphanumerics and underscores are allowed");
+        }
+
+        conf.setProperty(Keys.GRAPH_TABLE_PREFIX, name);
         return this;
     }
 
