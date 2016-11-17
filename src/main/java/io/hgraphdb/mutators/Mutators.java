@@ -37,7 +37,8 @@ public class Mutators {
     private static void create(Table table, Creator creator, Put put) {
         byte[] row = put.getRow();
         try {
-            boolean success = table.checkAndPut(row, Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES, null, put);
+            boolean success = table.checkAndPut(row, Constants.DEFAULT_FAMILY_BYTES,
+                    creator.getQualifierToCheck(), null, put);
             if (!success) {
                 HBaseElement element = (HBaseElement) creator.getElement();
                 if (element != null) {

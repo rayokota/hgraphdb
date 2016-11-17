@@ -8,12 +8,15 @@ public class LabelMetadata {
     private ValueType idType;
     private Map<String, ValueType> propertyTypes;
     protected Long createdAt;
+    protected Long updatedAt;
 
-    public LabelMetadata(ElementType type, String label, ValueType idType, Long createdAt, Map<String, ValueType> propertyTypes) {
+    public LabelMetadata(ElementType type, String label, ValueType idType,
+                         Long createdAt, Long updatedAt, Map<String, ValueType> propertyTypes) {
         this.key = new Key(type, label);
         this.idType = idType;
         this.propertyTypes = propertyTypes;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Key key() {
@@ -38,6 +41,14 @@ public class LabelMetadata {
 
     public Long createdAt() {
         return createdAt;
+    }
+
+    public Long updatedAt() {
+        return updatedAt;
+    }
+
+    public void updatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override

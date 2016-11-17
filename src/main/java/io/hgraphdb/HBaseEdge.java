@@ -42,6 +42,11 @@ public class HBaseEdge extends HBaseElement implements Edge {
     }
 
     @Override
+    public ElementType getElementType() {
+        return ElementType.EDGE;
+    }
+
+    @Override
     public void copyFrom(HBaseElement element) {
         super.copyFrom(element);
         if (element instanceof HBaseEdge) {
@@ -110,16 +115,6 @@ public class HBaseEdge extends HBaseElement implements Edge {
     public <V> Property<V> property(final String key, final V value) {
         setProperty(key, value);
         return new HBaseProperty<>(graph, this, key, value);
-    }
-
-    @Override
-    public boolean hasIndex(OperationType op, String propertyKey) {
-        return graph.hasIndex(op, ElementType.EDGE, label, propertyKey);
-    }
-
-    @Override
-    public Iterator<IndexMetadata> getIndices(OperationType op) {
-        return graph.getIndices(op, ElementType.EDGE, label, getPropertyKeys());
     }
 
     @Override

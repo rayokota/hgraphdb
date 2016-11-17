@@ -49,6 +49,8 @@ public abstract class HBaseElement implements Element {
         this.propertiesFullyLoaded = propertiesFullyLoaded;
     }
 
+    public abstract ElementType getElementType();
+
     public Table getTable() {
         return getModel().getTable();
     }
@@ -140,6 +142,8 @@ public abstract class HBaseElement implements Element {
     public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(key, value);
 
+        graph.validateProperty(label, getElementType(), key, value);
+
         // delete from index model before setting property
         Object oldValue = null;
         boolean hasIndex = hasIndex(OperationType.WRITE, key);
@@ -201,9 +205,13 @@ public abstract class HBaseElement implements Element {
         this.updatedAt = updatedAt;
     }
 
-    public abstract boolean hasIndex(OperationType op, String propertyKey);
+    public boolean hasIndex(OperationType op, String propertyKey) {
+        return graph.hasIndex(op, getElementType(), label, propertyKey);
+    }
 
-    public abstract Iterator<IndexMetadata> getIndices(OperationType op);
+    public Iterator<IndexMetadata> getIndices(OperationType op) {
+        return graph.getIndices(op, getElementType(), label, getPropertyKeys());
+    }
 
     public abstract ElementModel getModel();
 

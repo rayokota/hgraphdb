@@ -47,6 +47,11 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                 .build();
     }
 
+    @Override
+    public ElementType getElementType() {
+        return ElementType.VERTEX;
+    }
+
     public Iterator<Edge> getEdgesFromCache(Tuple cacheKey) {
         if (!isCached()) return null;
         List<Edge> edges = edgeCache.getIfPresent(cacheKey);
@@ -164,16 +169,6 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     public Iterator<Vertex> vertices(final Direction direction, final String label, final String key,
                                 final Object inclusiveFromValue, final Object exclusiveToValue) {
         return graph.getEdgeIndexModel().vertices(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
-    }
-
-    @Override
-    public boolean hasIndex(OperationType op, String propertyKey) {
-        return graph.hasIndex(op, ElementType.VERTEX, label, propertyKey);
-    }
-
-    @Override
-    public Iterator<IndexMetadata> getIndices(OperationType op) {
-        return graph.getIndices(op, ElementType.VERTEX, label, getPropertyKeys());
     }
 
     @Override

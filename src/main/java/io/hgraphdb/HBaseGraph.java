@@ -613,10 +613,21 @@ public class HBaseGraph implements Graph {
         if (!config.getUseSchema()) {
             throw new HBaseGraphException("Schema not enabled");
         }
+        long now = System.currentTimeMillis();
         LabelMetadata labelMetadata = new LabelMetadata(type, label, idType,
-                System.currentTimeMillis(), HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes));
+                now, now, HBaseGraphUtils.propertyKeysAndTypesToMap(propertyKeysAndTypes));
         labelMetadataModel.createLabelMetadata(labelMetadata);
         labels.put(labelMetadata.key(), labelMetadata);
+    }
+
+    public void updateLabel(ElementType type, String label, String propertyKey, ValueType propertyType) {
+        if (!config.getUseSchema()) {
+            throw new HBaseGraphException("Schema not enabled");
+        }
+        refreshSchema();
+        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+        labelMetadataModel.addPropertyMetadata(labelMetadata, propertyKey, propertyType);
+        labelMetadata.propertyTypes().put(propertyKey, propertyType);
     }
 
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
@@ -655,19 +666,27 @@ public class HBaseGraph implements Graph {
         if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
             throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
-        Map<String, ValueType> propertyTypes = labelMetadata.propertyTypes();
         properties.entrySet().stream().forEach(entry -> {
-            String propertyName = entry.getKey();
-            if (!Graph.Hidden.isHidden(propertyName)) {
-                ValueType propertyType = propertyTypes.get(entry.getKey());
-                if (propertyType == null) {
-                    throw new HBaseGraphNotValidException("Property '" + propertyName + "' has not been defined");
-                }
-                if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(entry.getValue())) {
-                    throw new HBaseGraphNotValidException("Property '" + propertyName + "' not of type " + propertyType);
-                }
-            }
+            validateProperty(labelMetadata, entry.getKey(), entry.getValue());
         });
+    }
+
+    public void validateProperty(String label, ElementType type, String propertyKey, Object value) {
+        LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
+        validateProperty(labelMetadata, propertyKey, value);
+    }
+
+    private void validateProperty(LabelMetadata labelMetadata, String propertyKey, Object value) {
+        Map<String, ValueType> propertyTypes = labelMetadata.propertyTypes();
+        if (!Graph.Hidden.isHidden(propertyKey)) {
+            ValueType propertyType = propertyTypes.get(propertyKey);
+            if (propertyType == null) {
+                throw new HBaseGraphNotValidException("Property '" + propertyKey + "' has not been defined");
+            }
+            if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(value)) {
+                throw new HBaseGraphNotValidException("Property '" + propertyKey + "' not of type " + propertyType);
+            }
+        }
     }
 
     @Override

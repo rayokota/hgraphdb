@@ -62,6 +62,29 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     }
 
     @Test
+    public void testVertexLabelAddProperty() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createLabel(ElementType.VERTEX, "b", ValueType.LONG, "key2", ValueType.LONG);
+
+        Vertex v1 = graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
+
+        Iterator<Vertex> it = graph.allVertices("b", "key2", 11L);
+        assertEquals(1, count(it));
+
+        try {
+            v1.property("key3", "hi");
+        } catch (HBaseGraphNotValidException e) {
+        }
+
+        graph.updateLabel(ElementType.VERTEX, "b", "key3", ValueType.STRING);
+        v1.property("key3", "hi");
+
+        it = graph.allVertices("b", "key2", 11L);
+        assertEquals(1, count(it));
+    }
+
+    @Test
     public void testEdgeLabel() {
         assertEquals(0, count(graph.vertices()));
 

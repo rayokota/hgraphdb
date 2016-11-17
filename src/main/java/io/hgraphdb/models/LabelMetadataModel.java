@@ -35,6 +35,11 @@ public class LabelMetadataModel extends BaseModel {
         Mutators.write(table, writer);
     }
 
+    public void addPropertyMetadata(LabelMetadata label, String propertyKey, ValueType propertyType) {
+        Creator creator = new PropertyMetadataWriter(graph, label, propertyKey, propertyType);
+        Mutators.create(table, creator);
+    }
+
     public LabelMetadata label(LabelMetadata.Key labelKey) {
         final LabelMetadataReader parser = new LabelMetadataReader(graph);
         Get get = new Get(serialize(labelKey));
@@ -76,6 +81,7 @@ public class LabelMetadataModel extends BaseModel {
 
         ValueType idType = null;
         Long createdAt = null;
+        Long updatedAt = null;
         Map<String, ValueType> props = new HashMap<>();
         for (Cell cell : result.listCells()) {
             String key = Bytes.toString(CellUtil.cloneQualifier(cell));
@@ -86,8 +92,10 @@ public class LabelMetadataModel extends BaseModel {
                 idType = ValueType.valueOf(((Byte)ValueUtils.deserialize(CellUtil.cloneValue(cell))).intValue());
             } else if (key.equals(Constants.CREATED_AT)) {
                 createdAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));
+            } else if (key.equals(Constants.UPDATED_AT)) {
+                updatedAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             }
         }
-        return new LabelMetadata(type, label, idType, createdAt, props);
+        return new LabelMetadata(type, label, idType, createdAt, updatedAt, props);
     }
 }
