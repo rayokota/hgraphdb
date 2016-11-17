@@ -88,9 +88,9 @@ An index can also be specified as a unique index.  For a vertex index, this mean
 
 By default HGraphDB does not use a schema.  Schema management can be enabled by calling `HBaseGraphConfiguration.useSchema(true)`.  Once schema management is enabled, the schema for vertex and edge labels can be defined.
 
-		graph.createLabel("author", /* id */ ValueType.STRING, "age", ValueType.INT);
-		graph.createLabel("book", /* id */ ValueType.STRING, "publisher", ValueType.STRING);
-		graph.createLabel("writes", /* id */ ValueType.STRING, "since", ValueType.DATE);   
+		graph.createLabel(ElementType.VERTEX, "author", /* id */ ValueType.STRING, "age", ValueType.INT);
+		graph.createLabel(ElementType.VERTEX, "book", /* id */ ValueType.STRING, "publisher", ValueType.STRING);
+		graph.createLabel(ElementType.EDGE, "writes", /* id */ ValueType.STRING, "since", ValueType.DATE);   
 	
 Edge labels must be explicitly connected to vertex labels before edges are added to the graph.
 
