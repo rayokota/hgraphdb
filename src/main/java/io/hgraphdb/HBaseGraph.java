@@ -486,6 +486,9 @@ public class HBaseGraph implements Graph {
     }
 
     public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate) {
+        if (configuration().getUseSchema()) {
+            validateLabel(type, label);
+        }
         IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex != null && oldIndex.state() != State.DROPPED) {
@@ -528,6 +531,12 @@ public class HBaseGraph implements Graph {
     public IndexMetadata getIndex(OperationType op, ElementType type, String label, String propertyKey) {
         Iterator<IndexMetadata> indices = getIndices(op, type, label, propertyKey);
         return indices.hasNext() ? indices.next() : null;
+    }
+
+    public Iterator<IndexMetadata> getIndices(OperationType op, ElementType type) {
+        return indices.values().stream()
+                .filter(index -> isIndexActive(op, index)
+                        && index.type().equals(type)).iterator();
     }
 
     public Iterator<IndexMetadata> getIndices(OperationType op, ElementType type, String label, String... propertyKeys) {
@@ -637,6 +646,14 @@ public class HBaseGraph implements Graph {
         return labelMetadata;
     }
 
+    public Iterator<LabelMetadata> getLabels(ElementType type) {
+        return labels.values().stream().filter(label -> label.type().equals(type)).iterator();
+    }
+
+    public Iterator<LabelConnection> getLabelConnections() {
+        return labelConnections.iterator();
+    }
+
     public void validateEdge(String label, Object id, Map<String, Object> properties, Vertex inVertex, Vertex outVertex) {
         if (!configuration().getUseSchema() || label == null || inVertex == null || outVertex == null) return;
         LabelMetadata inVertexLabelMetadata = validateLabel(ElementType.VERTEX, inVertex.label());
@@ -697,6 +714,12 @@ public class HBaseGraph implements Graph {
         this.vertexModel.close(clear);
         this.vertexIndexModel.close(clear);
         this.indexMetadataModel.close(clear);
+        if (this.labelMetadataModel != null) {
+            this.labelMetadataModel.close(clear);
+        }
+        if (this.labelConnectionModel != null) {
+            this.labelConnectionModel.close(clear);
+        }
     }
 
     @VisibleForTesting

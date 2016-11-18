@@ -30,8 +30,6 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     public void testVertexLabel() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(ElementType.VERTEX, "a", "key1");
-
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
             fail("Vertex should be invalid");
@@ -39,6 +37,8 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         }
 
         graph.createLabel(ElementType.VERTEX, "b", ValueType.LONG, "key2", ValueType.LONG);
+
+        graph.createIndex(ElementType.VERTEX, "b", "key2");
 
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
@@ -125,8 +125,6 @@ public class HBaseSchemaTest extends HBaseGraphTest {
     public void testEdgeLabel() {
         assertEquals(0, count(graph.vertices()));
 
-        graph.createIndex(ElementType.VERTEX, "a", "key1");
-
         graph.createLabel(ElementType.VERTEX, "a", ValueType.STRING, "key0", ValueType.INT);
         graph.createLabel(ElementType.VERTEX, "b", ValueType.STRING, "key1", ValueType.INT);
         graph.createLabel(ElementType.VERTEX, "c", ValueType.STRING, "key2", ValueType.INT);
@@ -139,6 +137,8 @@ public class HBaseSchemaTest extends HBaseGraphTest {
 
         graph.createLabel(ElementType.EDGE, "knows", ValueType.STRING, "since", ValueType.DATE);
         graph.connectLabels("a", "knows", "b");
+
+        graph.createIndex(ElementType.EDGE, "knows", "since");
 
         try {
             graph.addEdge(v3, v4, "foo", "blah", 11);
