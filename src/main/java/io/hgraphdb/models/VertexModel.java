@@ -7,7 +7,6 @@ import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.mutators.VertexRemover;
 import io.hgraphdb.mutators.VertexWriter;
 import io.hgraphdb.readers.VertexReader;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;

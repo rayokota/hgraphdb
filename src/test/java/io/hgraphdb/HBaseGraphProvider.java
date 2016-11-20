@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class HBaseGraphProvider extends AbstractGraphProvider {
 
-    private static final boolean useMock = false;
+    private static final boolean useMock = true;
 
     private static final Set<Class> IMPLEMENTATIONS = new HashSet<Class>() {{
         add(HBaseEdge.class);

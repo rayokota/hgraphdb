@@ -10,7 +10,6 @@ import io.hgraphdb.mutators.EdgeWriter;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.EdgeReader;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
