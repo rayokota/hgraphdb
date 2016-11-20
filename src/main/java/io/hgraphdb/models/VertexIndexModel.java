@@ -79,26 +79,32 @@ public class VertexIndexModel extends BaseModel {
 
     private Iterator<Vertex> vertices(Scan scan, Predicate<HBaseVertex> filter) {
         final VertexIndexReader parser = new VertexIndexReader(graph);
-        ResultScanner scanner = null;
+        ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.<Result, Vertex>flatMap(scanner.iterator(), result -> {
-                HBaseVertex vertex = (HBaseVertex) parser.parse(result);
-                try {
-                    boolean isLazy = graph.isLazyLoading();
-                    if (!isLazy) vertex.load();
-                    boolean passesFilter = isLazy || filter.test(vertex);
-                    if (passesFilter) {
-                        return IteratorUtils.of(vertex);
-                    } else {
-                        vertex.removeStaleIndex();
-                        return Collections.emptyIterator();
-                    }
-                } catch (final HBaseGraphNotFoundException e) {
-                    vertex.removeStaleIndex();
-                    return Collections.emptyIterator();
-                }
-            });
+            return IteratorUtils.<Result, Vertex>flatMap(
+                    IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
+                    result -> {
+                        if (result == Result.EMPTY_RESULT) {
+                            scanner.close();
+                            return Collections.emptyIterator();
+                        }
+                        HBaseVertex vertex = (HBaseVertex) parser.parse(result);
+                        try {
+                            boolean isLazy = graph.isLazyLoading();
+                            if (!isLazy) vertex.load();
+                            boolean passesFilter = isLazy || filter.test(vertex);
+                            if (passesFilter) {
+                                return IteratorUtils.of(vertex);
+                            } else {
+                                vertex.removeStaleIndex();
+                                return Collections.emptyIterator();
+                            }
+                        } catch (final HBaseGraphNotFoundException e) {
+                            vertex.removeStaleIndex();
+                            return Collections.emptyIterator();
+                        }
+                    });
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

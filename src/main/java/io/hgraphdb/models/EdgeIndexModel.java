@@ -145,6 +145,7 @@ public class EdgeIndexModel extends BaseModel {
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
                             vertex.cacheEdges(cacheKey, cached);
+                            scanner.close();
                             return Collections.emptyIterator();
                         }
                         HBaseEdge edge = (HBaseEdge) parser.parse(result);

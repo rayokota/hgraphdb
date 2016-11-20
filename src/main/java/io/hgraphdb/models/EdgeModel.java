@@ -2,6 +2,7 @@ package io.hgraphdb.models;
 
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphUtils;
 import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.Creator;
 import io.hgraphdb.mutators.EdgeRemover;
@@ -49,7 +50,7 @@ public class EdgeModel extends ElementModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(new Scan());
-            return IteratorUtils.<Result, Edge>map(scanner.iterator(), parser::parse);
+            return HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -63,7 +64,7 @@ public class EdgeModel extends ElementModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.limit(IteratorUtils.<Result, Edge>map(scanner.iterator(), parser::parse), limit);
+            return IteratorUtils.limit(HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse), limit);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -79,7 +80,7 @@ public class EdgeModel extends ElementModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.<Result, Edge>map(scanner.iterator(), parser::parse);
+            return HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

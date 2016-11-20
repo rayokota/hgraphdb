@@ -5,6 +5,8 @@ import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.mock.MockConnection;
 import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
@@ -13,13 +15,17 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import static io.hgraphdb.Constants.DEFAULT_FAMILY;
 import static io.hgraphdb.HBaseGraphConfiguration.Keys.*;
@@ -202,5 +208,18 @@ public final class HBaseGraphUtils {
             props.put(keyStr, valueType);
         }
         return props;
+    }
+
+    public static <E> Iterator<E> mapWithCloseAtEnd(ResultScanner scanner, final Function<Result, E> function) {
+        return IteratorUtils.flatMap(
+                IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
+                result -> {
+                    if (result == Result.EMPTY_RESULT) {
+                        scanner.close();
+                        return Collections.emptyIterator();
+                    }
+                    return IteratorUtils.of(function.apply(result));
+                }
+        );
     }
 }

@@ -58,7 +58,7 @@ public class LabelMetadataModel extends BaseModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(new Scan());
-            return IteratorUtils.<Result, LabelMetadata>map(scanner.iterator(), parser::parse);
+            return HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

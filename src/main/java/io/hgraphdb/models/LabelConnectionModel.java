@@ -1,10 +1,6 @@
 package io.hgraphdb.models;
 
-import io.hgraphdb.Constants;
-import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphException;
-import io.hgraphdb.LabelConnection;
-import io.hgraphdb.ValueUtils;
+import io.hgraphdb.*;
 import io.hgraphdb.mutators.Creator;
 import io.hgraphdb.mutators.LabelConnectionRemover;
 import io.hgraphdb.mutators.LabelConnectionWriter;
@@ -60,7 +56,7 @@ public class LabelConnectionModel extends BaseModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(new Scan());
-            return IteratorUtils.<Result, LabelConnection>map(scanner.iterator(), parser::parse);
+            return HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
