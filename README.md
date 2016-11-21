@@ -94,7 +94,7 @@ By default HGraphDB does not use a schema.  Schema management can be enabled by 
 	
 Edge labels must be explicitly connected to vertex labels before edges are added to the graph.
 
-		graph.connectLabels("author", "writes", "books"); 
+		graph.connectLabels("author", "writes", "book"); 
 
 Additional properties can be added to labels at a later time; otherwise labels cannot be changed.
 
