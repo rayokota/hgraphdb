@@ -109,6 +109,10 @@ public final class HBaseGraphUtils {
         createTable(config, admin, Constants.VERTICES, config.getVertexTableTTL());
         createTable(config, admin, Constants.VERTEX_INDICES, config.getVertexTableTTL());
         createTable(config, admin, Constants.INDEX_METADATA, HConstants.FOREVER);
+        if (config.getUseSchema()) {
+            createTable(config, admin, Constants.LABEL_METADATA, HConstants.FOREVER);
+            createTable(config, admin, Constants.LABEL_CONNECTIONS, HConstants.FOREVER);
+        }
     }
 
     private static void createTable(HBaseGraphConfiguration config, Admin admin, String name, int ttl) throws IOException {
@@ -149,6 +153,10 @@ public final class HBaseGraphUtils {
         dropTable(config, admin, Constants.VERTICES);
         dropTable(config, admin, Constants.VERTEX_INDICES);
         dropTable(config, admin, Constants.INDEX_METADATA);
+        if (config.getUseSchema()) {
+            dropTable(config, admin, Constants.LABEL_METADATA);
+            dropTable(config, admin, Constants.LABEL_CONNECTIONS);
+        }
     }
 
     private static void dropTable(HBaseGraphConfiguration config, Admin admin, String name) throws IOException {
