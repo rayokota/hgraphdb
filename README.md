@@ -9,7 +9,7 @@ Releases of HGraphDB are deployed to Maven Central.
 		<dependency>
 		    <groupId>io.hgraphdb</groupId>
 		    <artifactId>hgraphdb</artifactId>
-		    <version>0.3.4</version>
+		    <version>0.3.5</version>
 		</dependency>
 
 ## Setup
@@ -115,7 +115,7 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.3.4
+        gremlin> :install io.hgraphdb hgraphdb 0.3.5
         gremlin> :plugin use io.hgraphdb
                 
 Then restart the Gremlin console and run the following:
