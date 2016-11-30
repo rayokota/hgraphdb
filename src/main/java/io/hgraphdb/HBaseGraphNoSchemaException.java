@@ -2,7 +2,7 @@ package io.hgraphdb;
 
 public class HBaseGraphNoSchemaException extends HBaseGraphException {
 
-    private static final long serialVersionUID = 8943901671174278248L;
+    private static final long serialVersionUID = 8959506127869603126L;
 
     public HBaseGraphNoSchemaException() {
     }

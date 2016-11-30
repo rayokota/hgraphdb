@@ -4,6 +4,8 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 
 public class HBaseGraphNotFoundException extends HBaseGraphException {
 
+    private static final long serialVersionUID = 562966954442798338L;
+
     private final HBaseElement element;
 
     public HBaseGraphNotFoundException(Element element) {
