@@ -1,6 +1,6 @@
 package io.hgraphdb;
 
-public class HBaseGraphNotUniqueException extends RuntimeException {
+public class HBaseGraphNotUniqueException extends HBaseGraphException {
 
     private static final long serialVersionUID = 8943901671174278248L;
 

@@ -1,6 +1,6 @@
 package io.hgraphdb;
 
-public class HBaseGraphNotValidException extends RuntimeException {
+public class HBaseGraphNotValidException extends HBaseGraphException {
 
     private static final long serialVersionUID = 8943901671174278248L;
 
