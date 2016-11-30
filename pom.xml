@@ -3,7 +3,7 @@
 
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>0.3.5-SNAPSHOT</version>
+    <version>0.3.5</version>
     <packaging>jar</packaging>
 
     <name>hgraphdb</name>
@@ -27,7 +27,7 @@
         <connection>scm:git:git://github.com:rayokota/hgraphdb.git</connection>
         <developerConnection>scm:git:git@github.com:rayokota/hgraphdb.git</developerConnection>
         <url>git@github.com:rayokota/hgraphdb.git</url>
-      <tag>hgraphdb-0.3.1</tag>
+      <tag>hgraphdb-0.3.5</tag>
   </scm>
 
     <properties>
