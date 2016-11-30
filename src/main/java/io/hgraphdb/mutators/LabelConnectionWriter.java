@@ -2,7 +2,7 @@ package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphNotUniqueException;
 import io.hgraphdb.LabelConnection;
 import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Put;
@@ -37,6 +37,6 @@ public class LabelConnectionWriter implements Creator {
 
     @Override
     public RuntimeException alreadyExists() {
-        return new HBaseGraphException(labelConnection.toString() + " already exists");
+        return new HBaseGraphNotUniqueException(labelConnection.toString() + " already exists");
     }
 }

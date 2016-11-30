@@ -2,7 +2,7 @@ package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphNotUniqueException;
 import io.hgraphdb.LabelMetadata;
 import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Put;
@@ -46,6 +46,6 @@ public class LabelMetadataWriter implements Creator {
 
     @Override
     public RuntimeException alreadyExists() {
-        return new HBaseGraphException(label.toString() + " already exists");
+        return new HBaseGraphNotUniqueException(label.toString() + " already exists");
     }
 }

@@ -2,7 +2,7 @@ package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphNotUniqueException;
 import io.hgraphdb.IndexMetadata;
 import io.hgraphdb.ValueUtils;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -43,7 +43,7 @@ public class IndexMetadataWriter implements Creator, Mutator {
 
     @Override
     public RuntimeException alreadyExists() {
-        return new HBaseGraphException(index.toString() + " already exists");
+        return new HBaseGraphNotUniqueException(index.toString() + " already exists");
     }
 
     @Override

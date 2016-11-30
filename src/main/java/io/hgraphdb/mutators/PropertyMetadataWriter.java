@@ -46,7 +46,7 @@ public class PropertyMetadataWriter implements Creator {
 
     @Override
     public RuntimeException alreadyExists() {
-        return new HBaseGraphException("Property '" + propertyKey + "' for "
+        return new HBaseGraphNotUniqueException("Property '" + propertyKey + "' for "
                 + label.toString() + " already exists");
     }
 }

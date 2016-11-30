@@ -492,7 +492,7 @@ public class HBaseGraph implements Graph {
         IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex != null && oldIndex.state() != State.DROPPED) {
-            throw new HBaseGraphException("Index for " + indexKey.toString() + " already exists");
+            throw new HBaseGraphNotUniqueException("Index for " + indexKey.toString() + " already exists");
         }
         long now = System.currentTimeMillis();
         IndexMetadata index = new IndexMetadata(type, label, propertyKey, isUnique, State.CREATED, now, now);
@@ -565,7 +565,7 @@ public class HBaseGraph implements Graph {
     private void updateIndex(IndexMetadata.Key indexKey, State newState) {
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex == null) {
-            throw new HBaseGraphException("Index for " + indexKey.toString() + " does not exists");
+            throw new HBaseGraphNotValidException("Index for " + indexKey.toString() + " does not exist");
         }
         State oldState = oldIndex.state();
 
@@ -595,7 +595,7 @@ public class HBaseGraph implements Graph {
                 break;
         }
         if (!doTransition) {
-            throw new HBaseGraphException("Invalid index state transition: " + oldState + " -> " + newState);
+            throw new HBaseGraphNotValidException("Invalid index state transition: " + oldState + " -> " + newState);
         }
         oldIndex.state(newState);
         oldIndex.updatedAt(System.currentTimeMillis());
@@ -605,7 +605,7 @@ public class HBaseGraph implements Graph {
 
     public void createLabel(ElementType type, String label, ValueType idType, Object... propertyKeysAndTypes) {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         long now = System.currentTimeMillis();
         LabelMetadata labelMetadata = new LabelMetadata(type, label, idType,
@@ -616,7 +616,7 @@ public class HBaseGraph implements Graph {
 
     public LabelMetadata getLabel(ElementType type, String label) {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         LabelMetadata labelMetadata = labels.get(new LabelMetadata.Key(type, label));
         if (labelMetadata == null) {
@@ -627,21 +627,21 @@ public class HBaseGraph implements Graph {
 
     public Iterator<LabelMetadata> getLabels(ElementType type) {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         return labels.values().stream().filter(label -> label.type().equals(type)).iterator();
     }
 
     public Iterator<LabelConnection> getLabelConnections() {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         return labelConnections.iterator();
     }
 
     public void updateLabel(ElementType type, String label, Object... propertyKeysAndTypes) {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         refreshSchema();
         LabelMetadata labelMetadata = getLabel(type, label);
@@ -652,7 +652,7 @@ public class HBaseGraph implements Graph {
 
     public void connectLabels(String outVertexLabel, String edgeLabel, String inVertexLabel) {
         if (!configuration().getUseSchema()) {
-            throw new HBaseGraphException("Schema not enabled");
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
         }
         refreshSchema();
         getLabel(ElementType.VERTEX, outVertexLabel);
