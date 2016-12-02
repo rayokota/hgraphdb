@@ -310,7 +310,11 @@ public class EdgeIndexModel extends BaseModel {
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, edge.label(), Order.ASCENDING);
-        ValueUtils.serialize(buffer, key.equals(Constants.CREATED_AT) ? ((HBaseEdge) edge).createdAt() : edge.value(key));
+        if (key.equals(Constants.CREATED_AT)) {
+            ValueUtils.serialize(buffer, ((HBaseEdge) edge).createdAt());
+        } else {
+            ValueUtils.serialize(buffer, edge.value(key));
+        }
         if (!isUnique) {
             ValueUtils.serialize(buffer, direction == Direction.IN ? outVertexId : inVertexId);
             ValueUtils.serialize(buffer, edge.id());

@@ -86,6 +86,7 @@ public class VertexModel extends ElementModel {
         ElementHelper.validateProperty(key, value);
         final VertexReader parser = new VertexReader(graph);
 
+        // This method will not work with counters
         byte[] val = ValueUtils.serialize(value);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(keyBytes, val);
@@ -107,7 +108,7 @@ public class VertexModel extends ElementModel {
         }
         final VertexReader parser = new VertexReader(graph);
 
-        byte[] val = ValueUtils.serialize(value);
+        byte[] val = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, key, value);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(label, keyBytes, val);
         ResultScanner scanner = null;
@@ -129,8 +130,8 @@ public class VertexModel extends ElementModel {
         }
         final VertexReader parser = new VertexReader(graph);
 
-        byte[] fromVal = ValueUtils.serialize(inclusiveFrom);
-        byte[] toVal = ValueUtils.serialize(exclusiveTo);
+        byte[] fromVal = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, key, inclusiveFrom);
+        byte[] toVal = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, key, exclusiveTo);
         final byte[] keyBytes = Bytes.toBytes(key);
         Scan scan = getPropertyScan(label, keyBytes, fromVal, toVal);
         ResultScanner scanner = null;

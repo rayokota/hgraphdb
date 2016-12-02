@@ -28,7 +28,7 @@ public class PropertyWriter implements Mutator {
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        byte[] bytes = ValueUtils.serialize(value);
+        byte[] bytes = ValueUtils.serializePropertyValue(graph, ((HBaseElement) element).getElementType(), element.label(), key, value);
         Put put = new Put(ValueUtils.serializeWithSalt(element.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key), bytes);
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,

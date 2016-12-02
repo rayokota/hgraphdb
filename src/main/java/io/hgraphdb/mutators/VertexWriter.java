@@ -1,6 +1,7 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.ElementType;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseVertex;
 import io.hgraphdb.ValueUtils;
@@ -29,8 +30,7 @@ public final class VertexWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        String label = vertex.label();
-        if (label == null) label = Vertex.DEFAULT_LABEL;
+        final String label = vertex.label() != null ? vertex.label() : Vertex.DEFAULT_LABEL;
         Put put = new Put(ValueUtils.serializeWithSalt(vertex.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.LABEL_BYTES,
                 ValueUtils.serialize(label));
@@ -40,7 +40,7 @@ public final class VertexWriter implements Creator {
                 ValueUtils.serialize(((HBaseVertex)vertex).updatedAt()));
         ((HBaseVertex) vertex).getProperties().entrySet().stream()
                 .forEach(entry -> {
-                    byte[] bytes = ValueUtils.serialize(entry.getValue());
+                    byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, entry.getKey(), entry.getValue());
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
                 });
 

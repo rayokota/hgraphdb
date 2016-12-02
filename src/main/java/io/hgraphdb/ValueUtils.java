@@ -5,11 +5,7 @@ import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.hadoop.hbase.util.Order;
-import org.apache.hadoop.hbase.util.OrderedBytes;
-import org.apache.hadoop.hbase.util.PositionedByteRange;
-import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
-import org.apache.hadoop.hbase.util.SimplePositionedMutableByteRange;
+import org.apache.hadoop.hbase.util.*;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -66,6 +62,15 @@ public final class ValueUtils {
         } else {
             throw new IllegalArgumentException("Unexpected data of type : " + o.getClass().getName());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T deserializePropertyValue(HBaseGraph graph, ElementType type, String label, String key, byte[] target) {
+        ValueType valueType = graph.getPropertyType(type, label, key);
+        if (valueType == ValueType.COUNTER) {
+            return (T) Long.valueOf(Bytes.toLong(target));
+        }
+        return deserialize(target);
     }
 
     @SuppressWarnings("unchecked")
@@ -156,6 +161,14 @@ public final class ValueUtils {
     public static <T> T deserializeWithSalt(PositionedByteRange buffer) {
         buffer.get();  // discard salt
         return deserialize(buffer);
+    }
+
+    public static byte[] serializePropertyValue(HBaseGraph graph, ElementType type, String label, String key, Object o) {
+        ValueType valueType = graph.getPropertyType(type, label, key);
+        if (valueType == ValueType.COUNTER) {
+            return Bytes.toBytes((Long) o);
+        }
+        return serialize(o);
     }
 
     public static byte[] serialize(Object o) {

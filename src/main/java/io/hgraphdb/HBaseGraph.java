@@ -695,21 +695,33 @@ public class HBaseGraph implements Graph {
 
     public void validateProperty(ElementType type, String label, String propertyKey, Object value) {
         if (!configuration().getUseSchema()) return;
-        LabelMetadata labelMetadata = getLabel(type, label);
-        validateProperty(labelMetadata, propertyKey, value);
+        validateProperty(getLabel(type, label), propertyKey, value);
     }
 
     private void validateProperty(LabelMetadata labelMetadata, String propertyKey, Object value) {
+        getPropertyType(labelMetadata, propertyKey, value, true);
+    }
+
+    public ValueType getPropertyType(ElementType type, String label, String propertyKey) {
+        if (!configuration().getUseSchema()) return null;
+        return getPropertyType(getLabel(type, label), propertyKey, null, false);
+    }
+
+    private ValueType getPropertyType(LabelMetadata labelMetadata, String propertyKey, Object value, boolean doValidate) {
         Map<String, ValueType> propertyTypes = labelMetadata.propertyTypes();
         if (!Graph.Hidden.isHidden(propertyKey)) {
             ValueType propertyType = propertyTypes.get(propertyKey);
-            if (propertyType == null) {
-                throw new HBaseGraphNotValidException("Property '" + propertyKey + "' has not been defined");
+            if (doValidate) {
+                if (propertyType == null) {
+                    throw new HBaseGraphNotValidException("Property '" + propertyKey + "' has not been defined");
+                }
+                if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(value)) {
+                    throw new HBaseGraphNotValidException("Property '" + propertyKey + "' not of type " + propertyType);
+                }
             }
-            if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(value)) {
-                throw new HBaseGraphNotValidException("Property '" + propertyKey + "' not of type " + propertyType);
-            }
+            return propertyType;
         }
+        return null;
     }
 
     @Override

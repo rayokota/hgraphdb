@@ -38,7 +38,8 @@ public enum ValueType {
     KRYO_SERIALIZABLE(17),
     SERIALIZABLE(18),
     UUID(19),
-    ANY(20);
+    ANY(20),
+    COUNTER(21);
 
     private final byte code;
 

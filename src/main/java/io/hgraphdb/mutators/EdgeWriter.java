@@ -1,6 +1,7 @@
 package io.hgraphdb.mutators;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.ElementType;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.ValueUtils;
@@ -29,8 +30,7 @@ public class EdgeWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        String label = edge.label();
-        if (label == null) label = Edge.DEFAULT_LABEL;
+        final String label = edge.label() != null ? edge.label() : Edge.DEFAULT_LABEL;
         Put put = new Put(ValueUtils.serializeWithSalt(edge.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.TO_BYTES,
                 ValueUtils.serialize(edge.inVertex().id()));
@@ -44,7 +44,7 @@ public class EdgeWriter implements Creator {
                 ValueUtils.serialize(((HBaseEdge)edge).updatedAt()));
         ((HBaseEdge) edge).getProperties().entrySet().stream()
                 .forEach(entry -> {
-                    byte[] bytes = ValueUtils.serialize(entry.getValue());
+                    byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.EDGE, label, entry.getKey(), entry.getValue());
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
                 });
         return IteratorUtils.of(put);

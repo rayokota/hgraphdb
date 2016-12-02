@@ -1,10 +1,6 @@
 package io.hgraphdb.readers;
 
-import io.hgraphdb.Constants;
-import io.hgraphdb.HBaseGraph;
-import io.hgraphdb.HBaseGraphNotFoundException;
-import io.hgraphdb.HBaseVertex;
-import io.hgraphdb.ValueUtils;
+import io.hgraphdb.*;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Result;
@@ -41,7 +37,7 @@ public class VertexReader extends ElementReader<Vertex> {
         for (Cell cell : result.listCells()) {
             String key = Bytes.toString(CellUtil.cloneQualifier(cell));
             if (!Graph.Hidden.isHidden(key)) {
-                Object value = ValueUtils.deserialize(CellUtil.cloneValue(cell));
+                Object value = ValueUtils.deserializePropertyValue(graph, ElementType.VERTEX, label, key, CellUtil.cloneValue(cell));
                 props.put(key, value);
             } else if (key.equals(Constants.LABEL)) {
                 label = ValueUtils.deserialize(CellUtil.cloneValue(cell));
