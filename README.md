@@ -111,9 +111,11 @@ One unique feature of HGraphDB is support for counters.  The use of counters req
        HBaseVertex v = (HBaseVertex) graph.addVertex(T.id, "Kierkegaard", T.label, "author");
        v.incrementProperty("bookCount", 1L);
 
+One caveat is that indices on counters are not supported.
+
 Counters can be used by clients to materialize the number of edges on a node, for example, which will be more efficient than retrieving all the edges in order to obtain the count.  In this case, whenever an edge is added or removed, the client would either increment or decrement the corresponding counter.
 
-Counter updates are atomic as they make use of the underlying support for counters in HBase.
+Counter updates are atomic as they make use of the underlying support for counters in HBase.  
 
 ## Using the Gremlin Console
 
