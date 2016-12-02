@@ -109,7 +109,7 @@ One unique feature of HGraphDB is support for counters.  The use of counters req
        graph.createLabel(ElementType.VERTEX, "author", ValueType.STRING, "bookCount", ValueType.COUNTER);
 
        HBaseVertex v = (HBaseVertex) graph.addVertex(T.id, "Kierkegaard", T.label, "author");
-       v1.incrementProperty("bookCount", 1L);
+       v.incrementProperty("bookCount", 1L);
 
 Counters can be used to materialize the number of edges on a node, for example, which will be more efficient than retrieving all the edges in order to obtain the count.
 
