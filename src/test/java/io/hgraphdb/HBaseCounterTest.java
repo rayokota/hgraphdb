@@ -46,6 +46,9 @@ public class HBaseCounterTest extends HBaseGraphTest {
 
         it = graph.allVertices("b", "key2", 10L);
         assertEquals(1, count(it));
+
+        Long i = (Long) v1.property("key2").value();
+        assertEquals(10L, i.longValue());
     }
 
     @Test
@@ -79,5 +82,8 @@ public class HBaseCounterTest extends HBaseGraphTest {
 
         it = v1.edges(Direction.OUT, "knows", "key4", 13L);
         assertEquals(1, count(it));
+
+        Long i = (Long) e.property("key4").value();
+        assertEquals(13L, i.longValue());
     }
 }
