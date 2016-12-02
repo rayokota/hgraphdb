@@ -102,6 +102,19 @@ Additional properties can be added to labels at a later time; otherwise labels c
 		
 Whenever vertices or edges are added to the graph, they will first be validated against the schema.    
 
+## Counters
+
+One unique feature of HGraphDB is support for counters.  The use of counters requires that schema management is enabled.
+
+       graph.createLabel(ElementType.VERTEX, "author", ValueType.STRING, "bookCount", ValueType.COUNTER);
+
+       HBaseVertex v = (HBaseVertex) graph.addVertex(T.id, "Kierkegaard", T.label, "author");
+       v1.incrementProperty("bookCount", 1L);
+
+Counters can be used to materialize the number of edges on a node, for example, which will be more efficient than retrieving all the edges in order to obtain the count.
+
+Counter updates are atomic as they make use of the underlying support for counters in HBase.
+
 ## Using the Gremlin Console
 
 One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
