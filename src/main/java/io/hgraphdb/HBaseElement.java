@@ -167,6 +167,18 @@ public abstract class HBaseElement implements Element {
         Mutators.write(getTable(), writer);
     }
 
+    public void incrementProperty(String key, long value) {
+        ElementHelper.validateProperty(key, value);
+
+        graph.validateProperty(getElementType(), label, key, value);
+
+        updatedAt(System.currentTimeMillis());
+
+        Mutator writer = getModel().incrementProperty(this, key, value);
+        long newValue = Mutators.increment(getTable(), writer, key);
+        getProperties().put(key, newValue);
+    }
+
     public <V> V removeProperty(String key) {
         V value = getProperty(key);
         if (value != null) {

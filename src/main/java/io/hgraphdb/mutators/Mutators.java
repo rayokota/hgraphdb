@@ -3,8 +3,11 @@ package io.hgraphdb.mutators;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseElement;
 import io.hgraphdb.HBaseGraphException;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -59,8 +62,18 @@ public class Mutators {
         write(table, batch);
     }
 
-    private static void write(Table table, List<Mutation> mutations) {
-        if (mutations.size() == 0) return;
+    public static long increment(Table table, Mutator writer, String key) {
+        List<Mutation> batch = new ArrayList<>();
+        writer.constructMutations().forEachRemaining(batch::add);
+        Object[] results = write(table, batch);
+        // Increment result is the first
+        Result result = (Result) results[0];
+        Cell cell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key));
+        return Bytes.toLong(CellUtil.cloneValue(cell));
+    }
+
+    private static Object[] write(Table table, List<Mutation> mutations) {
+        if (mutations.size() == 0) return new Object[0];
         Object[] results = new Object[mutations.size()];
         try {
             table.batch(mutations, results);
@@ -72,5 +85,6 @@ public class Mutators {
         } catch (IOException | InterruptedException e) {
             throw new HBaseGraphException(e);
         }
+        return results;
     }
 }

@@ -10,6 +10,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EdgeReader extends ElementReader<Edge> {
 
@@ -35,12 +36,11 @@ public class EdgeReader extends ElementReader<Edge> {
         String label = null;
         Long createdAt = null;
         Long updatedAt = null;
-        Map<String, Object> props = new HashMap<>();
+        Map<String, byte[]> rawProps = new HashMap<>();
         for (Cell cell : result.listCells()) {
             String key = Bytes.toString(CellUtil.cloneQualifier(cell));
             if (!Graph.Hidden.isHidden(key)) {
-                Object value = ValueUtils.deserializePropertyValue(graph, ElementType.EDGE, label, key, CellUtil.cloneValue(cell));
-                props.put(key, value);
+                rawProps.put(key, CellUtil.cloneValue(cell));
             } else if (key.equals(Constants.TO)) {
                 inVertexId = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             } else if (key.equals(Constants.FROM)) {
@@ -53,6 +53,9 @@ public class EdgeReader extends ElementReader<Edge> {
                 updatedAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             }
         }
+        final String labelStr = label;
+        Map<String, Object> props = rawProps.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                e -> ValueUtils.deserializePropertyValue(graph, ElementType.EDGE, labelStr, e.getKey(), e.getValue())));
         if (inVertexId != null && outVertexId != null && label != null) {
             HBaseEdge newEdge = new HBaseEdge(graph, edge.id(), label, createdAt, updatedAt, props,
                     graph.findOrCreateVertex(inVertexId),

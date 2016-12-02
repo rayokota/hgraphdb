@@ -4,6 +4,7 @@ import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
 import io.hgraphdb.ValueUtils;
+import io.hgraphdb.mutators.PropertyIncrementer;
 import io.hgraphdb.mutators.PropertyRemover;
 import io.hgraphdb.mutators.PropertyWriter;
 import io.hgraphdb.readers.ElementReader;
@@ -69,6 +70,17 @@ public abstract class ElementModel extends BaseModel {
      */
     public PropertyWriter writeProperty(Element element, String key, Object value) {
         return new PropertyWriter(graph, element, key, value);
+    }
+
+    /**
+     * Increment the given property in the property table.
+     *
+     * @param element The element
+     * @param key The property key
+     * @param value The amount to increment
+     */
+    public PropertyIncrementer incrementProperty(Element element, String key, long value) {
+        return new PropertyIncrementer(graph, element, key, value);
     }
 
     protected Scan getPropertyScan(String label) {

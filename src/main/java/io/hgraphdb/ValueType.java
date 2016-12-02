@@ -93,6 +93,8 @@ public enum ValueType {
                 return UUID;
             case 20:
                 return ANY;
+            case 21:
+                return COUNTER;
             default:
                 return null;
         }

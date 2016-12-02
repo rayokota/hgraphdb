@@ -10,6 +10,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class VertexReader extends ElementReader<Vertex> {
 
@@ -33,12 +34,11 @@ public class VertexReader extends ElementReader<Vertex> {
         String label = null;
         Long createdAt = null;
         Long updatedAt = null;
-        Map<String, Object> props = new HashMap<>();
+        Map<String, byte[]> rawProps = new HashMap<>();
         for (Cell cell : result.listCells()) {
             String key = Bytes.toString(CellUtil.cloneQualifier(cell));
             if (!Graph.Hidden.isHidden(key)) {
-                Object value = ValueUtils.deserializePropertyValue(graph, ElementType.VERTEX, label, key, CellUtil.cloneValue(cell));
-                props.put(key, value);
+                rawProps.put(key, CellUtil.cloneValue(cell));
             } else if (key.equals(Constants.LABEL)) {
                 label = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             } else if (key.equals(Constants.CREATED_AT)) {
@@ -47,6 +47,9 @@ public class VertexReader extends ElementReader<Vertex> {
                 updatedAt = ValueUtils.deserialize(CellUtil.cloneValue(cell));
             }
         }
+        final String labelStr = label;
+        Map<String, Object> props = rawProps.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                e -> ValueUtils.deserializePropertyValue(graph, ElementType.VERTEX, labelStr, e.getKey(), e.getValue())));
         HBaseVertex newVertex = new HBaseVertex(graph, vertex.id(), label, createdAt, updatedAt, props);
         ((HBaseVertex) vertex).copyFrom(newVertex);
     }

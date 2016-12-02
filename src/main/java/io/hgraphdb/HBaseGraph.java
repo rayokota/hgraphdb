@@ -488,6 +488,10 @@ public class HBaseGraph implements Graph {
     public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate) {
         if (configuration().getUseSchema()) {
             getLabel(type, label);
+            ValueType propertyType = validateProperty(type, label, propertyKey, null);
+            if (propertyType == ValueType.COUNTER) {
+                throw new HBaseGraphNotValidException("Index on COUNTER property '" + propertyKey + "' is not valid");
+            }
         }
         IndexMetadata.Key indexKey = new IndexMetadata.Key(type, label, propertyKey);
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
@@ -689,17 +693,13 @@ public class HBaseGraph implements Graph {
             throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
         properties.entrySet().stream().forEach(entry -> {
-            validateProperty(labelMetadata, entry.getKey(), entry.getValue());
+            getPropertyType(labelMetadata, entry.getKey(), entry.getValue(), true);
         });
     }
 
-    public void validateProperty(ElementType type, String label, String propertyKey, Object value) {
-        if (!configuration().getUseSchema()) return;
-        validateProperty(getLabel(type, label), propertyKey, value);
-    }
-
-    private void validateProperty(LabelMetadata labelMetadata, String propertyKey, Object value) {
-        getPropertyType(labelMetadata, propertyKey, value, true);
+    public ValueType validateProperty(ElementType type, String label, String propertyKey, Object value) {
+        if (!configuration().getUseSchema()) return null;
+        return getPropertyType(getLabel(type, label), propertyKey, value, true);
     }
 
     public ValueType getPropertyType(ElementType type, String label, String propertyKey) {
@@ -715,7 +715,10 @@ public class HBaseGraph implements Graph {
                 if (propertyType == null) {
                     throw new HBaseGraphNotValidException("Property '" + propertyKey + "' has not been defined");
                 }
-                if (propertyType != ValueType.ANY && propertyType != ValueUtils.getValueType(value)) {
+                ValueType valueType = ValueUtils.getValueType(value);
+                if (value != null && propertyType != ValueType.ANY
+                        && (!(propertyType == ValueType.COUNTER && valueType == ValueType.LONG))
+                        && (propertyType != valueType)) {
                     throw new HBaseGraphNotValidException("Property '" + propertyKey + "' not of type " + propertyType);
                 }
             }
