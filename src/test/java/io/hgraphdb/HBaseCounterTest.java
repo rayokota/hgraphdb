@@ -6,12 +6,10 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.util.Iterator;
 
 import static org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils.count;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class HBaseCounterTest extends HBaseGraphTest {
 

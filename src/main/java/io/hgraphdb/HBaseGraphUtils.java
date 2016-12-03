@@ -218,6 +218,7 @@ public final class HBaseGraphUtils {
         return props;
     }
 
+    @SuppressWarnings("unchecked")
     public static <E> Iterator<E> mapWithCloseAtEnd(ResultScanner scanner, final Function<Result, E> function) {
         return IteratorUtils.flatMap(
                 IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),

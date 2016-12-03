@@ -77,6 +77,7 @@ public class VertexIndexModel extends BaseModel {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private Iterator<Vertex> vertices(Scan scan, Predicate<HBaseVertex> filter) {
         final VertexIndexReader parser = new VertexIndexReader(graph);
         ResultScanner scanner;
