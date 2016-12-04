@@ -23,14 +23,14 @@ public final class HBaseGraphStepStrategy extends AbstractTraversalStrategy<Trav
     @Override
     public void apply(final Traversal.Admin<?, ?> traversal) {
         for (final GraphStep originalGraphStep : TraversalHelper.getStepsOfClass(GraphStep.class, traversal)) {
-            final HBaseGraphStep<?, ?> neo4jGraphStep = new HBaseGraphStep<>(originalGraphStep);
-            TraversalHelper.replaceStep(originalGraphStep, neo4jGraphStep, traversal);
-            Step<?, ?> currentStep = neo4jGraphStep.getNextStep();
+            final HBaseGraphStep<?, ?> hbaseGraphStep = new HBaseGraphStep<>(originalGraphStep);
+            TraversalHelper.replaceStep(originalGraphStep, hbaseGraphStep, traversal);
+            Step<?, ?> currentStep = hbaseGraphStep.getNextStep();
             while (currentStep instanceof HasStep || currentStep instanceof NoOpBarrierStep) {
                 if (currentStep instanceof HasStep) {
                     for (final HasContainer hasContainer : ((HasContainerHolder) currentStep).getHasContainers()) {
-                        if (!GraphStep.processHasContainerIds(neo4jGraphStep, hasContainer))
-                            neo4jGraphStep.addHasContainer(hasContainer);
+                        if (!GraphStep.processHasContainerIds(hbaseGraphStep, hasContainer))
+                            hbaseGraphStep.addHasContainer(hasContainer);
                     }
                     TraversalHelper.copyLabels(currentStep, currentStep.getPreviousStep(), false);
                     traversal.removeStep(currentStep);
