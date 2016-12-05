@@ -12,11 +12,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.filter.BinaryPrefixComparator;
-import org.apache.hadoop.hbase.filter.CompareFilter;
-import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.PrefixFilter;
-import org.apache.hadoop.hbase.filter.RowFilter;
+import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.*;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -132,6 +128,28 @@ public class EdgeIndexModel extends BaseModel {
         });
     }
 
+    public Iterator<Edge> edgesWithLimit(HBaseVertex vertex, Direction direction, String label,
+                                         String key, Object inclusiveFromValue, int limit) {
+        byte[] fromBytes = inclusiveFromValue != null ? ValueUtils.serialize(inclusiveFromValue) : new byte[0];
+        Tuple cacheKey = new Quintet<>(direction, label, key, ByteBuffer.wrap(fromBytes), limit);
+        Iterator<Edge> edges = vertex.getEdgesFromCache(cacheKey);
+        if (edges != null) {
+            return edges;
+        }
+        IndexMetadata index = graph.getIndex(OperationType.READ, ElementType.EDGE, label, key);
+        final boolean useIndex = !key.equals(Constants.CREATED_AT) && index != null;
+        if (useIndex) {
+            LOGGER.debug("Using edge index for ({}, {})", label, key);
+        } else {
+            throw new HBaseGraphNotValidException("Method edgesWithLimit requires an index be defined");
+        }
+        Scan scan = getEdgesScanWithLimit(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, limit);
+        return IteratorUtils.limit(performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
+            byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
+            return Bytes.compareTo(propValueBytes, fromBytes) >= 0;
+        }), limit);
+    }
+
     @SuppressWarnings("unchecked")
     private Iterator<Edge> performEdgesScan(HBaseVertex vertex, Scan scan, Tuple cacheKey,
                                             boolean useIndex, Predicate<HBaseEdge> filter) {
@@ -152,7 +170,7 @@ public class EdgeIndexModel extends BaseModel {
                         try {
                             boolean isLazy = graph.isLazyLoading();
                             if (!isLazy) edge.load();
-                            boolean passesFilter = (isLazy && useIndex) || filter.test(edge);
+                            boolean passesFilter = (isLazy && useIndex) || filter == null || filter.test(edge);
                             if (passesFilter) {
                                 cached.add(edge);
                                 return IteratorUtils.of(edge);
@@ -185,6 +203,12 @@ public class EdgeIndexModel extends BaseModel {
                 inclusiveFromEdgeValue, exclusiveToEdgeValue), transformEdge(vertex));
     }
 
+    public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
+                                              String edgeKey, Object inclusiveFromEdgeValue, int limit) {
+        return IteratorUtils.flatMap(edges(vertex, direction, label, edgeKey,
+                inclusiveFromEdgeValue, limit), transformEdge(vertex));
+    }
+
     private Function<Edge, Iterator<Vertex>> transformEdge(HBaseVertex vertex) {
         return edge -> {
             Object inVertexId = edge.inVertex().id();
@@ -205,22 +229,26 @@ public class EdgeIndexModel extends BaseModel {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
         Scan scan;
+        PrefixFilter prefixFilter;
         if (direction == Direction.BOTH) {
             byte[] startRow = serializeForRead(vertex, null, null);
             byte[] prefix = serializeForRead(vertex, null, null);
             scan = new Scan(startRow);
-            scan.setFilter(new PrefixFilter(prefix));
+            prefixFilter = new PrefixFilter(prefix);
         } else {
             byte[] startRow = serializeForRead(vertex, direction, null);
             scan = new Scan(startRow);
-            scan.setFilter(new PrefixFilter(startRow));
+            prefixFilter = new PrefixFilter(startRow);
         }
 
-        applyEdgeLabelsRowFilter(scan, vertex, direction, key, labels);
+        FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+        filterList.addFilter(prefixFilter);
+        filterList.addFilter(applyEdgeLabelsRowFilter(scan, vertex, direction, key, labels));
+        scan.setFilter(filterList);
         return scan;
     }
 
-    private void applyEdgeLabelsRowFilter(Scan scan, Vertex vertex, Direction direction, String key, String... labels) {
+    private FilterList applyEdgeLabelsRowFilter(Scan scan, Vertex vertex, Direction direction, String key, String... labels) {
         FilterList rowFilters = new FilterList(FilterList.Operator.MUST_PASS_ONE);
         if (labels.length > 0) {
             Arrays.stream(labels).forEach(label -> {
@@ -239,15 +267,7 @@ public class EdgeIndexModel extends BaseModel {
                 applyEdgeLabelRowFilter(rowFilters, vertex, direction, key, null);
             }
         }
-
-        if (scan.getFilter() != null) {
-            FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-            filterList.addFilter(scan.getFilter());
-            filterList.addFilter(rowFilters);
-            scan.setFilter(filterList);
-        } else {
-            scan.setFilter(rowFilters);
-        }
+        return rowFilters;
     }
 
     private void applyEdgeLabelRowFilter(FilterList filters, Vertex vertex, Direction direction, String key, String label) {
@@ -272,6 +292,16 @@ public class EdgeIndexModel extends BaseModel {
         byte[] startRow = serializeForRead(vertex, direction, isUnique, key, label, fromInclusiveValue);
         byte[] stopRow = serializeForRead(vertex, direction, isUnique, key, label, toExclusiveValue);
         return new Scan(startRow, stopRow);
+    }
+
+    private Scan getEdgesScanWithLimit(Vertex vertex, Direction direction, boolean isUnique, String key, String label,
+                                       Object fromInclusiveValue, int limit) {
+        LOGGER.trace("Executing Scan, type: {}, id: {}", "key-limit", vertex.id());
+
+        byte[] startRow = fromInclusiveValue != null ? serializeForRead(vertex, direction, isUnique, key, label, fromInclusiveValue) : new byte[0];
+        Scan scan = startRow.length > 0 ? new Scan(startRow) : new Scan();
+        scan.setFilter(new PageFilter(limit));
+        return scan;
     }
 
     public byte[] serializeForRead(Vertex vertex, Direction direction, String label) {

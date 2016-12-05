@@ -305,10 +305,6 @@ public class MockHTable implements HTableInterface {
                     familyKvs = familyKvs.subList(0, maxResults);
                 }
                 kvs.addAll(familyKvs);
-                // Check for early out optimization
-                if (filter != null && filter.filterAllRemaining()) {
-                    break;
-                }
             }
         }
         return new Result(kvs);
@@ -383,10 +379,6 @@ public class MockHTable implements HTableInterface {
                 if (maxResults >= 0 && kvs.size() > maxResults) {
                     kvs = kvs.subList(0, maxResults);
                 }
-                // Check for early out optimization
-                if (filter != null && filter.filterAllRemaining()) {
-                    break;
-                }
             } else {
                 kvs = new ArrayList<KeyValue>();
                 for (byte[] family : scan.getFamilyMap().keySet()) {
@@ -420,10 +412,6 @@ public class MockHTable implements HTableInterface {
                         familyKvs = familyKvs.subList(0, maxResults);
                     }
                     kvs.addAll(familyKvs);
-                    // Check for early out optimization
-                    if (filter != null && filter.filterAllRemaining()) {
-                        break;
-                    }
                 }
             }
             if (!kvs.isEmpty()) {

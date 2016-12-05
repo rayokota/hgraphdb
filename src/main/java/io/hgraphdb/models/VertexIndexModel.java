@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.*;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -77,6 +78,14 @@ public class VertexIndexModel extends BaseModel {
         });
     }
 
+    public Iterator<Vertex> verticesWithLimit(String label, boolean isUnique, String key, Object inclusiveFrom, int limit) {
+        byte[] fromBytes = inclusiveFrom != null ? ValueUtils.serialize(inclusiveFrom) : new byte[0];
+        return IteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, inclusiveFrom, limit), vertex -> {
+            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
+            return Bytes.compareTo(propValueBytes, fromBytes) >= 0;
+        }), limit);
+    }
+
     @SuppressWarnings("unchecked")
     private Iterator<Vertex> vertices(Scan scan, Predicate<HBaseVertex> filter) {
         final VertexIndexReader parser = new VertexIndexReader(graph);
@@ -94,7 +103,7 @@ public class VertexIndexModel extends BaseModel {
                         try {
                             boolean isLazy = graph.isLazyLoading();
                             if (!isLazy) vertex.load();
-                            boolean passesFilter = isLazy || filter.test(vertex);
+                            boolean passesFilter = isLazy || filter == null || filter.test(vertex);
                             if (passesFilter) {
                                 return IteratorUtils.of(vertex);
                             } else {
@@ -122,6 +131,13 @@ public class VertexIndexModel extends BaseModel {
         byte[] startRow = serializeForRead(label, isUnique, key, inclusiveFrom);
         byte[] endRow = serializeForRead(label, isUnique, key, exclusiveTo);
         return new Scan(startRow, endRow);
+    }
+
+    private Scan getVertexIndexScanWithLimit(String label, boolean isUnique, String key, Object inclusiveFrom, int limit) {
+        byte[] startRow = inclusiveFrom != null ? serializeForRead(label, isUnique, key, inclusiveFrom) : new byte[0];
+        Scan scan = startRow.length > 0 ? new Scan(startRow) : new Scan();
+        scan.setFilter(new PageFilter(limit));
+        return scan;
     }
 
     public byte[] serializeForRead(String label, boolean isUnique, String key, Object value) {

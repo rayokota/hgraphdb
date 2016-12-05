@@ -2,6 +2,7 @@ package io.hgraphdb;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -88,6 +89,27 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(15), T.label, "a", "key1", 15);
 
         it = graph.allVertices("a", "key1", 11, 14);
+        assertEquals(3, count(it));
+    }
+
+    @Test
+    public void testVertexIndexLimit() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(ElementType.VERTEX, "a", "key1");
+        graph.addVertex(T.id, id(10), T.label, "a", "key1", 10);
+        graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
+        graph.addVertex(T.id, id(12), T.label, "a", "key1", 12);
+        graph.addVertex(T.id, id(13), T.label, "a", "key1", 13);
+        graph.addVertex(T.id, id(14), T.label, "a", "key1", 14);
+        graph.addVertex(T.id, id(15), T.label, "a", "key1", 15);
+        graph.addVertex(T.id, id(16), T.label, "a", "key1", 16);
+        graph.addVertex(T.id, id(17), T.label, "a", "key1", 17);
+
+        Iterator<Vertex> it = graph.allVerticesWithLimit("a", "key1", null, 3);
+        assertEquals(3, count(it));
+
+        it = graph.allVerticesWithLimit("a", "key1", 11, 3);
         assertEquals(3, count(it));
     }
 
@@ -196,6 +218,32 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v16, "key1", 16);
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 12, 16);
+        assertEquals(4, count(it));
+    }
+
+    @Test
+    public void testEdgeIndexLimit() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(ElementType.EDGE, "b", "key1");
+        Vertex v10 = graph.addVertex(T.id, id(10));
+        Vertex v11 = graph.addVertex(T.id, id(11));
+        Vertex v12 = graph.addVertex(T.id, id(12));
+        Vertex v13 = graph.addVertex(T.id, id(13));
+        Vertex v14 = graph.addVertex(T.id, id(14));
+        Vertex v15 = graph.addVertex(T.id, id(15));
+        Vertex v16 = graph.addVertex(T.id, id(16));
+        v10.addEdge("b", v11, "key1", 11);
+        v10.addEdge("b", v12, "key1", 12);
+        v10.addEdge("b", v13, "key1", 13);
+        v10.addEdge("b", v14, "key1", 14);
+        v10.addEdge("b", v15, "key1", 15);
+        v10.addEdge("b", v16, "key1", 16);
+
+        Iterator<Edge> it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 4);
+        assertEquals(4, count(it));
+
+        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4);
         assertEquals(4, count(it));
     }
 

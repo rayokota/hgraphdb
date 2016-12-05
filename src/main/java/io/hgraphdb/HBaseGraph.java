@@ -341,6 +341,10 @@ public class HBaseGraph implements Graph {
         return vertexModel.vertices(label, key, inclusiveFromValue, exclusiveToValue);
     }
 
+    public Iterator<Vertex> allVerticesWithLimit(String label, String key, Object inclusiveFromValue, int limit) {
+        return vertexModel.verticesWithLimit(label, key, inclusiveFromValue, limit);
+    }
+
     public Edge addEdge(Vertex outVertex, Vertex inVertex, String label, Object... keyValues) {
         return outVertex.addEdge(label, inVertex, keyValues);
     }

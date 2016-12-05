@@ -28,6 +28,7 @@ public final class HBaseVertexStep<E extends Element> extends VertexStep<E> impl
         originalVertexStep.getLabels().forEach(this::addLabel);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Iterator<E> flatMap(final Traverser.Admin<Vertex> traverser) {
         return Vertex.class.isAssignableFrom(getReturnClass()) ?
