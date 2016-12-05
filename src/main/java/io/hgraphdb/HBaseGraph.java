@@ -325,15 +325,11 @@ public class HBaseGraph implements Graph {
         return vertexModel.vertices(fromId, limit);
     }
 
-    public Iterator<Vertex> getVertices(String label) {
+    public Iterator<Vertex> verticesByLabel(String label) {
         return vertexModel.vertices(label);
     }
 
-    public Iterator<Vertex> getVertices(String key, Object value) {
-        return vertexModel.vertices(key, value);
-    }
-
-    public Iterator<Vertex> getVertices(String label, String key, Object value) {
+    public Iterator<Vertex> verticesByLabel(String label, String key, Object value) {
         return vertexModel.vertices(label, key, value);
     }
 
@@ -420,10 +416,6 @@ public class HBaseGraph implements Graph {
 
     public Iterator<Edge> allEdges(Object fromId, int limit) {
         return edgeModel.edges(fromId, limit);
-    }
-
-    public Iterator<Edge> getEdges(String key, Object value) {
-        return edgeModel.edges(key, value);
     }
 
     @Override

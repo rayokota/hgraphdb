@@ -72,7 +72,7 @@ Indices should be created before the relevant data is populated.  A future [enha
 Once an index is created and data has been populated, it can be used as follows:
 
 		// get persons named John
-		Iterator<Vertex> it = graph.getVertices("person", "name", "John");
+		Iterator<Vertex> it = graph.verticesByLabel("person", "name", "John");
 		...
 		// get persons first known by John between 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
 		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", 

@@ -92,15 +92,6 @@ public abstract class ElementModel extends BaseModel {
         return scan;
     }
 
-    protected Scan getPropertyScan(byte[] key, byte[] val) {
-        Scan scan = new Scan();
-        SingleColumnValueFilter valueFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,
-                key, CompareFilter.CompareOp.EQUAL, new BinaryComparator(val));
-        valueFilter.setFilterIfMissing(true);
-        scan.setFilter(valueFilter);
-        return scan;
-    }
-
     protected Scan getPropertyScan(String label, byte[] key, byte[] val) {
         Scan scan = new Scan();
         SingleColumnValueFilter labelFilter = new SingleColumnValueFilter(Constants.DEFAULT_FAMILY_BYTES,

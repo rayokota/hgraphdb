@@ -68,20 +68,4 @@ public class EdgeModel extends ElementModel {
             throw new HBaseGraphException(e);
         }
     }
-
-    public Iterator<Edge> edges(String key, Object value) {
-        ElementHelper.validateProperty(key, value);
-        final EdgeReader parser = new EdgeReader(graph);
-
-        byte[] val = ValueUtils.serialize(value);
-        final byte[] keyBytes = Bytes.toBytes(key);
-        Scan scan = getPropertyScan(keyBytes, val);
-        ResultScanner scanner = null;
-        try {
-            scanner = table.getScanner(scan);
-            return HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse);
-        } catch (IOException e) {
-            throw new HBaseGraphException(e);
-        }
-    }
 }

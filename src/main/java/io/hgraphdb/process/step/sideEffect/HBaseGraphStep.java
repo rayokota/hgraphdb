@@ -52,13 +52,13 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
             for (final HasContainer hasContainer : hasContainers) {
                 if (Compare.eq == hasContainer.getBiPredicate() && !hasContainer.getKey().equals(T.label.getAccessor())) {
                     if (graph.hasIndex(OperationType.READ, ElementType.VERTEX, label.get(), hasContainer.getKey())) {
-                        return IteratorUtils.stream(graph.getVertices(label.get(), hasContainer.getKey(), hasContainer.getValue()))
+                        return IteratorUtils.stream(graph.verticesByLabel(label.get(), hasContainer.getKey(), hasContainer.getValue()))
                                 .filter(vertex -> HasContainer.testAll(vertex, hasContainers)).iterator();
                     }
                 }
             }
             // find a vertex by label
-            return IteratorUtils.stream(graph.getVertices(label.get()))
+            return IteratorUtils.stream(graph.verticesByLabel(label.get()))
                     .filter(vertex -> HasContainer.testAll(vertex, hasContainers)).iterator();
         } else {
             // linear scan

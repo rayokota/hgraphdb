@@ -32,17 +32,17 @@ public class HBaseCounterTest extends HBaseGraphTest {
 
         HBaseVertex v1 = (HBaseVertex) graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
 
-        Iterator<Vertex> it = graph.getVertices("b", "key2", 11L);
+        Iterator<Vertex> it = graph.verticesByLabel("b", "key2", 11L);
         assertEquals(1, count(it));
 
         v1.incrementProperty("key2", 1L);
 
-        it = graph.getVertices("b", "key2", 12L);
+        it = graph.verticesByLabel("b", "key2", 12L);
         assertEquals(1, count(it));
 
         v1.incrementProperty("key2", -2L);
 
-        it = graph.getVertices("b", "key2", 10L);
+        it = graph.verticesByLabel("b", "key2", 10L);
         assertEquals(1, count(it));
 
         Long i = (Long) v1.property("key2").value();
