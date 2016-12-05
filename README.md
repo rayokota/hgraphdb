@@ -9,7 +9,7 @@ Releases of HGraphDB are deployed to Maven Central.
 		<dependency>
 		    <groupId>io.hgraphdb</groupId>
 		    <artifactId>hgraphdb</artifactId>
-		    <version>0.4.0</version>
+		    <version>0.4.1</version>
 		</dependency>
 
 ## Setup
@@ -96,7 +96,8 @@ Once an index is defined, results can be paginated.  HGraphDB supports [keyset p
 		it = graph.verticesWithLimit("person", "name", "John", pageSize + 1);
 		...
 		// get first page of persons most recently known by John
-		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", null, pageSize, /* reversed */ true);
+		Iterator<Edge> it = johnV.edgesWithLimit(Direction.OUT, "knows", "since", 
+			null, pageSize, /* reversed */ true);
 			 
 Also note that indices can be paginated in descending order by passing `reversed` as `true`.
 
@@ -146,7 +147,7 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.4.0
+        gremlin> :install io.hgraphdb hgraphdb 0.4.1
         gremlin> :plugin use io.hgraphdb
                 
 Then restart the Gremlin console and run the following:
