@@ -321,7 +321,7 @@ public class HBaseGraph implements Graph {
         return vertexModel.vertices();
     }
 
-    public Iterator<Vertex> getVertices(Object fromId, int limit) {
+    public Iterator<Vertex> allVertices(Object fromId, int limit) {
         return vertexModel.vertices(fromId, limit);
     }
 
@@ -418,7 +418,7 @@ public class HBaseGraph implements Graph {
         return edgeModel.edges();
     }
 
-    public Iterator<Edge> getEdges(Object fromId, int limit) {
+    public Iterator<Edge> allEdges(Object fromId, int limit) {
         return edgeModel.edges(fromId, limit);
     }
 
