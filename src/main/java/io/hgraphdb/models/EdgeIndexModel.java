@@ -18,8 +18,8 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
-import org.javatuples.*;
 import org.javatuples.Pair;
+import org.javatuples.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
