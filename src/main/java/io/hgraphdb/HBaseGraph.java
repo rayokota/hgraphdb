@@ -8,6 +8,7 @@ import io.hgraphdb.HBaseGraphConfiguration.InstanceType;
 import io.hgraphdb.IndexMetadata.State;
 import io.hgraphdb.models.*;
 import io.hgraphdb.process.strategy.optimization.HBaseGraphStepStrategy;
+import io.hgraphdb.process.strategy.optimization.HBaseVertexStepStrategy;
 import org.apache.commons.configuration.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
@@ -94,7 +95,11 @@ public class HBaseGraph implements Graph {
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraph.class);
 
     static {
-        TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class, TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(HBaseGraphStepStrategy.instance()));
+        TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class,
+                TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(
+                        HBaseGraphStepStrategy.instance(),
+                        HBaseVertexStepStrategy.instance()
+                ));
     }
 
     private final HBaseGraphConfiguration config;

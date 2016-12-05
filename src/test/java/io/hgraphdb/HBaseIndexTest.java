@@ -333,6 +333,24 @@ public class HBaseIndexTest extends HBaseGraphTest {
     }
 
     @Test
+    public void testGremlinEdgeIndex() {
+        assertEquals(0, count(graph.vertices()));
+
+        graph.createIndex(ElementType.EDGE, "b", "key1");
+        Vertex v10 = graph.addVertex(T.id, id(10));
+        Vertex v11 = graph.addVertex(T.id, id(11));
+        Vertex v12 = graph.addVertex(T.id, id(12));
+        Vertex v13 = graph.addVertex(T.id, id(13));
+        v10.addEdge("b", v11, "key1", 11);
+        v10.addEdge("b", v12, "key1", 11);
+        v10.addEdge("b", v13, "key1", 12);
+
+        GraphTraversalSource g = graph.traversal();
+        Iterator<Edge> it = g.V(id(10)).outE().has("b", "key1", 11);
+        assertEquals(2, count(it));
+    }
+
+    @Test
     public void testIndexExample() {
         assertEquals(0, count(graph.vertices()));
 
