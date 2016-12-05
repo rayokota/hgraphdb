@@ -19,11 +19,7 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -174,6 +170,34 @@ public final class HBaseGraphUtils {
 
     private static byte[] getEndKey(int regionCount) {
         return Bytes.toBytes((Integer.MAX_VALUE / regionCount * (regionCount - 1)));
+    }
+
+    static final byte[] MAX_BYTE_ARRAY = Bytes.createMaxByteArray(9);
+
+    public static byte[] createClosestRowBefore(byte[] row) {
+        if (row == null) {
+            throw new IllegalArgumentException("The passed row is empty");
+        }
+        if (Bytes.equals(row, HConstants.EMPTY_BYTE_ARRAY)) {
+            return MAX_BYTE_ARRAY;
+        }
+        if (row[row.length - 1] == 0) {
+            return Arrays.copyOf(row, row.length - 1);
+        } else {
+            byte[] closestFrontRow = Arrays.copyOf(row, row.length);
+            closestFrontRow[row.length - 1] = (byte) ((closestFrontRow[row.length - 1] & 0xff) - 1);
+            closestFrontRow = Bytes.add(closestFrontRow, MAX_BYTE_ARRAY);
+            return closestFrontRow;
+        }
+    }
+
+    public static byte[] createClosestRowAfter(byte[] row) {
+        if (row == null) {
+            throw new IllegalArgumentException("The passed row is empty");
+        }
+        byte[] closestBackRow = Arrays.copyOf(row, row.length + 1);
+        closestBackRow[closestBackRow.length - 1] = 0;
+        return closestBackRow;
     }
 
     public static Object generateIdIfNeeded(Object id) {

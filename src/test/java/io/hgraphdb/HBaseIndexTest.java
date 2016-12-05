@@ -106,11 +106,15 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(16), T.label, "a", "key1", 16);
         graph.addVertex(T.id, id(17), T.label, "a", "key1", 17);
 
-        Iterator<Vertex> it = graph.allVerticesWithLimit("a", "key1", null, 3);
+        Iterator<Vertex> it = graph.allVerticesWithLimit("a", "key1", null, 3, false);
         assertEquals(3, count(it));
 
-        it = graph.allVerticesWithLimit("a", "key1", 11, 3);
+        it = graph.allVerticesWithLimit("a", "key1", 11, 3, false);
         assertEquals(3, count(it));
+
+        it = graph.allVerticesWithLimit("a", "key1", 12, 3, true);
+        it.forEachRemaining(System.out::println);
+        //assertEquals(2, count(it));  // 11 and 10
     }
 
     @Test
@@ -233,6 +237,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Vertex v14 = graph.addVertex(T.id, id(14));
         Vertex v15 = graph.addVertex(T.id, id(15));
         Vertex v16 = graph.addVertex(T.id, id(16));
+        v10.addEdge("b", v11, "key1", 10);
         v10.addEdge("b", v11, "key1", 11);
         v10.addEdge("b", v12, "key1", 12);
         v10.addEdge("b", v13, "key1", 13);
@@ -240,11 +245,14 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v15, "key1", 15);
         v10.addEdge("b", v16, "key1", 16);
 
-        Iterator<Edge> it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 4);
+        Iterator<Edge> it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 4, false);
         assertEquals(4, count(it));
 
-        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4);
+        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, false);
         assertEquals(4, count(it));
+
+        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, true);
+        assertEquals(2, count(it));  // 11 and 10
     }
 
     @Test

@@ -143,12 +143,12 @@ public class VertexModel extends ElementModel {
         }
     }
 
-    public Iterator<Vertex> verticesWithLimit(String label, String key, Object inclusiveFrom, int limit) {
-        ElementHelper.validateProperty(key, inclusiveFrom != null ? inclusiveFrom : new Object());
+    public Iterator<Vertex> verticesWithLimit(String label, String key, Object from, int limit, boolean reversed) {
+        ElementHelper.validateProperty(key, from != null ? from : new Object());
         IndexMetadata index = graph.getIndex(OperationType.READ, ElementType.VERTEX, label, key);
         if (index != null) {
             LOGGER.debug("Using vertex index for ({}, {})", label, key);
-            return graph.getVertexIndexModel().verticesWithLimit(label, index.isUnique(), key, inclusiveFrom, limit);
+            return graph.getVertexIndexModel().verticesWithLimit(label, index.isUnique(), key, from, limit, reversed);
         }
         throw new HBaseGraphNotValidException("Method verticesWithLimit requires an index be defined");
     }

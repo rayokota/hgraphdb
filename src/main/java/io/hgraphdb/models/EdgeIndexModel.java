@@ -18,11 +18,8 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.javatuples.*;
 import org.javatuples.Pair;
-import org.javatuples.Quartet;
-import org.javatuples.Quintet;
-import org.javatuples.Tuple;
-import org.javatuples.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,9 +126,9 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Edge> edgesWithLimit(HBaseVertex vertex, Direction direction, String label,
-                                         String key, Object inclusiveFromValue, int limit) {
-        byte[] fromBytes = inclusiveFromValue != null ? ValueUtils.serialize(inclusiveFromValue) : new byte[0];
-        Tuple cacheKey = new Quintet<>(direction, label, key, ByteBuffer.wrap(fromBytes), limit);
+                                         String key, Object fromValue, int limit, boolean reversed) {
+        byte[] fromBytes = fromValue != null ? ValueUtils.serialize(fromValue) : new byte[0];
+        Tuple cacheKey = new Sextet<>(direction, label, key, ByteBuffer.wrap(fromBytes), limit, reversed);
         Iterator<Edge> edges = vertex.getEdgesFromCache(cacheKey);
         if (edges != null) {
             return edges;
@@ -143,10 +140,12 @@ public class EdgeIndexModel extends BaseModel {
         } else {
             throw new HBaseGraphNotValidException("Method edgesWithLimit requires an index be defined");
         }
-        Scan scan = getEdgesScanWithLimit(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, limit);
+        Scan scan = getEdgesScanWithLimit(vertex, direction, index.isUnique(), key, label, fromValue, limit, reversed);
         return IteratorUtils.limit(performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
+            if (fromBytes.length == 0) return true;
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
-            return Bytes.compareTo(propValueBytes, fromBytes) >= 0;
+            int compare = Bytes.compareTo(propValueBytes, fromBytes);
+            return reversed ? compare <= 0 : compare >= 0;
         }), limit);
     }
 
@@ -204,9 +203,9 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
-                                              String edgeKey, Object inclusiveFromEdgeValue, int limit) {
-        return IteratorUtils.flatMap(edges(vertex, direction, label, edgeKey,
-                inclusiveFromEdgeValue, limit), transformEdge(vertex));
+                                              String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
+        return IteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
+                fromEdgeValue, limit, reversed), transformEdge(vertex));
     }
 
     private Function<Edge, Iterator<Vertex>> transformEdge(HBaseVertex vertex) {
@@ -286,21 +285,28 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     private Scan getEdgesScan(Vertex vertex, Direction direction, boolean isUnique, String key, String label,
-                              Object fromInclusiveValue, Object toExclusiveValue) {
+                              Object inclusiveFromValue, Object exclusiveToValue) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key-range", vertex.id());
 
-        byte[] startRow = serializeForRead(vertex, direction, isUnique, key, label, fromInclusiveValue);
-        byte[] stopRow = serializeForRead(vertex, direction, isUnique, key, label, toExclusiveValue);
+        byte[] startRow = serializeForRead(vertex, direction, isUnique, key, label, inclusiveFromValue);
+        byte[] stopRow = serializeForRead(vertex, direction, isUnique, key, label, exclusiveToValue);
         return new Scan(startRow, stopRow);
     }
 
     private Scan getEdgesScanWithLimit(Vertex vertex, Direction direction, boolean isUnique, String key, String label,
-                                       Object fromInclusiveValue, int limit) {
+                                       Object fromValue, int limit, boolean reversed) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key-limit", vertex.id());
 
-        byte[] startRow = fromInclusiveValue != null ? serializeForRead(vertex, direction, isUnique, key, label, fromInclusiveValue) : new byte[0];
-        Scan scan = startRow.length > 0 ? new Scan(startRow) : new Scan();
-        scan.setFilter(new PageFilter(limit));
+        byte[] prefix = serializeForRead(vertex, direction, isUnique, key, label, null);
+        byte[] startRow = fromValue != null
+                ? serializeForRead(vertex, direction, isUnique, key, label, fromValue)
+                : (reversed ? HBaseGraphUtils.createClosestRowAfter(prefix) : prefix);
+        Scan scan = new Scan(startRow);
+        FilterList filterList = new FilterList();
+        filterList.addFilter(new PrefixFilter(prefix));
+        filterList.addFilter(new PageFilter(limit));
+        scan.setFilter(filterList);
+        scan.setReversed(reversed);
         return scan;
     }
 

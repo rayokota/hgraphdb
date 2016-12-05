@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.*;
@@ -78,11 +79,13 @@ public class VertexIndexModel extends BaseModel {
         });
     }
 
-    public Iterator<Vertex> verticesWithLimit(String label, boolean isUnique, String key, Object inclusiveFrom, int limit) {
-        byte[] fromBytes = inclusiveFrom != null ? ValueUtils.serialize(inclusiveFrom) : new byte[0];
-        return IteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, inclusiveFrom, limit), vertex -> {
+    public Iterator<Vertex> verticesWithLimit(String label, boolean isUnique, String key, Object from, int limit, boolean reversed) {
+        byte[] fromBytes = from != null ? ValueUtils.serialize(from) : new byte[0];
+        return IteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, from, limit, reversed), vertex -> {
+            if (fromBytes.length == 0) return true;
             byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
-            return Bytes.compareTo(propValueBytes, fromBytes) >= 0;
+            int compare = Bytes.compareTo(propValueBytes, fromBytes);
+            return reversed ? compare <= 0 : compare >= 0;
         }), limit);
     }
 
@@ -133,10 +136,17 @@ public class VertexIndexModel extends BaseModel {
         return new Scan(startRow, endRow);
     }
 
-    private Scan getVertexIndexScanWithLimit(String label, boolean isUnique, String key, Object inclusiveFrom, int limit) {
-        byte[] startRow = inclusiveFrom != null ? serializeForRead(label, isUnique, key, inclusiveFrom) : new byte[0];
-        Scan scan = startRow.length > 0 ? new Scan(startRow) : new Scan();
-        scan.setFilter(new PageFilter(limit));
+    private Scan getVertexIndexScanWithLimit(String label, boolean isUnique, String key, Object from, int limit, boolean reversed) {
+        byte[] prefix = serializeForRead(label, isUnique, key, null);
+        byte[] startRow = from != null
+                ? serializeForRead(label, isUnique, key, from)
+                : (reversed ? HBaseGraphUtils.createClosestRowAfter(prefix) : prefix);
+        Scan scan = new Scan(startRow);
+        FilterList filterList = new FilterList();
+        filterList.addFilter(new PrefixFilter(prefix));
+        filterList.addFilter(new PageFilter(limit));
+        scan.setFilter(filterList);
+        scan.setReversed(reversed);
         return scan;
     }
 
@@ -145,7 +155,9 @@ public class VertexIndexModel extends BaseModel {
         OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
-        ValueUtils.serialize(buffer, value);
+        if (value != null) {
+            ValueUtils.serialize(buffer, value);
+        }
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
         byte[] bytes = new byte[buffer.getRemaining()];
