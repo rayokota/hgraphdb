@@ -8,6 +8,7 @@ import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.EdgeIndexReader;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -101,8 +102,8 @@ public class EdgeIndexModel extends BaseModel {
         });
     }
 
-    public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String label,
-                                String key, Object inclusiveFromValue, Object exclusiveToValue) {
+    public Iterator<Edge> edgesInRange(HBaseVertex vertex, Direction direction, String label,
+                                       String key, Object inclusiveFromValue, Object exclusiveToValue) {
         byte[] fromBytes = ValueUtils.serialize(inclusiveFromValue);
         byte[] toBytes = ValueUtils.serialize(exclusiveToValue);
         Tuple cacheKey = new Quintet<>(direction, label, key, ByteBuffer.wrap(fromBytes), ByteBuffer.wrap(toBytes));
@@ -116,7 +117,7 @@ public class EdgeIndexModel extends BaseModel {
             LOGGER.debug("Using edge index for ({}, {})", label, key);
         }
         Scan scan = useIndex
-                ? getEdgesScan(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, exclusiveToValue)
+                ? getEdgesScanInRange(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, exclusiveToValue)
                 : getEdgesEndpointScan(vertex, direction, Constants.CREATED_AT, label);
         return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
@@ -127,7 +128,7 @@ public class EdgeIndexModel extends BaseModel {
 
     public Iterator<Edge> edgesWithLimit(HBaseVertex vertex, Direction direction, String label,
                                          String key, Object fromValue, int limit, boolean reversed) {
-        byte[] fromBytes = fromValue != null ? ValueUtils.serialize(fromValue) : new byte[0];
+        byte[] fromBytes = fromValue != null ? ValueUtils.serialize(fromValue) : HConstants.EMPTY_BYTE_ARRAY;
         Tuple cacheKey = new Sextet<>(direction, label, key, ByteBuffer.wrap(fromBytes), limit, reversed);
         Iterator<Edge> edges = vertex.getEdgesFromCache(cacheKey);
         if (edges != null) {
@@ -142,7 +143,7 @@ public class EdgeIndexModel extends BaseModel {
         }
         Scan scan = getEdgesScanWithLimit(vertex, direction, index.isUnique(), key, label, fromValue, limit, reversed);
         return IteratorUtils.limit(performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
-            if (fromBytes.length == 0) return true;
+            if (fromBytes == HConstants.EMPTY_BYTE_ARRAY) return true;
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             int compare = Bytes.compareTo(propValueBytes, fromBytes);
             return reversed ? compare <= 0 : compare >= 0;
@@ -196,9 +197,9 @@ public class EdgeIndexModel extends BaseModel {
         return IteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
     }
 
-    public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,
-                                     String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
-        return IteratorUtils.flatMap(edges(vertex, direction, label, edgeKey,
+    public Iterator<Vertex> verticesInRange(HBaseVertex vertex, Direction direction, String label,
+                                            String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
+        return IteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
                 inclusiveFromEdgeValue, exclusiveToEdgeValue), transformEdge(vertex));
     }
 
@@ -284,8 +285,8 @@ public class EdgeIndexModel extends BaseModel {
         return scan;
     }
 
-    private Scan getEdgesScan(Vertex vertex, Direction direction, boolean isUnique, String key, String label,
-                              Object inclusiveFromValue, Object exclusiveToValue) {
+    private Scan getEdgesScanInRange(Vertex vertex, Direction direction, boolean isUnique, String key, String label,
+                                     Object inclusiveFromValue, Object exclusiveToValue) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key-range", vertex.id());
 
         byte[] startRow = serializeForRead(vertex, direction, isUnique, key, label, inclusiveFromValue);
@@ -300,7 +301,8 @@ public class EdgeIndexModel extends BaseModel {
         byte[] prefix = serializeForRead(vertex, direction, isUnique, key, label, null);
         byte[] startRow = fromValue != null
                 ? serializeForRead(vertex, direction, isUnique, key, label, fromValue)
-                : (reversed ? HBaseGraphUtils.createClosestRowAfter(prefix) : prefix);
+                : prefix;
+        if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);
         Scan scan = new Scan(startRow);
         FilterList filterList = new FilterList();
         filterList.addFilter(new PrefixFilter(prefix));

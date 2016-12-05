@@ -152,9 +152,14 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         return graph.getEdgeIndexModel().edges(this, direction, label, key, value);
     }
 
-    public Iterator<Edge> edges(final Direction direction, final String label, final String key,
-                                final Object inclusiveFromValue, final Object exclusiveToValue) {
-        return graph.getEdgeIndexModel().edges(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
+    public Iterator<Edge> edgesInRange(final Direction direction, final String label, final String key,
+                                       final Object inclusiveFromValue, final Object exclusiveToValue) {
+        return graph.getEdgeIndexModel().edgesInRange(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
+    }
+
+    public Iterator<Edge> edgesWithLimit(final Direction direction, final String label, final String key,
+                                         final Object fromValue, final int limit) {
+        return edgesWithLimit(direction, label, key, fromValue, limit, false);
     }
 
     public Iterator<Edge> edgesWithLimit(final Direction direction, final String label, final String key,
@@ -171,13 +176,18 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         return graph.getEdgeIndexModel().vertices(this, direction, label, key, value);
     }
 
-    public Iterator<Vertex> vertices(final Direction direction, final String label, final String key,
-                                     final Object inclusiveFromValue, final Object exclusiveToValue) {
-        return graph.getEdgeIndexModel().vertices(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
+    public Iterator<Vertex> verticesInRange(final Direction direction, final String label, final String key,
+                                            final Object inclusiveFromValue, final Object exclusiveToValue) {
+        return graph.getEdgeIndexModel().verticesInRange(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
     }
 
     public Iterator<Vertex> verticesWithLimit(final Direction direction, final String label, final String key,
-                                              final Object fromValue, final int limit, boolean reversed) {
+                                              final Object fromValue, final int limit) {
+        return verticesWithLimit(direction, label, key, fromValue, limit, false);
+    }
+
+    public Iterator<Vertex> verticesWithLimit(final Direction direction, final String label, final String key,
+                                              final Object fromValue, final int limit, final boolean reversed) {
         return graph.getEdgeIndexModel().verticesWithLimit(this, direction, label, key, fromValue, limit, reversed);
     }
 

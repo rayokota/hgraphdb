@@ -72,7 +72,7 @@ Indices should be created before the relevant data is populated.  A future [enha
 Once an index is created and data has been populated, it can be used as follows:
 
 		// get persons named John
-		Iterator<Vertex> it = graph.allVertices("person", "name", "John");
+		Iterator<Vertex> it = graph.getVertices("person", "name", "John");
 		...
 		// get persons first known by John between 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
 		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", 
@@ -83,6 +83,22 @@ Note that the indices support range queries, where the start of the range is inc
 An index can also be specified as a unique index.  For a vertex index, this means only one vertex can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
 
 		graph.createIndex(ElementType.VERTEX, "person", "name", /* unique */ true);
+
+## Pagination
+
+Once an index is defined, results can be paginated.  HGraphDB supports [keyset pagination] (http://use-the-index-luke.com/no-offset), for both vertex and edge indices. 
+
+		// get first page of persons (note that null is passed as start key)
+		final int pageSize = 20;
+		Iterator<Vertex> it = graph.verticesWithLimit("person", "name", null, pageSize);
+		...
+		// get next page using start key of last person from previous page
+		it = graph.verticesWithLimit("person", "name", "John", pageSize + 1);
+		...
+		// get first page of persons most recently known by John
+		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", null, pageSize, /* reversed */ true);
+			 
+Also note that indices can be paginated in descending order by passing `reversed` as `true`.
 
 ## Schema Management
 

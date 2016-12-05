@@ -321,27 +321,31 @@ public class HBaseGraph implements Graph {
         return vertexModel.vertices();
     }
 
-    public Iterator<Vertex> allVertices(Object fromId, int limit) {
+    public Iterator<Vertex> getVertices(Object fromId, int limit) {
         return vertexModel.vertices(fromId, limit);
     }
 
-    public Iterator<Vertex> allVertices(String label) {
+    public Iterator<Vertex> getVertices(String label) {
         return vertexModel.vertices(label);
     }
 
-    public Iterator<Vertex> allVertices(String key, Object value) {
+    public Iterator<Vertex> getVertices(String key, Object value) {
         return vertexModel.vertices(key, value);
     }
 
-    public Iterator<Vertex> allVertices(String label, String key, Object value) {
+    public Iterator<Vertex> getVertices(String label, String key, Object value) {
         return vertexModel.vertices(label, key, value);
     }
 
-    public Iterator<Vertex> allVertices(String label, String key, Object inclusiveFromValue, Object exclusiveToValue) {
-        return vertexModel.vertices(label, key, inclusiveFromValue, exclusiveToValue);
+    public Iterator<Vertex> verticesInRange(String label, String key, Object inclusiveFromValue, Object exclusiveToValue) {
+        return vertexModel.verticesInRange(label, key, inclusiveFromValue, exclusiveToValue);
     }
 
-    public Iterator<Vertex> allVerticesWithLimit(String label, String key, Object fromValue, int limit, boolean reversed) {
+    public Iterator<Vertex> verticesWithLimit(String label, String key, Object fromValue, int limit) {
+        return verticesWithLimit(label, key, fromValue, limit, false);
+    }
+
+    public Iterator<Vertex> verticesWithLimit(String label, String key, Object fromValue, int limit, boolean reversed) {
         return vertexModel.verticesWithLimit(label, key, fromValue, limit, reversed);
     }
 
@@ -414,11 +418,11 @@ public class HBaseGraph implements Graph {
         return edgeModel.edges();
     }
 
-    public Iterator<Edge> allEdges(Object fromId, int limit) {
+    public Iterator<Edge> getEdges(Object fromId, int limit) {
         return edgeModel.edges(fromId, limit);
     }
 
-    public Iterator<Edge> allEdges(String key, Object value) {
+    public Iterator<Edge> getEdges(String key, Object value) {
         return edgeModel.edges(key, value);
     }
 

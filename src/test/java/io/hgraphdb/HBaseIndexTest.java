@@ -32,7 +32,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(3), T.label, "a", "key1", 1);
         graph.addVertex(T.id, id(4), T.label, "b", "key1", 1);
 
-        Iterator<Vertex> it = graph.allVertices("a", "key1", 1);
+        Iterator<Vertex> it = graph.getVertices("a", "key1", 1);
         assertEquals(2, count(it));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1");
@@ -42,7 +42,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(13), T.label, "a", "key1", 11);
         graph.addVertex(T.id, id(14), T.label, "b", "key1", 11);
 
-        it = graph.allVertices("a", "key1", 11);
+        it = graph.getVertices("a", "key1", 11);
         assertEquals(2, count(it));
     }
 
@@ -52,7 +52,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         graph.createIndex(ElementType.VERTEX, "a", "key1", true);
         graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
-        Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
+        Iterator<Vertex> it = graph.getVertices("a", "key1", 11);
         Vertex v = it.next();
         assertEquals(id(10), v.id());
 
@@ -61,7 +61,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
             fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException x) { }
 
-        it = graph.allVertices("a", "key1", 11);
+        it = graph.getVertices("a", "key1", 11);
         v = it.next();
         assertEquals(id(10), v.id());
     }
@@ -76,7 +76,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(4), T.label, "a", "key1", 4);
         graph.addVertex(T.id, id(5), T.label, "a", "key1", 5);
 
-        Iterator<Vertex> it = graph.allVertices("a", "key1", 1, 4);
+        Iterator<Vertex> it = graph.verticesInRange("a", "key1", 1, 4);
         assertEquals(3, count(it));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1");
@@ -87,7 +87,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(14), T.label, "a", "key1", 14);
         graph.addVertex(T.id, id(15), T.label, "a", "key1", 15);
 
-        it = graph.allVertices("a", "key1", 11, 14);
+        it = graph.verticesInRange("a", "key1", 11, 14);
         assertEquals(3, count(it));
     }
 
@@ -105,15 +105,17 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(16), T.label, "a", "key1", 16);
         graph.addVertex(T.id, id(17), T.label, "a", "key1", 17);
 
-        Iterator<Vertex> it = graph.allVerticesWithLimit("a", "key1", null, 3, false);
+        Iterator<Vertex> it = graph.verticesWithLimit("a", "key1", null, 3);
         assertEquals(3, count(it));
 
-        it = graph.allVerticesWithLimit("a", "key1", 11, 3, false);
+        it = graph.verticesWithLimit("a", "key1", 11, 3);
         assertEquals(3, count(it));
 
-        it = graph.allVerticesWithLimit("a", "key1", 12, 3, true);
-        it.forEachRemaining(System.out::println);
-        //assertEquals(2, count(it));  // 11 and 10
+        it = graph.verticesWithLimit("a", "key1", 12, 3, true);
+        assertEquals(3, count(it));
+
+        it = graph.verticesWithLimit("a", "key1", null, 20, true);
+        assertEquals(8, count(it));
     }
 
     @Test
@@ -128,7 +130,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(14), T.label, "a", "key1", 1);
         graph.addVertex(T.id, id(15), T.label, "a", "key1", 2);
 
-        Iterator<Vertex> it = graph.allVertices("a", "key1", -2, 2);
+        Iterator<Vertex> it = graph.verticesInRange("a", "key1", -2, 2);
         assertEquals(4, count(it));
     }
 
@@ -202,7 +204,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v0.addEdge("b", v5, "key1", 5);
         v0.addEdge("b", v6, "key1", 6);
 
-        Iterator<Edge> it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        Iterator<Edge> it = ((HBaseVertex) v0).edgesInRange(Direction.OUT, "b", "key1", 2, 6);
         assertEquals(4, count(it));
 
         graph.createIndex(ElementType.EDGE, "b", "key1");
@@ -220,7 +222,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v15, "key1", 15);
         v10.addEdge("b", v16, "key1", 16);
 
-        it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 12, 16);
+        it = ((HBaseVertex) v10).edgesInRange(Direction.OUT, "b", "key1", 12, 16);
         assertEquals(4, count(it));
     }
 
@@ -244,14 +246,17 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v15, "key1", 15);
         v10.addEdge("b", v16, "key1", 16);
 
-        Iterator<Edge> it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 4, false);
+        Iterator<Edge> it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 4);
         assertEquals(4, count(it));
 
-        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, false);
+        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4);
         assertEquals(4, count(it));
 
         it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, true);
-        assertEquals(2, count(it));  // 11 and 10
+        assertEquals(3, count(it));
+
+        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 10, true);
+        assertEquals(7, count(it));
     }
 
     @Test
@@ -273,7 +278,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v10.addEdge("b", v15, "key1", 1);
         v10.addEdge("b", v16, "key1", 2);
 
-        Iterator<Edge> it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", -2, 2);
+        Iterator<Edge> it = ((HBaseVertex) v10).edgesInRange(Direction.OUT, "b", "key1", -2, 2);
         assertEquals(4, count(it));
     }
 
@@ -296,12 +301,12 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v0.addEdge("b", v5, "key1", 5);
         v0.addEdge("b", v6, "key1", 6);
 
-        Iterator<Edge> it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        Iterator<Edge> it = ((HBaseVertex) v0).edgesInRange(Direction.OUT, "b", "key1", 2, 6);
         assertEquals(4, count(it));
 
         graph.removeEdge(edge);
 
-        it = ((HBaseVertex) v0).edges(Direction.OUT, "b", "key1", 2, 6);
+        it = ((HBaseVertex) v0).edgesInRange(Direction.OUT, "b", "key1", 2, 6);
         assertEquals(3, count(it));
     }
 
@@ -311,28 +316,28 @@ public class HBaseIndexTest extends HBaseGraphTest {
         graph.createIndex(ElementType.VERTEX, "a", "key1");
         Vertex v = graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
 
-        Iterator<Vertex> it = graph.allVertices("a", "key1", 11);
+        Iterator<Vertex> it = graph.getVertices("a", "key1", 11);
         assertEquals(1, count(it));
 
         VertexProperty<Integer> p = v.property("key1", 11);
 
-        it = graph.allVertices("a", "key1", 11);
+        it = graph.getVertices("a", "key1", 11);
         assertEquals(1, count(it));
-        it = graph.allVertices("a", "key1", 12);
+        it = graph.getVertices("a", "key1", 12);
         assertEquals(0, count(it));
 
         p = v.property("key1", 12);
 
-        it = graph.allVertices("a", "key1", 11);
+        it = graph.getVertices("a", "key1", 11);
         assertEquals(0, count(it));
-        it = graph.allVertices("a", "key1", 12);
+        it = graph.getVertices("a", "key1", 12);
         assertEquals(1, count(it));
 
         p.remove();
 
-        it = graph.allVertices("a", "key1", 11);
+        it = graph.getVertices("a", "key1", 11);
         assertEquals(0, count(it));
-        it = graph.allVertices("a", "key1", 12);
+        it = graph.getVertices("a", "key1", 12);
         assertEquals(0, count(it));
     }
 
@@ -424,10 +429,10 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v0.addEdge("knows", v4, "since", LocalDate.parse("2007-12-01"));
         v0.addEdge("knows", v5, "since", LocalDate.parse("2008-01-01"));
 
-        Iterator<Vertex> it = graph.allVertices("person", "name", "John");
+        Iterator<Vertex> it = graph.getVertices("person", "name", "John");
         HBaseVertex v = (HBaseVertex) it.next();
 
-        Iterator<Edge> it2 = v.edges(Direction.OUT, "knows", "since",
+        Iterator<Edge> it2 = v.edgesInRange(Direction.OUT, "knows", "since",
                 LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
         assertEquals(3, count(it2));
     }

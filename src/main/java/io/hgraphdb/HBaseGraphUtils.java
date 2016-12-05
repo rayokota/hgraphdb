@@ -172,32 +172,20 @@ public final class HBaseGraphUtils {
         return Bytes.toBytes((Integer.MAX_VALUE / regionCount * (regionCount - 1)));
     }
 
-    static final byte[] MAX_BYTE_ARRAY = Bytes.createMaxByteArray(9);
-
-    public static byte[] createClosestRowBefore(byte[] row) {
-        if (row == null) {
-            throw new IllegalArgumentException("The passed row is empty");
+    public static byte[] incrementBytes(final byte[] value) {
+        byte [] newValue = Arrays.copyOf(value, value.length);
+        for (int i = 0; i < newValue.length; i++) {
+            int val = newValue[newValue.length - i - 1] & 0x0ff;
+            int total = val + 1;
+            boolean carry = false;
+            if (total > 255) {
+                carry = true;
+                total %= 256;
+            }
+            newValue[newValue.length - i - 1] = (byte) total;
+            if (!carry) return newValue;
         }
-        if (Bytes.equals(row, HConstants.EMPTY_BYTE_ARRAY)) {
-            return MAX_BYTE_ARRAY;
-        }
-        if (row[row.length - 1] == 0) {
-            return Arrays.copyOf(row, row.length - 1);
-        } else {
-            byte[] closestFrontRow = Arrays.copyOf(row, row.length);
-            closestFrontRow[row.length - 1] = (byte) ((closestFrontRow[row.length - 1] & 0xff) - 1);
-            closestFrontRow = Bytes.add(closestFrontRow, MAX_BYTE_ARRAY);
-            return closestFrontRow;
-        }
-    }
-
-    public static byte[] createClosestRowAfter(byte[] row) {
-        if (row == null) {
-            throw new IllegalArgumentException("The passed row is empty");
-        }
-        byte[] closestBackRow = Arrays.copyOf(row, row.length + 1);
-        closestBackRow[closestBackRow.length - 1] = 0;
-        return closestBackRow;
+        return newValue;
     }
 
     public static Object generateIdIfNeeded(Object id) {

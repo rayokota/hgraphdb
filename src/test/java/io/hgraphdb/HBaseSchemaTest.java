@@ -60,7 +60,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
 
         graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
 
-        Iterator<Vertex> it = graph.allVertices("b", "key2", 11L);
+        Iterator<Vertex> it = graph.getVertices("b", "key2", 11L);
         assertEquals(1, count(it));
     }
 
@@ -72,7 +72,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
 
         Vertex v1 = graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
 
-        Iterator<Vertex> it = graph.allVertices("b", "key2", 11L);
+        Iterator<Vertex> it = graph.getVertices("b", "key2", 11L);
         assertEquals(1, count(it));
 
         try {
@@ -83,7 +83,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         graph.updateLabel(ElementType.VERTEX, "b", "key3", ValueType.STRING);
         v1.property("key3", "hi");
 
-        it = graph.allVertices("b", "key2", 11L);
+        it = graph.getVertices("b", "key2", 11L);
         assertEquals(1, count(it));
     }
 

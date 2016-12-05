@@ -8,6 +8,7 @@ import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.readers.VertexIndexReader;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -69,10 +70,10 @@ public class VertexIndexModel extends BaseModel {
         });
     }
 
-    public Iterator<Vertex> vertices(String label, boolean isUnique, String key, Object inclusiveFrom, Object exclusiveTo) {
+    public Iterator<Vertex> verticesInRange(String label, boolean isUnique, String key, Object inclusiveFrom, Object exclusiveTo) {
         byte[] fromBytes = ValueUtils.serialize(inclusiveFrom);
         byte[] toBytes = ValueUtils.serialize(exclusiveTo);
-        return vertices(getVertexIndexScan(label, isUnique, key, inclusiveFrom, exclusiveTo), vertex -> {
+        return vertices(getVertexIndexScanInRange(label, isUnique, key, inclusiveFrom, exclusiveTo), vertex -> {
             byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
                     && Bytes.compareTo(propValueBytes, toBytes) < 0;
@@ -80,9 +81,9 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> verticesWithLimit(String label, boolean isUnique, String key, Object from, int limit, boolean reversed) {
-        byte[] fromBytes = from != null ? ValueUtils.serialize(from) : new byte[0];
+        byte[] fromBytes = from != null ? ValueUtils.serialize(from) : HConstants.EMPTY_BYTE_ARRAY;
         return IteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, from, limit, reversed), vertex -> {
-            if (fromBytes.length == 0) return true;
+            if (fromBytes == HConstants.EMPTY_BYTE_ARRAY) return true;
             byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
             int compare = Bytes.compareTo(propValueBytes, fromBytes);
             return reversed ? compare <= 0 : compare >= 0;
@@ -130,7 +131,7 @@ public class VertexIndexModel extends BaseModel {
         return scan;
     }
 
-    private Scan getVertexIndexScan(String label, boolean isUnique, String key, Object inclusiveFrom, Object exclusiveTo) {
+    private Scan getVertexIndexScanInRange(String label, boolean isUnique, String key, Object inclusiveFrom, Object exclusiveTo) {
         byte[] startRow = serializeForRead(label, isUnique, key, inclusiveFrom);
         byte[] endRow = serializeForRead(label, isUnique, key, exclusiveTo);
         return new Scan(startRow, endRow);
@@ -140,7 +141,8 @@ public class VertexIndexModel extends BaseModel {
         byte[] prefix = serializeForRead(label, isUnique, key, null);
         byte[] startRow = from != null
                 ? serializeForRead(label, isUnique, key, from)
-                : (reversed ? HBaseGraphUtils.createClosestRowAfter(prefix) : prefix);
+                : prefix;
+        if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);
         Scan scan = new Scan(startRow);
         FilterList filterList = new FilterList();
         filterList.addFilter(new PrefixFilter(prefix));
