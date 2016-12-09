@@ -57,6 +57,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration(Configuration config) {
         conf = new PropertiesConfiguration();
+        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
         if (config != null) {
             config.getKeys().forEachRemaining(key ->

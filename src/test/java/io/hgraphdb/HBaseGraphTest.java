@@ -22,8 +22,8 @@ public class HBaseGraphTest {
         if (useMock) {
             return config.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
         } else {
-            config.setProperty("hbase.zookeeper.quorum", "127.0.0.1");
-            config.setProperty("zookeeper.znode.parent", "/hbase-unsecure");
+            config.set("hbase.zookeeper.quorum", "127.0.0.1");
+            config.set("zookeeper.znode.parent", "/hbase-unsecure");
             return config.setInstanceType(HBaseGraphConfiguration.InstanceType.DISTRIBUTED);
         }
     }
