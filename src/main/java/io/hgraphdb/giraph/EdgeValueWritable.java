@@ -54,11 +54,7 @@ public final class EdgeValueWritable implements Writable, Serializable {
             }
             writable.readFields(input);
             this.value = writable;
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Failed writable init", e);
-        } catch (IllegalAccessException e) {
-            throw new IOException("Failed writable init", e);
-        } catch (InstantiationException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw new IOException("Failed writable init", e);
         }
     }

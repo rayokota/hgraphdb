@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
-import io.hgraphdb.HBaseVertex;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.conf.GiraphConstants;
 //import org.apache.giraph.io.formats.FileOutputFormatUtil;
@@ -47,8 +46,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-
-import static org.apache.hadoop.hbase.mapreduce.TableInputFormat.INPUT_TABLE;
 
 /**
  * A base class for running internal tests on a vertex

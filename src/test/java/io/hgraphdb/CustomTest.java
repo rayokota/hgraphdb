@@ -105,8 +105,8 @@ public class CustomTest extends AbstractGremlinProcessTest {
         tryCommit(graph, getAssertVertexEdgeCounts(4, 4));
 
         graph.vertices().forEachRemaining(v -> {
-            assertEquals(1l, IteratorUtils.count(v.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(v.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(v.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(v.edges(Direction.IN)));
         });
 
         graph.edges().forEachRemaining(x -> {
@@ -124,25 +124,25 @@ public class CustomTest extends AbstractGremlinProcessTest {
             assertEquals(c, vc);
             assertEquals(d, vd);
 
-            assertEquals(1l, IteratorUtils.count(va.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(va.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(vb.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vb.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(vc.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vc.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(vd.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vd.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(va.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(va.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(vb.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vb.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(vc.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vc.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(vd.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vd.edges(Direction.OUT)));
 
             final Edge i = a.addEdge(graphProvider.convertLabel("hates"), b);
 
-            assertEquals(1l, IteratorUtils.count(va.edges(Direction.IN)));
-            assertEquals(2l, IteratorUtils.count(va.edges(Direction.OUT)));
-            assertEquals(2l, IteratorUtils.count(vb.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vb.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(vc.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vc.edges(Direction.OUT)));
-            assertEquals(1l, IteratorUtils.count(vd.edges(Direction.IN)));
-            assertEquals(1l, IteratorUtils.count(vd.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(va.edges(Direction.IN)));
+            assertEquals(2L, IteratorUtils.count(va.edges(Direction.OUT)));
+            assertEquals(2L, IteratorUtils.count(vb.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vb.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(vc.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vc.edges(Direction.OUT)));
+            assertEquals(1L, IteratorUtils.count(vd.edges(Direction.IN)));
+            assertEquals(1L, IteratorUtils.count(vd.edges(Direction.OUT)));
 
             for (Edge x : IteratorUtils.list(a.edges(Direction.OUT))) {
                 assertTrue(x.label().equals(graphProvider.convertLabel("knows")) || x.label().equals(graphProvider.convertLabel("hates")));

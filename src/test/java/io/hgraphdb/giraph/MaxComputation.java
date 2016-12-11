@@ -20,9 +20,6 @@ package io.hgraphdb.giraph;
 import io.hgraphdb.HBaseVertex;
 import org.apache.giraph.graph.Vertex;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Writable;
-import org.apache.tinkerpop.gremlin.structure.Property;
 
 import java.io.IOException;
 

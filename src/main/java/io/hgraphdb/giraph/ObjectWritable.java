@@ -36,6 +36,7 @@ public final class ObjectWritable<T> implements WritableComparable<ObjectWritabl
         return null == this.t ? NULL : this.t.toString();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void readFields(final DataInput input) throws IOException {
         Kryo kryo = new Kryo();

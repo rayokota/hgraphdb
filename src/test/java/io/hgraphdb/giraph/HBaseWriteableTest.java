@@ -42,14 +42,14 @@ public class HBaseWriteableTest {
 
     @Test
     public void testObjectWritable() throws Exception {
-        Object o = new Integer(1);
-        ObjectWritable writable = new ObjectWritable(o);
+        Integer o = 1;
+        ObjectWritable<Integer> writable = new ObjectWritable<Integer>(o);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(baos);
         writable.write(output);
         byte[] bytes = baos.toByteArray();
         writable.readFields(new DataInputStream(new ByteArrayInputStream(bytes)));
-        Object o2 = writable.get();
+        Integer o2 = writable.get();
         assertEquals(o, o2);
     }
 }
