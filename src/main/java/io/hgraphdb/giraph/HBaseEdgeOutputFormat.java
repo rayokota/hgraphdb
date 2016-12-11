@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("rawtypes")
 public abstract class HBaseEdgeOutputFormat
-        extends EdgeOutputFormat<ObjectWritable, VertexWritable, EdgeWritable> {
+        extends EdgeOutputFormat<ObjectWritable, VertexValueWritable, EdgeValueWritable> {
 
     /**
      * Constructor
@@ -40,7 +40,7 @@ public abstract class HBaseEdgeOutputFormat
      *
      */
     public abstract static class HBaseEdgeWriter
-            extends EdgeWriter<ObjectWritable, VertexWritable, EdgeWritable> {
+            extends EdgeWriter<ObjectWritable, VertexValueWritable, EdgeValueWritable> {
 
         /**
          * HBase graph
@@ -112,12 +112,12 @@ public abstract class HBaseEdgeOutputFormat
         @Override
         public void writeEdge(
                 ObjectWritable id,
-                VertexWritable vertex,
-                Edge<ObjectWritable, EdgeWritable> edge)
+                VertexValueWritable vertex,
+                Edge<ObjectWritable, EdgeValueWritable> edge)
                 throws IOException, InterruptedException {
-            HBaseVertex v = vertex.get();
+            HBaseVertex v = vertex.getVertex();
             v.setGraph(graph);
-            HBaseEdge e = edge.getValue().get();
+            HBaseEdge e = edge.getValue().getEdge();
             e.setGraph(graph);
             ((HBaseVertex) e.outVertex()).setGraph(graph);
             ((HBaseVertex) e.inVertex()).setGraph(graph);

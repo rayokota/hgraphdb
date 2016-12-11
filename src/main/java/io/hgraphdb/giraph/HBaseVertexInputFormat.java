@@ -35,13 +35,15 @@ import org.apache.log4j.Logger;
  */
 @SuppressWarnings("rawtypes")
 public class HBaseVertexInputFormat
-        extends VertexValueInputFormat<ObjectWritable, VertexWritable> {
+        extends VertexValueInputFormat<ObjectWritable, VertexValueWritable> {
+
+    public static final String VERTEX_INPUT_TABLE = "hbase.mapreduce.vertextable";
 
     /**
      * delegate HBase table input format
      */
     protected static final TableInputFormat BASE_FORMAT =
-            new TableInputFormat();
+            new TableInputFormat(VERTEX_INPUT_TABLE);
     /**
      * logger
      */
@@ -53,7 +55,7 @@ public class HBaseVertexInputFormat
     }
 
     @Override
-    public VertexValueReader<ObjectWritable, VertexWritable> createVertexValueReader(
+    public VertexValueReader<ObjectWritable, VertexValueWritable> createVertexValueReader(
             InputSplit split, TaskAttemptContext context) throws IOException {
         return new HBaseVertexReader(split, context);
     }
@@ -67,7 +69,7 @@ public class HBaseVertexInputFormat
      *
      */
     public static class HBaseVertexReader
-            extends VertexValueReader<ObjectWritable, VertexWritable> {
+            extends VertexValueReader<ObjectWritable, VertexValueWritable> {
 
         /**
          * Reader instance
@@ -78,11 +80,6 @@ public class HBaseVertexInputFormat
          * HBase graph
          */
         private final HBaseGraph graph;
-
-        /**
-         * HBase vertex
-         */
-        private HBaseVertex vertex;
 
         /**
          * Context passed to initialize
@@ -125,10 +122,7 @@ public class HBaseVertexInputFormat
          * @throws InterruptedException
          */
         public HBaseVertex getCurrentHBaseVertex() throws IOException, InterruptedException {
-            if (vertex == null) {
-                vertex = parseHBaseVertex(getRecordReader().getCurrentValue());
-            }
-            return vertex;
+            return parseHBaseVertex(getRecordReader().getCurrentValue());
         }
 
         private HBaseVertex parseHBaseVertex(Result result) {
@@ -150,9 +144,9 @@ public class HBaseVertexInputFormat
         }
 
         @Override
-        public VertexWritable getCurrentVertexValue()
+        public VertexValueWritable getCurrentVertexValue()
                 throws IOException, InterruptedException {
-            return new VertexWritable(getCurrentHBaseVertex());
+            return new VertexValueWritable(getCurrentHBaseVertex());
         }
 
         /**

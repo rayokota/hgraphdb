@@ -29,7 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 @SuppressWarnings("rawtypes")
 public abstract class HBaseVertexOutputFormat
-        extends VertexOutputFormat<ObjectWritable, VertexWritable, Writable> {
+        extends VertexOutputFormat<ObjectWritable, VertexValueWritable, Writable> {
 
     /**
      * Constructor
@@ -40,7 +40,7 @@ public abstract class HBaseVertexOutputFormat
      *
      */
     public abstract static class HBaseVertexWriter
-            extends VertexWriter<ObjectWritable, VertexWritable, Writable> {
+            extends VertexWriter<ObjectWritable, VertexValueWritable, Writable> {
 
         /**
          * HBase graph
@@ -111,9 +111,9 @@ public abstract class HBaseVertexOutputFormat
 
         @Override
         public void writeVertex(
-                Vertex<ObjectWritable, VertexWritable, Writable> vertex)
+                Vertex<ObjectWritable, VertexValueWritable, Writable> vertex)
                 throws IOException, InterruptedException {
-            HBaseVertex v = vertex.getValue().get();
+            HBaseVertex v = vertex.getValue().getVertex();
             v.setGraph(graph);
             writeVertex(getWriter(), v);
         }

@@ -58,6 +58,7 @@ public class MockHTable implements HTableInterface {
     private final TableName tableName;
     private final List<String> columnFamilies = new ArrayList<>();
     private final List<Class<? extends Service>> coprocessorClasses = new ArrayList<>();
+    private Configuration config;
 
     private NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data
             = new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR);
@@ -116,7 +117,12 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public Configuration getConfiguration() {
-        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
+        return config;
+    }
+
+    public MockHTable setConfiguration(Configuration config) {
+        this.config = config;
+        return this;
     }
 
     /**

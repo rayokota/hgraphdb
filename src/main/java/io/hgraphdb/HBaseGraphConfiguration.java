@@ -22,7 +22,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         MOCK
     }
 
-    static class Keys {
+    public static class Keys {
         public static final String GRAPH_CLASS                     = "gremlin.graph";
         public static final String INSTANCE_TYPE                   = "gremlin.hbase.instanceType";
         public static final String GRAPH_NAMESPACE                 = "gremlin.hbase.namespace";

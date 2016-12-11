@@ -1,9 +1,11 @@
 package io.hgraphdb.giraph;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.tinkerpop.gremlin.process.computer.MapReduce;
-import org.apache.tinkerpop.gremlin.structure.io.gryo.kryoshim.KryoShimServiceLoader;
 
 import java.io.*;
 
@@ -36,13 +38,19 @@ public final class ObjectWritable<T> implements WritableComparable<ObjectWritabl
 
     @Override
     public void readFields(final DataInput input) throws IOException {
+        Kryo kryo = new Kryo();
         final ByteArrayInputStream bais = new ByteArrayInputStream(WritableUtils.readCompressedByteArray(input));
-        this.t = KryoShimServiceLoader.readClassAndObject(bais);
+        this.t = (T) kryo.readClassAndObject(new Input(bais));
     }
 
     @Override
     public void write(final DataOutput output) throws IOException {
-        final byte serialized[] = KryoShimServiceLoader.writeClassAndObjectToBytes(this.t);
+        Kryo kryo = new Kryo();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Output out = new Output(baos);
+        kryo.writeClassAndObject(out, this.t);
+        out.close();
+        final byte[] serialized = baos.toByteArray();
         WritableUtils.writeCompressedByteArray(output, serialized);
     }
 

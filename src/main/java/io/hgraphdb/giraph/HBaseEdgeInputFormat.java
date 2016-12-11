@@ -36,14 +36,16 @@ import java.util.List;
  */
 @SuppressWarnings("rawtypes")
 public class HBaseEdgeInputFormat
-        extends EdgeInputFormat<ObjectWritable, EdgeWritable> {
+        extends EdgeInputFormat<ObjectWritable, EdgeValueWritable> {
 
+
+    public static final String EDGE_INPUT_TABLE = "hbase.mapreduce.edgetable";
 
     /**
      * delegate HBase table input format
      */
     protected static final TableInputFormat BASE_FORMAT =
-            new TableInputFormat();
+            new TableInputFormat(EDGE_INPUT_TABLE);
     /**
      * logger
      */
@@ -55,7 +57,7 @@ public class HBaseEdgeInputFormat
     }
 
     @Override
-    public EdgeReader<ObjectWritable, EdgeWritable> createEdgeReader(
+    public EdgeReader<ObjectWritable, EdgeValueWritable> createEdgeReader(
             InputSplit split, TaskAttemptContext context) throws IOException {
         return new HBaseEdgeReader(split, context);
     }
@@ -69,7 +71,7 @@ public class HBaseEdgeInputFormat
      *
      */
     public static class HBaseEdgeReader
-            extends EdgeReader<ObjectWritable, EdgeWritable> {
+            extends EdgeReader<ObjectWritable, EdgeValueWritable> {
 
         /**
          * Reader instance
@@ -80,11 +82,6 @@ public class HBaseEdgeInputFormat
          * HBase graph
          */
         private final HBaseGraph graph;
-
-        /**
-         * HBase edge
-         */
-        private HBaseEdge edge;
 
         /**
          * Context passed to initialize
@@ -127,10 +124,7 @@ public class HBaseEdgeInputFormat
          * @throws InterruptedException
          */
         public HBaseEdge getCurrentHBaseEdge() throws IOException, InterruptedException {
-            if (edge == null) {
-                edge = parseHBaseEdge(getRecordReader().getCurrentValue());
-            }
-            return edge;
+            return parseHBaseEdge(getRecordReader().getCurrentValue());
         }
 
         private HBaseEdge parseHBaseEdge(Result result) {
@@ -145,10 +139,10 @@ public class HBaseEdgeInputFormat
         }
 
         @Override
-        public Edge<ObjectWritable, EdgeWritable> getCurrentEdge()
+        public Edge<ObjectWritable, EdgeValueWritable> getCurrentEdge()
                 throws IOException, InterruptedException {
-            Edge<ObjectWritable, EdgeWritable> edge = EdgeFactory.create(
-                    getCurrentTargetId(), new EdgeWritable(getCurrentHBaseEdge()));
+            Edge<ObjectWritable, EdgeValueWritable> edge = EdgeFactory.create(
+                    getCurrentTargetId(), new EdgeValueWritable(getCurrentHBaseEdge()));
             return edge;
         }
 

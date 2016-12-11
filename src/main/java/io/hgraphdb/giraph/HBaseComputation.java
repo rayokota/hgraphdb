@@ -6,8 +6,8 @@ import org.apache.hadoop.io.Writable;
 
 import java.io.IOException;
 
-public abstract class HBaseComputation<M extends Writable> extends BasicComputation<ObjectWritable, VertexWritable, EdgeWritable, M> {
+public abstract class HBaseComputation<M extends Writable> extends BasicComputation<ObjectWritable, VertexValueWritable, EdgeValueWritable, M> {
 
     @Override
-    public abstract void compute(final Vertex<ObjectWritable, VertexWritable, EdgeWritable> vertex, final Iterable<M> messages) throws IOException;
+    public abstract void compute(final Vertex<ObjectWritable, VertexValueWritable, EdgeValueWritable> vertex, final Iterable<M> messages) throws IOException;
 }

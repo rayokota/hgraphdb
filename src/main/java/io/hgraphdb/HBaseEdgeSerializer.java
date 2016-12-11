@@ -8,20 +8,14 @@ public class HBaseEdgeSerializer extends HBaseElementSerializer<HBaseEdge> {
 
     public void write(Kryo kryo, Output output, HBaseEdge edge) {
         super.write(kryo, output, edge);
-        byte[] outVBytes = ValueUtils.serialize(edge.outVertex().id());
-        output.writeInt(outVBytes.length);
-        output.writeBytes(outVBytes);
-        byte[] inVBytes = ValueUtils.serialize(edge.inVertex().id());
-        output.writeInt(inVBytes.length);
-        output.writeBytes(inVBytes);
+        kryo.writeClassAndObject(output, edge.outVertex().id());
+        kryo.writeClassAndObject(output, edge.inVertex().id());
     }
 
     public HBaseEdge read(Kryo kryo, Input input, Class<HBaseEdge> type) {
         HBaseEdge edge = super.read(kryo, input, type);
-        int outVBytesLen = input.readInt();
-        Object outVId = ValueUtils.deserialize(input.readBytes(outVBytesLen));
-        int inVBytesLen = input.readInt();
-        Object inVId = ValueUtils.deserialize(input.readBytes(inVBytesLen));
+        Object outVId = kryo.readClassAndObject(input);
+        Object inVId = kryo.readClassAndObject(input);
         edge.setOutVertex(new HBaseVertex(null, outVId));
         edge.setInVertex(new HBaseVertex(null, inVId));
         return edge;

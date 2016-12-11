@@ -62,7 +62,7 @@ public class MockConnection implements Connection {
     public Table getTable(TableName tableName) throws IOException {
         Table table = tables.get(tableName);
         if (table == null) {
-            table = new MockHTable(tableName, Constants.DEFAULT_FAMILY);
+            table = new MockHTable(tableName, Constants.DEFAULT_FAMILY).setConfiguration(config);
             tables.put(tableName, table);
         }
         return table;

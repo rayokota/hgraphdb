@@ -16,13 +16,13 @@ public class HBaseWriteableTest {
     public void testVertexWritable() throws Exception {
         Map<String, Object> properties = ImmutableMap.of("foo", 4L, "bar", "barVal");
         HBaseVertex v = new HBaseVertex(null, 1, "mylabel", 2L, 3L, properties);
-        VertexWritable writable = new VertexWritable(v);
+        VertexValueWritable writable = new VertexValueWritable(v);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(baos);
         writable.write(output);
         byte[] bytes = baos.toByteArray();
         writable.readFields(new DataInputStream(new ByteArrayInputStream(bytes)));
-        HBaseVertex v2 = writable.get();
+        HBaseVertex v2 = writable.getVertex();
         assertEquals(v, v2);
     }
 
@@ -30,13 +30,26 @@ public class HBaseWriteableTest {
     public void testEdgeWritable() throws Exception {
         Map<String, Object> properties = ImmutableMap.of("foo", 4L, "bar", "barVal");
         HBaseEdge e = new HBaseEdge(null, 1, "mylabel", 2L, 3L, properties, new HBaseVertex(null, 10), new HBaseVertex(null, 20));
-        EdgeWritable writable = new EdgeWritable(e);
+        EdgeValueWritable writable = new EdgeValueWritable(e);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(baos);
         writable.write(output);
         byte[] bytes = baos.toByteArray();
         writable.readFields(new DataInputStream(new ByteArrayInputStream(bytes)));
-        HBaseEdge e2 = writable.get();
+        HBaseEdge e2 = writable.getEdge();
         assertEquals(e, e2);
+    }
+
+    @Test
+    public void testObjectWritable() throws Exception {
+        Object o = new Integer(1);
+        ObjectWritable writable = new ObjectWritable(o);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(baos);
+        writable.write(output);
+        byte[] bytes = baos.toByteArray();
+        writable.readFields(new DataInputStream(new ByteArrayInputStream(bytes)));
+        Object o2 = writable.get();
+        assertEquals(o, o2);
     }
 }
