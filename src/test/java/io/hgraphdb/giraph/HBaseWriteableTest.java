@@ -5,10 +5,13 @@ import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseVertex;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class HBaseWriteableTest {
 

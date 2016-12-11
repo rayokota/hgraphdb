@@ -1,7 +1,5 @@
 package io.hgraphdb.giraph;
 
-import java.io.IOException;
-
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseVertex;
@@ -13,6 +11,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import java.io.IOException;
 
 /**
  * Base class for writing Vertex mutations back to specific

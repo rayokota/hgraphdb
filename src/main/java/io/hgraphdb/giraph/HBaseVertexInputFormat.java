@@ -1,8 +1,5 @@
 package io.hgraphdb.giraph;
 
-import java.io.IOException;
-import java.util.List;
-
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseVertex;
@@ -18,6 +15,9 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Base class that wraps an HBase TableInputFormat and underlying Scan object

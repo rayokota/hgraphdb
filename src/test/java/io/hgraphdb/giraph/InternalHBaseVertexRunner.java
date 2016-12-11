@@ -21,11 +21,9 @@ package io.hgraphdb.giraph;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.conf.GiraphConstants;
-//import org.apache.giraph.io.formats.FileOutputFormatUtil;
 import org.apache.giraph.io.formats.GiraphFileInputFormat;
 import org.apache.giraph.io.formats.InMemoryVertexOutputFormat;
 import org.apache.giraph.job.GiraphJob;
@@ -35,17 +33,16 @@ import org.apache.giraph.utils.TestGraph;
 import org.apache.giraph.zk.InProcessZooKeeperRunner;
 import org.apache.giraph.zk.ZookeeperConfig;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
+//import org.apache.giraph.io.formats.FileOutputFormatUtil;
 
 /**
  * A base class for running internal tests on a vertex
@@ -162,14 +159,6 @@ public class InternalHBaseVertexRunner {
             String[] edgeInputData,
             String checkpointsDir,
             File tmpDir) throws Exception {
-        HBaseGraph graph = new HBaseGraph(new HBaseGraphConfiguration(conf), MockConnectionFactory.createConnection(conf));
-        Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
-        Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
-        Vertex v5 = graph.addVertex(T.id, 5, T.label, "bye");
-        v5.addEdge("e", v1);
-        v1.addEdge("e", v5);
-        v1.addEdge("e", v2);
-        v2.addEdge("e", v5);
         conf.set(HBaseEdgeInputFormat.EDGE_INPUT_TABLE, "edges");
         conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, "vertices");
         conf.set(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());

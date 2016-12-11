@@ -18,7 +18,12 @@
 package io.hgraphdb.giraph;
 
 import com.google.common.collect.Maps;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.giraph.conf.GiraphConfiguration;
+import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
 
 import java.util.Map;
@@ -31,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 public class MaxComputationTest {
     @Test
     public void testMax() throws Exception {
-        String[] graph = {
+        String[] s = {
                 "5 1",
                 "1 5 2",
                 "2 5",
@@ -39,11 +44,20 @@ public class MaxComputationTest {
 
         GiraphConfiguration conf = new GiraphConfiguration();
         conf.setComputationClass(MaxComputation.class);
-        //conf.setVertexInputFormatClass(IntIntNullTextInputFormat.class);
         conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
         conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
         conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
-        Iterable<String> results = InternalHBaseVertexRunner.run(conf, graph);
+
+        HBaseGraph graph = new HBaseGraph(new HBaseGraphConfiguration(conf), MockConnectionFactory.createConnection(conf));
+        Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
+        Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
+        Vertex v5 = graph.addVertex(T.id, 5, T.label, "bye");
+        v5.addEdge("e", v1);
+        v1.addEdge("e", v5);
+        v1.addEdge("e", v2);
+        v2.addEdge("e", v5);
+
+        Iterable<String> results = InternalHBaseVertexRunner.run(conf, s);
 
         Map<Integer, Integer> values = parseResults(results);
         assertEquals(3, values.size());
