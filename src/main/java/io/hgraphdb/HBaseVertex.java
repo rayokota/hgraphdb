@@ -25,7 +25,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseVertex.class);
 
-    private final Cache<Tuple, List<Edge>> edgeCache;
+    private transient Cache<Tuple, List<Edge>> edgeCache;
 
     public HBaseVertex(HBaseGraph graph, Object id) {
         this(graph, id, null, null, null, null, false);
@@ -39,12 +39,14 @@ public class HBaseVertex extends HBaseElement implements Vertex {
                        Map<String, Object> properties, boolean propertiesFullyLoaded) {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
 
-        graph.validateVertex(label, id, properties);
+        if (graph != null) {
+            graph.validateVertex(label, id, properties);
 
-        this.edgeCache = CacheBuilder.<Tuple, List<Edge>>newBuilder()
-                .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
-                .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
-                .build();
+            this.edgeCache = CacheBuilder.<Tuple, List<Edge>>newBuilder()
+                    .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
+                    .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
+                    .build();
+        }
     }
 
     @Override
@@ -53,18 +55,18 @@ public class HBaseVertex extends HBaseElement implements Vertex {
     }
 
     public Iterator<Edge> getEdgesFromCache(Tuple cacheKey) {
-        if (!isCached()) return null;
+        if (edgeCache == null || !isCached()) return null;
         List<Edge> edges = edgeCache.getIfPresent(cacheKey);
         return edges != null ? IteratorUtils.filter(edges.iterator(), edge -> !((HBaseEdge) edge).isDeleted()) : null;
     }
 
     public void cacheEdges(Tuple cacheKey, List<Edge> edges) {
-        if (!isCached()) return;
+        if (edgeCache == null || !isCached()) return;
         edgeCache.put(cacheKey, edges);
     }
 
     protected void invalidateEdgeCache() {
-        edgeCache.invalidateAll();
+        if (edgeCache != null) edgeCache.invalidateAll();
     }
 
     @Override

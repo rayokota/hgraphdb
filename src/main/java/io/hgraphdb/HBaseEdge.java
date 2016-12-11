@@ -26,6 +26,10 @@ public class HBaseEdge extends HBaseElement implements Edge {
         this(graph, id, null, null, null, null, null, null);
     }
 
+    public HBaseEdge(HBaseGraph graph, Object id, String label, Long createdAt, Long updatedAt, Map<String, Object> properties) {
+        this(graph, id, label, createdAt, updatedAt, properties, properties != null, null, null);
+    }
+
     public HBaseEdge(HBaseGraph graph, Object id, String label, Long createdAt, Long updatedAt, Map<String, Object> properties,
                      Vertex inVertex, Vertex outVertex) {
         this(graph, id, label, createdAt, updatedAt, properties, properties != null, inVertex, outVertex);
@@ -35,10 +39,12 @@ public class HBaseEdge extends HBaseElement implements Edge {
                      boolean propertiesFullyLoaded, Vertex inVertex, Vertex outVertex) {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
 
-        graph.validateEdge(label, id, properties, inVertex, outVertex);
-
         this.inVertex = inVertex;
         this.outVertex = outVertex;
+
+        if (graph != null) {
+            graph.validateEdge(label, id, properties, inVertex, outVertex);
+        }
     }
 
     @Override
@@ -61,9 +67,17 @@ public class HBaseEdge extends HBaseElement implements Edge {
         return getVertex(Direction.OUT);
     }
 
+    protected void setOutVertex(HBaseVertex outVertex) {
+        this.outVertex = outVertex;
+    }
+
     @Override
     public Vertex inVertex() {
         return getVertex(Direction.IN);
+    }
+
+    protected void setInVertex(HBaseVertex inVertex) {
+        this.inVertex = inVertex;
     }
 
     @Override

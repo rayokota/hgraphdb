@@ -37,6 +37,7 @@
         <hbase.version>1.2.0</hbase.version>
         <tinkerpop.version>3.2.3</tinkerpop.version>
         <kryo.version>4.0.0</kryo.version>
+        <giraph.version>1.2.0-hadoop2</giraph.version>
     </properties>
 
     <dependencies>
@@ -59,6 +60,18 @@
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>${kryo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.giraph</groupId>
+            <artifactId>giraph-core</artifactId>
+            <version>${giraph.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-server</artifactId>
+            <version>${hbase.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- TESTING -->
         <dependency>

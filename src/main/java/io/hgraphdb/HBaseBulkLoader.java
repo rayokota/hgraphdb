@@ -1,12 +1,10 @@
 package io.hgraphdb;
 
-import io.hgraphdb.mutators.Creator;
-import io.hgraphdb.mutators.EdgeIndexWriter;
-import io.hgraphdb.mutators.EdgeWriter;
-import io.hgraphdb.mutators.VertexIndexWriter;
-import io.hgraphdb.mutators.VertexWriter;
+import io.hgraphdb.mutators.*;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -28,6 +26,10 @@ public final class HBaseBulkLoader {
     private BufferedMutator verticesMutator;
     private BufferedMutator vertexIndicesMutator;
 
+    public HBaseBulkLoader(Configuration config) throws IOException {
+        this(new HBaseGraph(new HBaseGraphConfiguration(config), ConnectionFactory.createConnection(config)));
+    }
+
     public HBaseBulkLoader(HBaseGraph graph) {
         try {
             this.graph = graph;
@@ -37,7 +39,6 @@ public final class HBaseBulkLoader {
                         LOGGER.warn("Failed to send put: " + e.getRow(i));
                     }
             };
-
 
             HBaseGraphConfiguration config = graph.configuration();
 
@@ -57,6 +58,10 @@ public final class HBaseBulkLoader {
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
+    }
+
+    public HBaseGraph getGraph() {
+        return graph;
     }
 
     public Vertex addVertex(final Object... keyValues) {
@@ -106,6 +111,76 @@ public final class HBaseBulkLoader {
             edgesMutator.mutate(IteratorUtils.list(creator.constructInsertions()));
 
             return edge;
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    public void setProperty(Edge edge, String key, Object value) {
+        try {
+            HBaseEdge e = (HBaseEdge) edge;
+            ElementHelper.validateProperty(key, value);
+
+            graph.validateProperty(e.getElementType(), e.label(), key, value);
+
+            // delete from index model before setting property
+            Object oldValue = null;
+            boolean hasIndex = e.hasIndex(OperationType.WRITE, key);
+            if (hasIndex) {
+                // only load old value if using index
+                oldValue = e.getProperty(key);
+                if (oldValue != null && !oldValue.equals(value)) {
+                    EdgeIndexRemover indexRemover = new EdgeIndexRemover(graph, e, key, null);
+                    edgeIndicesMutator.mutate(IteratorUtils.list(indexRemover.constructMutations()));
+                }
+            }
+
+            e.getProperties().put(key, value);
+            e.updatedAt(System.currentTimeMillis());
+
+            if (hasIndex) {
+                if (oldValue == null || !oldValue.equals(value)) {
+                    EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, e, key, null);
+                    edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
+                }
+            }
+            PropertyWriter propertyWriter = new PropertyWriter(graph, e, key, value);
+            edgesMutator.mutate(IteratorUtils.list(propertyWriter.constructMutations()));
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    public void setProperty(Vertex vertex, String key, Object value) {
+        try {
+            HBaseVertex v = (HBaseVertex) vertex;
+            ElementHelper.validateProperty(key, value);
+
+            graph.validateProperty(v.getElementType(), v.label(), key, value);
+
+            // delete from index model before setting property
+            Object oldValue = null;
+            boolean hasIndex = v.hasIndex(OperationType.WRITE, key);
+            if (hasIndex) {
+                // only load old value if using index
+                oldValue = v.getProperty(key);
+                if (oldValue != null && !oldValue.equals(value)) {
+                    VertexIndexRemover indexRemover = new VertexIndexRemover(graph, v, key, null);
+                    vertexIndicesMutator.mutate(IteratorUtils.list(indexRemover.constructMutations()));
+                }
+            }
+
+            v.getProperties().put(key, value);
+            v.updatedAt(System.currentTimeMillis());
+
+            if (hasIndex) {
+                if (oldValue == null || !oldValue.equals(value)) {
+                    VertexIndexWriter indexWriter = new VertexIndexWriter(graph, v, key);
+                    vertexIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
+                }
+            }
+            PropertyWriter propertyWriter = new PropertyWriter(graph, v, key, value);
+            verticesMutator.mutate(IteratorUtils.list(propertyWriter.constructMutations()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

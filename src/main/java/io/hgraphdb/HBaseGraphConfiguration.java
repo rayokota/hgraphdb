@@ -52,7 +52,8 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public HBaseGraphConfiguration() {
-        this(null);
+        conf = new PropertiesConfiguration();
+        conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
     }
 
     public HBaseGraphConfiguration(Configuration config) {
@@ -62,6 +63,15 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         if (config != null) {
             config.getKeys().forEachRemaining(key ->
                     conf.setProperty(key.replace("..", "."), config.getProperty(key)));
+        }
+    }
+
+    public HBaseGraphConfiguration(org.apache.hadoop.conf.Configuration config) {
+        conf = new PropertiesConfiguration();
+        conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
+        if (config != null) {
+            config.iterator().forEachRemaining(entry ->
+                    conf.setProperty(entry.getKey(), entry.getValue()));
         }
     }
 

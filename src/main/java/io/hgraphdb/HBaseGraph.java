@@ -199,8 +199,10 @@ public class HBaseGraph implements Graph {
                     .build();
 
             refreshSchema();
-            executor.scheduleAtFixedRate(this::refreshSchema,
-                    config.getSchemaCacheRefreshSecs(), config.getSchemaCacheRefreshSecs(), TimeUnit.SECONDS);
+            int schemaCacheRefreshSecs = config.getSchemaCacheRefreshSecs();
+            if (schemaCacheRefreshSecs > 0) {
+                executor.scheduleAtFixedRate(this::refreshSchema, schemaCacheRefreshSecs, schemaCacheRefreshSecs, TimeUnit.SECONDS);
+            }
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

@@ -21,17 +21,17 @@ public abstract class HBaseElement implements Element {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseElement.class);
 
-    protected final HBaseGraph graph;
+    protected HBaseGraph graph;
     protected final Object id;
     protected String label;
     protected Long createdAt;
     protected Long updatedAt;
     protected Map<String, Object> properties;
-    protected boolean propertiesFullyLoaded;
-    protected IndexMetadata.Key indexKey;
-    protected long indexTs;
-    protected boolean isCached;
-    protected boolean isDeleted;
+    protected transient boolean propertiesFullyLoaded;
+    protected transient IndexMetadata.Key indexKey;
+    protected transient long indexTs;
+    protected transient boolean isCached;
+    protected transient boolean isDeleted;
 
     protected HBaseElement(HBaseGraph graph,
                            Object id,
@@ -58,6 +58,10 @@ public abstract class HBaseElement implements Element {
     @Override
     public Graph graph() {
         return graph;
+    }
+
+    public void setGraph(HBaseGraph graph) {
+        this.graph = graph;
     }
 
     @Override
