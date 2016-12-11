@@ -119,6 +119,8 @@ public abstract class HBaseEdgeOutputFormat
             v.setGraph(graph);
             HBaseEdge e = edge.getValue().get();
             e.setGraph(graph);
+            ((HBaseVertex) e.outVertex()).setGraph(graph);
+            ((HBaseVertex) e.inVertex()).setGraph(graph);
             writeEdge(getWriter(), v, e);
         }
 
