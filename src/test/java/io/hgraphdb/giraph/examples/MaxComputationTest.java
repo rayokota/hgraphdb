@@ -26,13 +26,12 @@ public class MaxComputationTest extends HBaseGraphTest {
     @Test
     public void testMax() throws Exception {
         HBaseGraphConfiguration hconf = graph.configuration();
-        Configuration conf = hconf.toHBaseConfiguration();
 
-        GiraphConfiguration gconf = new GiraphConfiguration(conf);
-        gconf.setComputationClass(MaxComputation.class);
-        gconf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
-        gconf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
-        gconf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
+        GiraphConfiguration conf = new GiraphConfiguration(hconf.toHBaseConfiguration());
+        conf.setComputationClass(MaxComputation.class);
+        conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
+        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
 
         Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
         Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
@@ -42,7 +41,7 @@ public class MaxComputationTest extends HBaseGraphTest {
         v1.addEdge("e", v2);
         v2.addEdge("e", v5);
 
-        Iterable<String> results = InternalHBaseVertexRunner.run(gconf);
+        Iterable<String> results = InternalHBaseVertexRunner.run(conf);
 
         Map<Integer, Integer> values = parseResults(results);
         assertEquals(3, values.size());
