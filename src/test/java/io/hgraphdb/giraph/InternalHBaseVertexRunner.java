@@ -3,6 +3,7 @@ package io.hgraphdb.giraph;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
+import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.conf.GiraphConstants;
@@ -10,6 +11,7 @@ import org.apache.giraph.job.GiraphJob;
 import org.apache.giraph.utils.FileUtils;
 import org.apache.giraph.zk.InProcessZooKeeperRunner;
 import org.apache.giraph.zk.ZookeeperConfig;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
@@ -110,9 +112,12 @@ public class InternalHBaseVertexRunner {
             GiraphConfiguration conf,
             String checkpointsDir,
             File tmpDir) throws Exception {
-        conf.set(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
-        conf.set(HBaseEdgeInputFormat.EDGE_INPUT_TABLE, "edges");
-        conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, "vertices");
+
+        String ns = conf.get(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE);
+        String prefix = conf.get(HBaseGraphConfiguration.Keys.GRAPH_TABLE_PREFIX);
+        String tablePrefix = (ns != null ? ns + TableName.NAMESPACE_DELIM : "") + (prefix != null ? prefix : "");
+        conf.set(HBaseEdgeInputFormat.EDGE_INPUT_TABLE, tablePrefix + Constants.EDGES);
+        conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, tablePrefix + Constants.VERTICES);
 
         File outputDir = FileUtils.createTempDir(tmpDir, "output");
         File zkDir = FileUtils.createTempDir(tmpDir, "_bspZooKeeper");

@@ -3,10 +3,12 @@ package io.hgraphdb.giraph.examples;
 import com.google.common.collect.Maps;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
+import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import io.hgraphdb.giraph.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Ignore;
@@ -19,20 +21,19 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test for max computation
  */
-public class MaxComputationTest {
+public class MaxComputationTest extends HBaseGraphTest {
     @Ignore
     @Test
     public void testMax() throws Exception {
-        GiraphConfiguration conf = new GiraphConfiguration();
-        conf.setComputationClass(MaxComputation.class);
-        conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
-        conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
-        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
+        HBaseGraphConfiguration hconf = graph.configuration();
+        Configuration conf = hconf.toHBaseConfiguration();
 
-        HBaseGraphConfiguration hconf = new HBaseGraphConfiguration(conf);
-        hconf.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
+        GiraphConfiguration gconf = new GiraphConfiguration(conf);
+        gconf.setComputationClass(MaxComputation.class);
+        gconf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
+        gconf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
+        gconf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
 
-        HBaseGraph graph = new HBaseGraph(hconf);
         Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
         Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
         Vertex v5 = graph.addVertex(T.id, 5, T.label, "bye");
@@ -41,7 +42,7 @@ public class MaxComputationTest {
         v1.addEdge("e", v2);
         v2.addEdge("e", v5);
 
-        Iterable<String> results = InternalHBaseVertexRunner.run(conf);
+        Iterable<String> results = InternalHBaseVertexRunner.run(gconf);
 
         Map<Integer, Integer> values = parseResults(results);
         assertEquals(3, values.size());
