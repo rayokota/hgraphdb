@@ -9,6 +9,7 @@ import io.hgraphdb.giraph.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -19,6 +20,7 @@ import static org.junit.Assert.assertEquals;
  * Test for max computation
  */
 public class MaxComputationTest {
+    @Ignore
     @Test
     public void testMax() throws Exception {
         GiraphConfiguration conf = new GiraphConfiguration();

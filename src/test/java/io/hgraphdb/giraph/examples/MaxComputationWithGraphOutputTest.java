@@ -9,6 +9,7 @@ import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -17,6 +18,7 @@ import static org.junit.Assert.assertEquals;
  * Test for max computation
  */
 public class MaxComputationWithGraphOutputTest {
+    @Ignore
     @Test
     public void testMax() throws Exception {
         GiraphConfiguration conf = new GiraphConfiguration();
