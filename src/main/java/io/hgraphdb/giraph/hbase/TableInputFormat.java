@@ -65,12 +65,11 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
     @Override
     protected void initializeTable(Connection connection, TableName tableName) throws java.io.IOException {
         if (isMock()) {
-            this.connection = new MockConnection(getConf());
             this.table = connection.getTable(tableName);
         } else {
             super.initializeTable(connection, tableName);
-            this.connection = connection;
         }
+        this.connection = connection;
     }
 
     @Override

@@ -3,6 +3,7 @@ package io.hgraphdb.giraph;
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseVertex;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class TestEdgeOutputFormat extends HBaseEdgeOutputFormat {
         }
 
         @Override
-        public void writeEdge(HBaseBulkLoader writer, HBaseVertex outVertex, HBaseEdge edge) {
+        public void writeEdge(HBaseBulkLoader writer, HBaseVertex outVertex, HBaseEdge edge, Writable value) {
         }
     }
 }

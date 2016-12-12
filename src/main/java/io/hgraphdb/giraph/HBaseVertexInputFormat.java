@@ -82,6 +82,11 @@ public class HBaseVertexInputFormat
         private final HBaseGraph graph;
 
         /**
+         * HBase vertex
+         */
+        private HBaseVertex vertex;
+
+        /**
          * Context passed to initialize
          */
         private TaskAttemptContext context;
@@ -122,7 +127,10 @@ public class HBaseVertexInputFormat
          * @throws InterruptedException
          */
         public HBaseVertex getCurrentHBaseVertex() throws IOException, InterruptedException {
-            return parseHBaseVertex(getRecordReader().getCurrentValue());
+            if (vertex == null) {
+                vertex = parseHBaseVertex(getRecordReader().getCurrentValue());
+            }
+            return vertex;
         }
 
         private HBaseVertex parseHBaseVertex(Result result) {
@@ -133,6 +141,7 @@ public class HBaseVertexInputFormat
         @Override
         public boolean nextVertex() throws IOException,
                 InterruptedException {
+            vertex = null;
             return getRecordReader().nextKeyValue();
         }
 

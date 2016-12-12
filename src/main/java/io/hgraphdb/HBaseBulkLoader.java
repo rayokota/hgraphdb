@@ -26,8 +26,8 @@ public final class HBaseBulkLoader {
     private BufferedMutator verticesMutator;
     private BufferedMutator vertexIndicesMutator;
 
-    public HBaseBulkLoader(Configuration config) throws IOException {
-        this(new HBaseGraph(new HBaseGraphConfiguration(config), ConnectionFactory.createConnection(config)));
+    public HBaseBulkLoader(HBaseGraphConfiguration config) throws IOException {
+        this(new HBaseGraph(config, HBaseGraphUtils.getConnection(config)));
     }
 
     public HBaseBulkLoader(HBaseGraph graph) {

@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.mock.MockConnection;
+import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
 import org.apache.hadoop.hbase.regionserver.BloomType;
@@ -36,7 +37,7 @@ public final class HBaseGraphUtils {
         Configuration hbaseConfig = config.toHBaseConfiguration();
         try {
             if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) {
-                return new MockConnection(hbaseConfig);
+                return MockConnectionFactory.createConnection(hbaseConfig);
             }
             UserGroupInformation ugi = null;
             if ("kerberos".equals(hbaseConfig.get(HBASE_SECURITY_AUTHENTICATION))) {

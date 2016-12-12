@@ -84,6 +84,11 @@ public class HBaseEdgeInputFormat
         private final HBaseGraph graph;
 
         /**
+         * HBase edge
+         */
+        private HBaseEdge edge;
+
+        /**
          * Context passed to initialize
          */
         private TaskAttemptContext context;
@@ -124,7 +129,10 @@ public class HBaseEdgeInputFormat
          * @throws InterruptedException
          */
         public HBaseEdge getCurrentHBaseEdge() throws IOException, InterruptedException {
-            return parseHBaseEdge(getRecordReader().getCurrentValue());
+            if (edge == null) {
+                edge = parseHBaseEdge(getRecordReader().getCurrentValue());
+            }
+            return edge;
         }
 
         private HBaseEdge parseHBaseEdge(Result result) {
@@ -135,6 +143,7 @@ public class HBaseEdgeInputFormat
         @Override
         public boolean nextEdge() throws IOException,
                 InterruptedException {
+            edge = null;
             return getRecordReader().nextKeyValue();
         }
 

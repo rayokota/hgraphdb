@@ -2,6 +2,7 @@ package io.hgraphdb.giraph;
 
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseVertex;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.slf4j.Logger;
@@ -12,9 +13,9 @@ import java.io.IOException;
 /*
  Test subclass for HBaseVertexOutputFormat
  */
-public class TestVertexOutputFormat extends HBaseVertexOutputFormat {
+public class VertexMaxPropertyOutputFormat extends HBaseVertexOutputFormat {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestVertexOutputFormat.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VertexMaxPropertyOutputFormat.class);
 
     @Override
     public HBaseVertexWriter createVertexWriter(TaskAttemptContext context)
@@ -35,6 +36,7 @@ public class TestVertexOutputFormat extends HBaseVertexOutputFormat {
 
         @Override
         public void writeVertex(HBaseBulkLoader writer, HBaseVertex vertex, Writable value) {
+            writer.setProperty(vertex, "max", ((IntWritable) value).get());
         }
     }
 }

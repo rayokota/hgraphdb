@@ -3,11 +3,13 @@ package io.hgraphdb.giraph;
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseVertex;
 import org.apache.giraph.edge.Edge;
 import org.apache.giraph.io.EdgeOutputFormat;
 import org.apache.giraph.io.EdgeWriter;
 import org.apache.hadoop.hbase.mapreduce.TableOutputCommitter;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -64,7 +66,7 @@ public abstract class HBaseEdgeOutputFormat
          */
         public HBaseEdgeWriter(TaskAttemptContext context)
                 throws IOException, InterruptedException {
-            this.writer = new HBaseBulkLoader(context.getConfiguration());
+            this.writer = new HBaseBulkLoader(new HBaseGraphConfiguration(context.getConfiguration()));
             this.graph = writer.getGraph();
         }
 
@@ -121,10 +123,10 @@ public abstract class HBaseEdgeOutputFormat
             e.setGraph(graph);
             ((HBaseVertex) e.outVertex()).setGraph(graph);
             ((HBaseVertex) e.inVertex()).setGraph(graph);
-            writeEdge(getWriter(), v, e);
+            writeEdge(getWriter(), v, e, edge.getValue().getValue());
         }
 
-        public abstract void writeEdge(HBaseBulkLoader writer, HBaseVertex outVertex, HBaseEdge edge);
+        public abstract void writeEdge(HBaseBulkLoader writer, HBaseVertex outVertex, HBaseEdge edge, Writable value);
     }
 
     /**

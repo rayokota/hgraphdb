@@ -2,6 +2,7 @@ package io.hgraphdb.giraph;
 
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseVertex;
 import org.apache.giraph.graph.Vertex;
 import org.apache.giraph.io.VertexOutputFormat;
@@ -64,7 +65,7 @@ public abstract class HBaseVertexOutputFormat
          */
         public HBaseVertexWriter(TaskAttemptContext context)
                 throws IOException, InterruptedException {
-            this.writer = new HBaseBulkLoader(context.getConfiguration());
+            this.writer = new HBaseBulkLoader(new HBaseGraphConfiguration(context.getConfiguration()));
             this.graph = writer.getGraph();
         }
 
@@ -115,10 +116,10 @@ public abstract class HBaseVertexOutputFormat
                 throws IOException, InterruptedException {
             HBaseVertex v = vertex.getValue().getVertex();
             v.setGraph(graph);
-            writeVertex(getWriter(), v);
+            writeVertex(getWriter(), v, vertex.getValue().getValue());
         }
 
-        public abstract void writeVertex(HBaseBulkLoader writer, HBaseVertex vertex);
+        public abstract void writeVertex(HBaseBulkLoader writer, HBaseVertex vertex, Writable value);
     }
 
     /**
