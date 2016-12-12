@@ -18,7 +18,8 @@ public class HBaseGraphTest {
     protected HBaseGraphConfiguration generateGraphConfig(String graphNamespace) {
         HBaseGraphConfiguration config = new HBaseGraphConfiguration()
                 .setGraphNamespace(graphNamespace)
-                .setCreateTables(true);
+                .setCreateTables(true)
+                .setRegionCount(1);
         if (useMock) {
             return config.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
         } else {
