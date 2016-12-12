@@ -89,6 +89,7 @@ public abstract class HBaseEdgeOutputFormat
         public void close(TaskAttemptContext context)
                 throws IOException, InterruptedException {
             writer.close();
+            graph.close();
         }
 
         /**

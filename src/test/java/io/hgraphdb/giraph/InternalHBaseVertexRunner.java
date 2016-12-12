@@ -6,17 +6,10 @@ import com.google.common.io.Files;
 import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.conf.GiraphConstants;
-import org.apache.giraph.io.formats.GiraphFileInputFormat;
-import org.apache.giraph.io.formats.InMemoryVertexOutputFormat;
 import org.apache.giraph.job.GiraphJob;
 import org.apache.giraph.utils.FileUtils;
-import org.apache.giraph.utils.InMemoryVertexInputFormat;
-import org.apache.giraph.utils.TestGraph;
 import org.apache.giraph.zk.InProcessZooKeeperRunner;
 import org.apache.giraph.zk.ZookeeperConfig;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 
@@ -145,7 +138,7 @@ public class InternalHBaseVertexRunner {
         Job internalJob = job.getInternalJob();
         //FileOutputFormatUtil.setOutputPath(job.getInternalJob(),
         //        new Path(outputDir.toString()));
-        job.getInternalJob().getConfiguration().set("mapred.output.dir", outputDir.toString());
+        internalJob.getConfiguration().set("mapred.output.dir", outputDir.toString());
 
         // Configure a local zookeeper instance
         ZookeeperConfig qpConfig = configLocalZooKeeper(zkDir);

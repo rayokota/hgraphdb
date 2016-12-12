@@ -12,7 +12,9 @@ import java.util.Map;
 public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E> {
 
     public void write(Kryo kryo, Output output, E element) {
-        kryo.writeClassAndObject(output, element.id());
+        byte[] idBytes = ValueUtils.serialize(element.id());
+        output.writeInt(idBytes.length);
+        output.writeBytes(idBytes);
         output.writeString(element.label());
         output.writeLong(element.createdAt());
         output.writeLong(element.updatedAt());
@@ -20,12 +22,15 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
         output.writeInt(properties.size());
         properties.entrySet().forEach(entry -> {
             output.writeString(entry.getKey());
-            kryo.writeClassAndObject(output, entry.getValue());
+            byte[] bytes = ValueUtils.serialize(entry.getValue());
+            output.writeInt(bytes.length);
+            output.writeBytes(bytes);
         });
     }
 
     public E read(Kryo kryo, Input input, Class<E> type) {
-        Object id = kryo.readClassAndObject(input);
+        int idBytesLen = input.readInt();
+        Object id = ValueUtils.deserialize(input.readBytes(idBytesLen));
         String label = input.readString();
         long createdAt = input.readLong();
         long updatedAt = input.readLong();
@@ -33,7 +38,8 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
         Map<String, Object> properties = new HashMap<>();
         for (int i = 0; i < propertiesSize; i++) {
             String key = input.readString();
-            Object value = kryo.readClassAndObject(input);
+            int bytesLen = input.readInt();
+            Object value = ValueUtils.deserialize(input.readBytes(bytesLen));
             properties.put(key, value);
         }
         try {

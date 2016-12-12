@@ -127,7 +127,11 @@ public final class HBaseGraphUtils {
                 .setTimeToLive(ttl);
         tableDescriptor.addFamily(columnDescriptor);
         int regionCount = config.getRegionCount();
-        admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);
+        if (regionCount <= 1) {
+            admin.createTable(tableDescriptor);
+        } else {
+            admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);
+        }
     }
 
     public static void dropTables(HBaseGraphConfiguration config, Connection conn) {
