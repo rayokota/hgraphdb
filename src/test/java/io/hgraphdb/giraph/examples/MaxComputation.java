@@ -15,9 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hgraphdb.giraph;
+package io.hgraphdb.giraph.examples;
 
 import io.hgraphdb.HBaseVertex;
+import io.hgraphdb.giraph.EdgeValueWritable;
+import io.hgraphdb.giraph.HBaseComputation;
+import io.hgraphdb.giraph.ObjectWritable;
+import io.hgraphdb.giraph.VertexValueWritable;
 import org.apache.giraph.graph.Vertex;
 import org.apache.hadoop.io.IntWritable;
 

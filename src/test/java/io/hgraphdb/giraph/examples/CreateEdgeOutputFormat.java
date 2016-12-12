@@ -1,8 +1,9 @@
-package io.hgraphdb.giraph;
+package io.hgraphdb.giraph.examples;
 
 import io.hgraphdb.HBaseBulkLoader;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseVertex;
+import io.hgraphdb.giraph.HBaseEdgeOutputFormat;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.slf4j.Logger;
@@ -10,12 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/*
- Test subclass for HBaseEdgeOutputFormat
- */
-public class TestEdgeOutputFormat extends HBaseEdgeOutputFormat {
+public class CreateEdgeOutputFormat extends HBaseEdgeOutputFormat {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestEdgeOutputFormat.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateEdgeOutputFormat.class);
 
     @Override
     public HBaseEdgeWriter createEdgeWriter(TaskAttemptContext context)
@@ -36,6 +34,8 @@ public class TestEdgeOutputFormat extends HBaseEdgeOutputFormat {
 
         @Override
         public void writeEdge(HBaseBulkLoader writer, HBaseVertex outVertex, HBaseEdge edge, Writable value) {
+            outVertex.addEdge("e2", edge.inVertex());
         }
     }
 }
+

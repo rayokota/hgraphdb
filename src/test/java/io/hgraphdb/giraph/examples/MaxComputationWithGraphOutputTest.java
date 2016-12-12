@@ -15,40 +15,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hgraphdb.giraph;
+package io.hgraphdb.giraph.examples;
 
-import com.google.common.collect.Maps;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
+import io.hgraphdb.giraph.HBaseEdgeInputFormat;
+import io.hgraphdb.giraph.HBaseVertexInputFormat;
+import io.hgraphdb.giraph.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.junit.Test;
-
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test for max computation
  */
-public class MaxComputationTest {
+public class MaxComputationWithGraphOutputTest {
     @Test
     public void testMax() throws Exception {
-        String[] s = {
-                "5 1",
-                "1 5 2",
-                "2 5",
-        };
-
         GiraphConfiguration conf = new GiraphConfiguration();
         conf.setComputationClass(MaxComputation.class);
         conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
         conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
-        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
+        conf.setEdgeOutputFormatClass(CreateEdgeOutputFormat.class);
+        conf.setVertexOutputFormatClass(MaxPropertyVertexOutputFormat.class);
 
-        HBaseGraph graph = new HBaseGraph(new HBaseGraphConfiguration(conf), MockConnectionFactory.createConnection(conf));
+        HBaseGraphConfiguration hconf = new HBaseGraphConfiguration(conf);
+        hconf.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
+
+        HBaseGraph graph = new HBaseGraph(hconf);
         Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
         Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
         Vertex v5 = graph.addVertex(T.id, 5, T.label, "bye");
@@ -57,23 +56,9 @@ public class MaxComputationTest {
         v1.addEdge("e", v2);
         v2.addEdge("e", v5);
 
-        Iterable<String> results = InternalHBaseVertexRunner.run(conf, s);
+        InternalHBaseVertexRunner.run(conf);
 
-        Map<Integer, Integer> values = parseResults(results);
-        assertEquals(3, values.size());
-        assertEquals(5, (int) values.get(1));
-        assertEquals(5, (int) values.get(2));
-        assertEquals(5, (int) values.get(5));
-    }
-
-    private static Map<Integer, Integer> parseResults(Iterable<String> results) {
-        Map<Integer, Integer> values = Maps.newHashMap();
-        for (String line : results) {
-            String[] tokens = line.split("\\s+");
-            int id = Integer.valueOf(tokens[0]);
-            int value = Integer.valueOf(tokens[1]);
-            values.put(id, value);
-        }
-        return values;
+        graph.vertices().forEachRemaining(v -> assertEquals(5, v.property("max").value()));
+        assertEquals(4, IteratorUtils.count(IteratorUtils.filter(graph.edges(), e -> e.label().equals("e2"))));
     }
 }

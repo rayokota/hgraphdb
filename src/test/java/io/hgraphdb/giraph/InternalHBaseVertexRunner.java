@@ -70,22 +70,6 @@ public class InternalHBaseVertexRunner {
     }
 
     /**
-     * Attempts to run the vertex internally in the current JVM, reading from and
-     * writing to a temporary folder on local disk. Will start its own zookeeper
-     * instance.
-     *
-     * @param conf            GiraphClasses specifying which types to use
-     * @param vertexInputData linewise vertex input data
-     * @return linewise output data, or null if job fails
-     * @throws Exception if anything goes wrong
-     */
-    public static Iterable<String> run(
-            GiraphConfiguration conf,
-            String[] vertexInputData) throws Exception {
-        return run(conf, vertexInputData, null);
-    }
-
-    /**
      * Run the ZooKeeper in-process and the job.
      *
      * @param zookeeperConfig Quorum peer configuration
@@ -121,19 +105,15 @@ public class InternalHBaseVertexRunner {
      * instance.
      *
      * @param conf            GiraphClasses specifying which types to use
-     * @param vertexInputData linewise vertex input data
-     * @param edgeInputData   linewise edge input data
      * @return linewise output data, or null if job fails
      * @throws Exception if anything goes wrong
      */
     public static Iterable<String> run(
-            GiraphConfiguration conf,
-            String[] vertexInputData,
-            String[] edgeInputData) throws Exception {
+            GiraphConfiguration conf) throws Exception {
         // Prepare input file, output folder and temporary folders
         File tmpDir = FileUtils.createTestDir(conf.getComputationName());
         try {
-            return run(conf, vertexInputData, edgeInputData, null, tmpDir);
+            return run(conf, null, tmpDir);
         } finally {
             FileUtils.delete(tmpDir);
         }
@@ -145,8 +125,6 @@ public class InternalHBaseVertexRunner {
      * instance.
      *
      * @param conf            GiraphClasses specifying which types to use
-     * @param vertexInputData linewise vertex input data
-     * @param edgeInputData   linewise edge input data
      * @param checkpointsDir  if set, will use this folder
      *                        for storing checkpoints.
      * @param tmpDir          file path for storing temporary files.
@@ -155,35 +133,15 @@ public class InternalHBaseVertexRunner {
      */
     public static Iterable<String> run(
             GiraphConfiguration conf,
-            String[] vertexInputData,
-            String[] edgeInputData,
             String checkpointsDir,
             File tmpDir) throws Exception {
+        conf.set(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
         conf.set(HBaseEdgeInputFormat.EDGE_INPUT_TABLE, "edges");
         conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, "vertices");
-        conf.set(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
-
-        File vertexInputFile = null;
-        File edgeInputFile = null;
-        if (conf.hasVertexInputFormat()) {
-            vertexInputFile = FileUtils.createTempFile(tmpDir, "vertices.txt");
-        }
-        if (conf.hasEdgeInputFormat()) {
-            edgeInputFile = FileUtils.createTempFile(tmpDir, "edges.txt");
-        }
 
         File outputDir = FileUtils.createTempDir(tmpDir, "output");
         File zkDir = FileUtils.createTempDir(tmpDir, "_bspZooKeeper");
         File zkMgrDir = FileUtils.createTempDir(tmpDir, "_defaultZkManagerDir");
-        // Write input data to disk
-        /*
-        if (conf.hasVertexInputFormat()) {
-            FileUtils.writeLines(vertexInputFile, vertexInputData);
-        }
-        if (conf.hasEdgeInputFormat()) {
-            FileUtils.writeLines(edgeInputFile, edgeInputData);
-        }
-        */
 
         conf.setWorkerConfiguration(1, 1, 100.0f);
         GiraphConstants.SPLIT_MASTER_WORKER.set(conf, false);
@@ -203,14 +161,6 @@ public class InternalHBaseVertexRunner {
         GiraphJob job = new GiraphJob(conf, conf.getComputationName());
 
         Job internalJob = job.getInternalJob();
-        if (conf.hasVertexInputFormat()) {
-            GiraphFileInputFormat.setVertexInputPath(internalJob.getConfiguration(),
-                    new Path(vertexInputFile.toString()));
-        }
-        if (conf.hasEdgeInputFormat()) {
-            GiraphFileInputFormat.setEdgeInputPath(internalJob.getConfiguration(),
-                    new Path(edgeInputFile.toString()));
-        }
         //FileOutputFormatUtil.setOutputPath(job.getInternalJob(),
         //        new Path(outputDir.toString()));
         job.getInternalJob().getConfiguration().set("mapred.output.dir", outputDir.toString());
@@ -230,138 +180,6 @@ public class InternalHBaseVertexRunner {
             return ImmutableList.of();
         }
 
-    }
-
-    /**
-     * Attempts to run the vertex internally in the current JVM,
-     * reading from an in-memory graph. Will start its own zookeeper
-     * instance.
-     *
-     * @param <I>   Vertex ID
-     * @param <V>   Vertex Value
-     * @param <E>   Edge Value
-     * @param conf  GiraphClasses specifying which types to use
-     * @param graph input graph
-     * @throws Exception if anything goes wrong
-     */
-    public static <I extends WritableComparable,
-            V extends Writable,
-            E extends Writable> void run(
-            GiraphConfiguration conf,
-            TestGraph<I, V, E> graph) throws Exception {
-        // Prepare temporary folders
-        File tmpDir = FileUtils.createTestDir(conf.getComputationName());
-        try {
-            run(conf, graph, tmpDir, null);
-        } finally {
-            FileUtils.delete(tmpDir);
-        }
-    }
-
-    /**
-     * Attempts to run the vertex internally in the current JVM,
-     * reading from an in-memory graph. Will start its own zookeeper
-     * instance.
-     *
-     * @param <I>            Vertex ID
-     * @param <V>            Vertex Value
-     * @param <E>            Edge Value
-     * @param conf           GiraphClasses specifying which types to use
-     * @param graph          input graph
-     * @param tmpDir         file path for storing temporary files.
-     * @param checkpointsDir if set, will use this folder
-     *                       for storing checkpoints.
-     * @throws Exception if anything goes wrong
-     */
-    public static <I extends WritableComparable,
-            V extends Writable,
-            E extends Writable> void run(
-            GiraphConfiguration conf,
-            TestGraph<I, V, E> graph,
-            File tmpDir,
-            String checkpointsDir) throws Exception {
-        File zkDir = FileUtils.createTempDir(tmpDir, "_bspZooKeeper");
-        File zkMgrDir = FileUtils.createTempDir(tmpDir, "_defaultZkManagerDir");
-
-        if (checkpointsDir == null) {
-            checkpointsDir = FileUtils.
-                    createTempDir(tmpDir, "_checkpoints").toString();
-        }
-
-        conf.setVertexInputFormatClass(InMemoryVertexInputFormat.class);
-
-        // Create and configure the job to run the vertex
-        GiraphJob job = new GiraphJob(conf, conf.getComputationName());
-
-        InMemoryVertexInputFormat.setGraph(graph);
-
-        conf.setWorkerConfiguration(1, 1, 100.0f);
-        GiraphConstants.SPLIT_MASTER_WORKER.set(conf, false);
-        GiraphConstants.LOCAL_TEST_MODE.set(conf, true);
-        GiraphConstants.ZOOKEEPER_SERVER_PORT.set(conf, 0);
-
-        conf.set(GiraphConstants.ZOOKEEPER_DIR, zkDir.toString());
-        GiraphConstants.ZOOKEEPER_MANAGER_DIRECTORY.set(conf,
-                zkMgrDir.toString());
-        GiraphConstants.CHECKPOINT_DIRECTORY.set(conf, checkpointsDir);
-
-        runZooKeeperAndJob(configLocalZooKeeper(zkDir), job);
-    }
-
-    /**
-     * Attempts to run the vertex internally in the current JVM, reading and
-     * writing to an in-memory graph. Will start its own zookeeper
-     * instance.
-     *
-     * @param <I>   Vertex ID
-     * @param <V>   Vertex Value
-     * @param <E>   Edge Value
-     * @param conf  GiraphClasses specifying which types to use
-     * @param graph input graph
-     * @return Output graph
-     * @throws Exception if anything goes wrong
-     */
-    public static <I extends WritableComparable,
-            V extends Writable,
-            E extends Writable> TestGraph<I, V, E> runWithInMemoryOutput(
-            GiraphConfiguration conf,
-            TestGraph<I, V, E> graph) throws Exception {
-        // Prepare temporary folders
-        File tmpDir = FileUtils.createTestDir(conf.getComputationName());
-        try {
-            return runWithInMemoryOutput(conf, graph, tmpDir, null);
-        } finally {
-            FileUtils.delete(tmpDir);
-        }
-    }
-
-    /**
-     * Attempts to run the vertex internally in the current JVM, reading and
-     * writing to an in-memory graph. Will start its own zookeeper
-     * instance.
-     *
-     * @param <I>            Vertex ID
-     * @param <V>            Vertex Value
-     * @param <E>            Edge Value
-     * @param conf           GiraphClasses specifying which types to use
-     * @param graph          input graph
-     * @param tmpDir         file path for storing temporary files.
-     * @param checkpointsDir if set, will use this folder
-     *                       for storing checkpoints.
-     * @return Output graph
-     * @throws Exception if anything goes wrong
-     */
-    public static <I extends WritableComparable,
-            V extends Writable,
-            E extends Writable> TestGraph<I, V, E> runWithInMemoryOutput(
-            GiraphConfiguration conf,
-            TestGraph<I, V, E> graph,
-            File tmpDir,
-            String checkpointsDir) throws Exception {
-        conf.setVertexOutputFormatClass(InMemoryVertexOutputFormat.class);
-        InMemoryVertexOutputFormat.initializeOutputGraph(conf);
-        org.apache.giraph.utils.InternalVertexRunner.run(conf, graph, tmpDir, checkpointsDir);
-        return InMemoryVertexOutputFormat.getOutputGraph();
     }
 
     /**

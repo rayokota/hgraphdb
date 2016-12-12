@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package io.hgraphdb.giraph;
+package io.hgraphdb.giraph.examples;
 
 
+import io.hgraphdb.giraph.VertexValueWritable;
 import org.apache.giraph.graph.Vertex;
 import org.apache.giraph.io.formats.TextVertexOutputFormat;
 import org.apache.hadoop.io.IntWritable;
