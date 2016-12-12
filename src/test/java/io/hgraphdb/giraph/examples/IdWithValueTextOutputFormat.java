@@ -1,13 +1,12 @@
 package io.hgraphdb.giraph.examples;
 
 
+import io.hgraphdb.giraph.EdgeValueWritable;
+import io.hgraphdb.giraph.ObjectWritable;
 import io.hgraphdb.giraph.VertexValueWritable;
 import org.apache.giraph.graph.Vertex;
 import org.apache.giraph.io.formats.TextVertexOutputFormat;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
@@ -23,8 +22,8 @@ import java.io.IOException;
  * @param <E> Edge value
  */
 @SuppressWarnings("rawtypes")
-public class IdWithValueTextOutputFormat<I extends WritableComparable,
-        V extends VertexValueWritable, E extends Writable>
+public class IdWithValueTextOutputFormat<I extends ObjectWritable,
+        V extends VertexValueWritable, E extends EdgeValueWritable>
         extends TextVertexOutputFormat<I, V, E> {
 
     /**
@@ -76,17 +75,15 @@ public class IdWithValueTextOutputFormat<I extends WritableComparable,
         protected Text convertVertexToLine(Vertex<I, V, E> vertex)
                 throws IOException {
 
-            Writable writable = vertex.getValue().getValue();
             StringBuilder str = new StringBuilder();
-            int value = writable instanceof IntWritable ? ((IntWritable) writable).get() : 0;
             if (reverseOutput) {
-                str.append(value);
+                str.append(vertex.getValue().getValue());
                 str.append(delimiter);
                 str.append(vertex.getId().toString());
             } else {
                 str.append(vertex.getId().toString());
                 str.append(delimiter);
-                str.append(value);
+                str.append(vertex.getValue().getValue());
             }
             return new Text(str.toString());
         }

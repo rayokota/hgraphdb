@@ -13,31 +13,32 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 
 import java.io.*;
 
-public final class EdgeValueWritable implements Writable, Serializable {
+public final class EdgeValueWritable<V extends Writable> implements Writable, Serializable {
 
     private HBaseEdge edge;
-    private Writable value;
+    private V value;
 
     public EdgeValueWritable() {
     }
 
     public EdgeValueWritable(final HBaseEdge edge) {
         this.edge = edge;
-        this.value = NullWritable.get();
+        this.value = null;
     }
 
     public HBaseEdge getEdge() {
         return edge;
     }
 
-    public Writable getValue() {
+    public V getValue() {
         return value;
     }
 
-    public void setValue(Writable value) {
+    public void setValue(V value) {
         this.value = value;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void readFields(final DataInput input) throws IOException {
         try {
@@ -53,7 +54,7 @@ public final class EdgeValueWritable implements Writable, Serializable {
                 writable = cls.newInstance();
             }
             writable.readFields(input);
-            this.value = writable;
+            this.value = writable != NullWritable.get() ? (V) writable : null;
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw new IOException("Failed writable init", e);
         }
@@ -69,8 +70,9 @@ public final class EdgeValueWritable implements Writable, Serializable {
         out.close();
         final byte[] serialized = baos.toByteArray();
         WritableUtils.writeCompressedByteArray(output, serialized);
-        Text.writeString(output, value.getClass().getName());
-        value.write(output);
+        Writable writable = value != null ? value : NullWritable.get();
+        Text.writeString(output, writable.getClass().getName());
+        writable.write(output);
     }
 
     private void writeObject(final ObjectOutputStream outputStream) throws IOException {

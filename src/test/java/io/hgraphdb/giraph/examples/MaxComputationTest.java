@@ -1,14 +1,12 @@
 package io.hgraphdb.giraph.examples;
 
 import com.google.common.collect.Maps;
-import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import io.hgraphdb.giraph.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Ignore;
@@ -25,13 +23,6 @@ public class MaxComputationTest extends HBaseGraphTest {
     @Ignore
     @Test
     public void testMax() throws Exception {
-        HBaseGraphConfiguration hconf = graph.configuration();
-
-        GiraphConfiguration conf = new GiraphConfiguration(hconf.toHBaseConfiguration());
-        conf.setComputationClass(MaxComputation.class);
-        conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
-        conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
-        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
 
         Vertex v1 = graph.addVertex(T.id, 1, T.label, "hi");
         Vertex v2 = graph.addVertex(T.id, 2, T.label, "world");
@@ -40,6 +31,13 @@ public class MaxComputationTest extends HBaseGraphTest {
         v1.addEdge("e", v5);
         v1.addEdge("e", v2);
         v2.addEdge("e", v5);
+
+        HBaseGraphConfiguration hconf = graph.configuration();
+        GiraphConfiguration conf = new GiraphConfiguration(hconf.toHBaseConfiguration());
+        conf.setComputationClass(MaxComputation.class);
+        conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
+        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
 
         Iterable<String> results = InternalHBaseVertexRunner.run(conf);
 

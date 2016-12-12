@@ -1,13 +1,11 @@
 package io.hgraphdb.giraph.examples;
 
-import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import io.hgraphdb.giraph.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
