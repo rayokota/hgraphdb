@@ -26,7 +26,6 @@ import java.io.IOException;
  * wrapper methods from having to be called.
  * <p>
  * Works with {@link HBaseVertexInputFormat}
- *
  */
 @SuppressWarnings("rawtypes")
 public abstract class HBaseVertexOutputFormat
@@ -38,7 +37,6 @@ public abstract class HBaseVertexOutputFormat
      * Simple class which takes an instance of RecordWriter
      * over Writable objects. Subclasses are
      * expected to implement writeVertex()
-     *
      */
     public abstract static class HBaseVertexWriter
             extends VertexWriter<ObjectWritable, VertexValueWritable, Writable> {

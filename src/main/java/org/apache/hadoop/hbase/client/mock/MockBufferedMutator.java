@@ -102,13 +102,15 @@ public class MockBufferedMutator implements BufferedMutator {
             Object[] results = new Object[mutations.size()];
             conn.getTable(name).batch(mutations, results);
             mutations.clear();
-        } catch (InterruptedException e) { }
+        } catch (InterruptedException e) {
+        }
     }
 
     /**
      * Returns the maximum size in bytes of the write buffer for this HTable.
      * <p>
      * The default value comes from the configuration parameter {@code hbase.client.write.buffer}.
+     *
      * @return The size of the write buffer in bytes.
      */
     public long getWriteBufferSize() {

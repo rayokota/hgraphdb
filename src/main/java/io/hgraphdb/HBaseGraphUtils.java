@@ -86,7 +86,8 @@ public final class HBaseGraphUtils {
         } finally {
             try {
                 if (admin != null) admin.close();
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -139,7 +140,8 @@ public final class HBaseGraphUtils {
         } finally {
             try {
                 if (admin != null) admin.close();
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -173,7 +175,7 @@ public final class HBaseGraphUtils {
     }
 
     public static byte[] incrementBytes(final byte[] value) {
-        byte [] newValue = Arrays.copyOf(value, value.length);
+        byte[] newValue = Arrays.copyOf(value, value.length);
         for (int i = 0; i < newValue.length; i++) {
             int val = newValue[newValue.length - i - 1] & 0x0ff;
             int total = val + 1;

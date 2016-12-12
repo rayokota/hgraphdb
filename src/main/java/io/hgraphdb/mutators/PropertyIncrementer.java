@@ -33,7 +33,7 @@ public class PropertyIncrementer implements Mutator {
         incr.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key), value);
         Put put = new Put(ValueUtils.serializeWithSalt(element.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                ValueUtils.serialize(((HBaseElement)element).updatedAt()));
+                ValueUtils.serialize(((HBaseElement) element).updatedAt()));
         return IteratorUtils.of(incr, put);
     }
 }

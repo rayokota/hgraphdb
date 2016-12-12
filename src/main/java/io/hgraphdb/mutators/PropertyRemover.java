@@ -32,7 +32,7 @@ public class PropertyRemover implements Mutator {
         delete.addColumns(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key));
         Put put = new Put(idBytes);
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                ValueUtils.serialize(((HBaseElement)element).updatedAt()));
+                ValueUtils.serialize(((HBaseElement) element).updatedAt()));
         return IteratorUtils.of(delete, put);
     }
 }

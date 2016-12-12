@@ -72,7 +72,7 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
     }
 
     @Override
-    protected Pair<byte[][],byte[][]> getStartEndKeys() throws IOException {
+    protected Pair<byte[][], byte[][]> getStartEndKeys() throws IOException {
         if (isMock()) {
             return new Pair<>(new byte[][]{HConstants.EMPTY_START_ROW}, new byte[][]{HConstants.EMPTY_END_ROW});
         } else {

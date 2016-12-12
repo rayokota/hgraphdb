@@ -285,7 +285,7 @@ public final class ValueUtils {
     /**
      * Returns the salt for a given value.
      *
-     * @param value    the value
+     * @param value the value
      * @return the salt to prepend to {@code value}
      */
     public static byte getSaltingByte(byte[] value) {

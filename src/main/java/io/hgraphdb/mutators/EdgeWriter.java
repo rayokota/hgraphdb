@@ -39,9 +39,9 @@ public class EdgeWriter implements Creator {
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.LABEL_BYTES,
                 ValueUtils.serialize(label));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES,
-                ValueUtils.serialize(((HBaseEdge)edge).createdAt()));
+                ValueUtils.serialize(((HBaseEdge) edge).createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                ValueUtils.serialize(((HBaseEdge)edge).updatedAt()));
+                ValueUtils.serialize(((HBaseEdge) edge).updatedAt()));
         ((HBaseEdge) edge).getProperties().entrySet().stream()
                 .forEach(entry -> {
                     byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.EDGE, label, entry.getKey(), entry.getValue());

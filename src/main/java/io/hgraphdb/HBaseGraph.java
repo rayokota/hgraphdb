@@ -216,7 +216,9 @@ public class HBaseGraph implements Graph {
         return edgeModel;
     }
 
-    public EdgeIndexModel getEdgeIndexModel() { return edgeIndexModel; }
+    public EdgeIndexModel getEdgeIndexModel() {
+        return edgeIndexModel;
+    }
 
     public VertexModel getVertexModel() {
         return vertexModel;
@@ -377,6 +379,7 @@ public class HBaseGraph implements Graph {
                     .iterator();
         }
     }
+
     public Edge edge(Object id) {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
@@ -535,7 +538,7 @@ public class HBaseGraph implements Graph {
                 configuration().getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
     }
 
-    public boolean hasIndex(OperationType op, ElementType type, String label, String propertyKey ) {
+    public boolean hasIndex(OperationType op, ElementType type, String label, String propertyKey) {
         return getIndex(op, type, label, propertyKey) != null;
     }
 

@@ -32,7 +32,6 @@ import java.util.List;
  * wrapper methods from having to be called.
  * <p>
  * Works with {@link HBaseEdgeOutputFormat}
- *
  */
 @SuppressWarnings("rawtypes")
 public class HBaseEdgeInputFormat
@@ -68,7 +67,6 @@ public class HBaseEdgeInputFormat
      * edge instantiation details without worrying about connection
      * semantics. Subclasses are expected to implement nextEdge() and
      * getCurrentEdge()
-     *
      */
     public static class HBaseEdgeReader
             extends EdgeReader<ObjectWritable, EdgeValueWritable> {
@@ -122,7 +120,8 @@ public class HBaseEdgeInputFormat
             this.context = context;
         }
 
-        /** Get last HBase edge. Generate it if missing.
+        /**
+         * Get last HBase edge. Generate it if missing.
          *
          * @return The last HBase edge
          * @throws IOException

@@ -31,7 +31,6 @@ import java.util.List;
  * wrapper methods from having to be called.
  * <p>
  * Works with {@link HBaseVertexOutputFormat}
- *
  */
 @SuppressWarnings("rawtypes")
 public class HBaseVertexInputFormat
@@ -66,7 +65,6 @@ public class HBaseVertexInputFormat
      * vertex instantiation details without worrying about connection
      * semantics. Subclasses are expected to implement nextVertex() and
      * getCurrentVertex()
-     *
      */
     public static class HBaseVertexReader
             extends VertexValueReader<ObjectWritable, VertexValueWritable> {
@@ -120,7 +118,8 @@ public class HBaseVertexInputFormat
             this.context = context;
         }
 
-        /** Get last HBase vertex. Generate it if missing.
+        /**
+         * Get last HBase vertex. Generate it if missing.
          *
          * @return The last HBase vertex
          * @throws IOException

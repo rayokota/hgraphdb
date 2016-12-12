@@ -55,7 +55,7 @@ public abstract class ElementModel extends BaseModel {
      * Delete the property entry from property table.
      *
      * @param element The element
-     * @param key The property key
+     * @param key     The property key
      */
     public PropertyRemover clearProperty(Element element, String key) {
         return new PropertyRemover(graph, element, key);
@@ -65,8 +65,8 @@ public abstract class ElementModel extends BaseModel {
      * Write the given property to the property table.
      *
      * @param element The element
-     * @param key The property key
-     * @param value The property value
+     * @param key     The property key
+     * @param value   The property value
      */
     public PropertyWriter writeProperty(Element element, String key, Object value) {
         return new PropertyWriter(graph, element, key, value);
@@ -76,8 +76,8 @@ public abstract class ElementModel extends BaseModel {
      * Increment the given property in the property table.
      *
      * @param element The element
-     * @param key The property key
-     * @param value The amount to increment
+     * @param key     The property key
+     * @param value   The amount to increment
      */
     public PropertyIncrementer incrementProperty(Element element, String key, long value) {
         return new PropertyIncrementer(graph, element, key, value);

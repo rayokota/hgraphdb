@@ -27,7 +27,6 @@ import java.io.IOException;
  * wrapper methods from having to be called.
  * <p>
  * Works with {@link HBaseEdgeInputFormat}
- *
  */
 @SuppressWarnings("rawtypes")
 public abstract class HBaseEdgeOutputFormat
@@ -39,7 +38,6 @@ public abstract class HBaseEdgeOutputFormat
      * Simple class which takes an instance of RecordWriter
      * over Writable objects. Subclasses are
      * expected to implement writeEdge()
-     *
      */
     public abstract static class HBaseEdgeWriter
             extends EdgeWriter<ObjectWritable, VertexValueWritable, EdgeValueWritable> {

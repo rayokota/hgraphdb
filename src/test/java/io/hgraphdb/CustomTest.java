@@ -202,6 +202,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
     public Traversal<Vertex, Vertex> get_g_VX1X_outXknowsX(final Object v1Id) {
         return g.V(v1Id).out("knows");
     }
+
     private void assert_g_v1_outXknowsX(final Traversal<Vertex, Vertex> traversal) {
         printTraversalForm(traversal);
         printTraversalForm2(traversal);
@@ -240,6 +241,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
                 .outE("knows")
                 .has("weight", 1.0d).as("here").inV().has("name", "josh").select("here");
     }
+
     private static void assertCommonB(final Traversal<Vertex, Edge> traversal) {
         assertTrue(traversal.hasNext());
         assertTrue(traversal.hasNext());
@@ -264,14 +266,14 @@ public class CustomTest extends AbstractGremlinProcessTest {
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void shouldReadWriteModern() throws Exception {
         try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            ((HBaseGraph)graph).createIndex(ElementType.EDGE, "knows", "weight");
+            ((HBaseGraph) graph).createIndex(ElementType.EDGE, "knows", "weight");
             final GraphWriter writer = graph.io(ioBuilderToTest).writer().create();
             writer.writeGraph(os, graph);
 
             final Configuration configuration = graphProvider.newGraphConfiguration("readGraph", this.getClass(), name.getMethodName(), LoadGraphWith.GraphData.MODERN);
             graphProvider.clear(configuration);
             final Graph g1 = graphProvider.openTestGraph(configuration);
-            ((HBaseGraph)g1).createIndex(ElementType.EDGE, "knows", "weight");
+            ((HBaseGraph) g1).createIndex(ElementType.EDGE, "knows", "weight");
             final GraphReader reader = graph.io(ioBuilderToTest).reader().create();
             //((HBaseGraph) graph).dump();
             //((HBaseGraph) g1).dump();

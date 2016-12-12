@@ -2,9 +2,9 @@
  * This file is licensed to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the
  * License. You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * Modifications
  *
  * <ul>
-  *     <li>fix filter (by k-mack) : https://gist.github.com/k-mack/4600133</li>
+ *     <li>fix filter (by k-mack) : https://gist.github.com/k-mack/4600133</li>
  *     <li>fix batch() : implement all mutate operation and fix result[] count.</li>
  *     <li>fix exists()</li>
  *     <li>fix increment() : wrong return value</li>
@@ -566,7 +566,8 @@ public class MockHTable implements HTableInterface {
                 kv.updateLatestStamp(Bytes.toBytes(ts));
                 try {
                     Thread.sleep(1);  // sleep for 1 millis so timestamps don't conflict
-                } catch (InterruptedException e) { }
+                } catch (InterruptedException e) {
+                }
                 byte[] qualifier = kv.getQualifier();
                 NavigableMap<Long, byte[]> qualifierData = forceFind(familyData, qualifier, new ConcurrentSkipListMap<Long, byte[]>());
                 qualifierData.put(kv.getTimestamp(), kv.getValue());
@@ -590,33 +591,32 @@ public class MockHTable implements HTableInterface {
             return !data.containsKey(row) ||
                     !data.get(row).containsKey(family) ||
                     !data.get(row).get(family).containsKey(qualifier);
-        else
-            if (data.containsKey(row) &&
+        else if (data.containsKey(row) &&
                 data.get(row).containsKey(family) &&
                 data.get(row).get(family).containsKey(qualifier) &&
                 !data.get(row).get(family).get(qualifier).isEmpty()) {
 
-                byte[] oldValue = data.get(row).get(family).get(qualifier).lastEntry().getValue();
-                int compareResult = Bytes.compareTo(value, oldValue);
-                switch (compareOp) {
-                    case LESS:
-                        return compareResult < 0;
-                    case LESS_OR_EQUAL:
-                        return compareResult <= 0;
-                    case EQUAL:
-                        return compareResult == 0;
-                    case NOT_EQUAL:
-                        return compareResult != 0;
-                    case GREATER_OR_EQUAL:
-                        return compareResult >= 0;
-                    case GREATER:
-                        return compareResult > 0;
-                    default:
-                        throw new RuntimeException("Unknown Compare op " + compareOp.name());
-                }
-            } else {
-                return false;
+            byte[] oldValue = data.get(row).get(family).get(qualifier).lastEntry().getValue();
+            int compareResult = Bytes.compareTo(value, oldValue);
+            switch (compareOp) {
+                case LESS:
+                    return compareResult < 0;
+                case LESS_OR_EQUAL:
+                    return compareResult <= 0;
+                case EQUAL:
+                    return compareResult == 0;
+                case NOT_EQUAL:
+                    return compareResult != 0;
+                case GREATER_OR_EQUAL:
+                    return compareResult >= 0;
+                case GREATER:
+                    return compareResult > 0;
+                default:
+                    throw new RuntimeException("Unknown Compare op " + compareOp.name());
             }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -815,7 +815,7 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public <T extends Service, R> Map<byte[], R> coprocessorService(final Class<T> service,
-                                                                   byte[] startKey, byte[] endKey, final Batch.Call<T,R> callable)
+                                                                    byte[] startKey, byte[] endKey, final Batch.Call<T, R> callable)
             throws ServiceException, Throwable {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
@@ -834,7 +834,7 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public <T extends Service, R> void coprocessorService(final Class<T> service,
-                                                          byte[] startKey, byte[] endKey, final Batch.Call<T,R> callable,
+                                                          byte[] startKey, byte[] endKey, final Batch.Call<T, R> callable,
                                                           final Batch.Callback<R> callback) throws ServiceException, Throwable {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }

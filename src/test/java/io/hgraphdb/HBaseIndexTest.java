@@ -59,7 +59,8 @@ public class HBaseIndexTest extends HBaseGraphTest {
         try {
             graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
             fail("should reject non-unique key");
-        } catch (HBaseGraphNotUniqueException x) { }
+        } catch (HBaseGraphNotUniqueException x) {
+        }
 
         it = graph.verticesByLabel("a", "key1", 11);
         v = it.next();
@@ -180,7 +181,8 @@ public class HBaseIndexTest extends HBaseGraphTest {
         try {
             v10.addEdge("b", v12, "key1", 11);
             fail("should reject non-unique key");
-        } catch (HBaseGraphNotUniqueException x) { }
+        } catch (HBaseGraphNotUniqueException x) {
+        }
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         e = it.next();

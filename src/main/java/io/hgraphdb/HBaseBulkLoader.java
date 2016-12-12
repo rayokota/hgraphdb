@@ -33,9 +33,9 @@ public final class HBaseBulkLoader {
             this.graph = graph;
 
             BufferedMutator.ExceptionListener listener = (e, mutator) -> {
-                    for (int i = 0; i < e.getNumExceptions(); i++) {
-                        LOGGER.warn("Failed to send put: " + e.getRow(i));
-                    }
+                for (int i = 0; i < e.getNumExceptions(); i++) {
+                    LOGGER.warn("Failed to send put: " + e.getRow(i));
+                }
             };
 
             HBaseGraphConfiguration config = graph.configuration();

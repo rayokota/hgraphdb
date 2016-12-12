@@ -32,7 +32,7 @@ public class PropertyWriter implements Mutator {
         Put put = new Put(ValueUtils.serializeWithSalt(element.id()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key), bytes);
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
-                ValueUtils.serialize(((HBaseElement)element).updatedAt()));
+                ValueUtils.serialize(((HBaseElement) element).updatedAt()));
         return IteratorUtils.of(put);
     }
 }
