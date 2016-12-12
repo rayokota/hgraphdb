@@ -34,8 +34,8 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
     }
 
     public boolean isMock() {
-        return getConf().get(HBaseGraphConfiguration.Keys.INSTANCE_TYPE).equals(
-                HBaseGraphConfiguration.InstanceType.MOCK.toString());
+        return HBaseGraphConfiguration.InstanceType.MOCK.toString().equals(
+            getConf().get(HBaseGraphConfiguration.Keys.INSTANCE_TYPE));
     }
 
     public Connection getConnection() {

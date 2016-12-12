@@ -206,6 +206,44 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>fattestjar</id>
+            <build>
+                <plugins>
+                    <!-- create a complete jar for testing in other environments -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>                    
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>3.0.2</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>test-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/test-jar-with-dependencies.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
