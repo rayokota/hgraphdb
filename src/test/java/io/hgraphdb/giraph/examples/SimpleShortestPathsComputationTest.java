@@ -72,6 +72,55 @@ public class SimpleShortestPathsComputationTest extends HBaseGraphTest {
         assertEquals(4.0, distances.get(4L), 0d);
     }
 
+    /**
+     * A local integration test on toy data
+     */
+    @Ignore
+    @Test
+    public void testToyData2() throws Exception {
+
+        Vertex v0 = graph.addVertex(T.id, 0);
+        Vertex v1 = graph.addVertex(T.id, 1);
+        Vertex v2 = graph.addVertex(T.id, 2);
+        Vertex v3 = graph.addVertex(T.id, 3);
+        Vertex v4 = graph.addVertex(T.id, 4);
+        v0.addEdge("e", v1, "weight", 1);
+        v0.addEdge("e", v3, "weight", 3);
+        v1.addEdge("e", v0, "weight", 1);
+        v1.addEdge("e", v2, "weight", 2);
+        v1.addEdge("e", v3, "weight", 1);
+        v2.addEdge("e", v1, "weight", 2);
+        v2.addEdge("e", v4, "weight", 4);
+        v3.addEdge("e", v0, "weight", 3);
+        v3.addEdge("e", v1, "weight", 1);
+        v3.addEdge("e", v4, "weight", 4);
+        v4.addEdge("e", v3, "weight", 4);
+        v4.addEdge("e", v2, "weight", 4);
+
+        HBaseGraphConfiguration hconf = graph.configuration();
+        GiraphConfiguration conf = new GiraphConfiguration(hconf.toHBaseConfiguration());
+        // start from vertex 1
+        SOURCE_ID.set(conf, 1);
+        conf.setComputationClass(SimpleShortestPathsComputation.class);
+        conf.setEdgeInputFormatClass(HBaseEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(HBaseVertexInputFormat.class);
+        conf.setVertexOutputFormatClass(VertexWithDoubleValueNullEdgeTextOutputFormat.class);
+
+        // run internally
+        Iterable<String> results = InternalHBaseVertexRunner.run(conf);
+
+        Map<Long, Double> distances = parseDistances(results);
+
+        // verify results
+        assertNotNull(distances);
+        assertEquals(5, distances.size());
+        assertEquals(1.0, distances.get(0L), 0d);
+        assertEquals(0.0, distances.get(1L), 0d);
+        assertEquals(2.0, distances.get(2L), 0d);
+        assertEquals(1.0, distances.get(3L), 0d);
+        assertEquals(5.0, distances.get(4L), 0d);
+    }
+
     private Map<Long, Double> parseDistances(Iterable<String> results) {
         Map<Long, Double> distances =
                 Maps.newHashMapWithExpectedSize(Iterables.size(results));
