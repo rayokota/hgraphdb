@@ -1,4 +1,4 @@
-package io.hgraphdb.giraph.hbase;
+package io.hgraphdb.giraph.utils;
 
 import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.commons.logging.Log;

@@ -6,7 +6,7 @@ import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
-import io.hgraphdb.giraph.InternalHBaseVertexRunner;
+import io.hgraphdb.giraph.utils.InternalHBaseVertexRunner;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;

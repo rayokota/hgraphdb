@@ -3,7 +3,7 @@ package io.hgraphdb.giraph;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseVertex;
-import io.hgraphdb.giraph.hbase.TableInputFormat;
+import io.hgraphdb.giraph.utils.TableInputFormat;
 import io.hgraphdb.readers.VertexReader;
 import org.apache.giraph.io.VertexValueInputFormat;
 import org.apache.giraph.io.VertexValueReader;

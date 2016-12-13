@@ -144,7 +144,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
     }
 
     public int getRegionCount() {
-        return conf.getInt(Keys.REGION_COUNT, 256);
+        return conf.getInt(Keys.REGION_COUNT, 1);
     }
 
     public HBaseGraphConfiguration setRegionCount(int regionCount) {
