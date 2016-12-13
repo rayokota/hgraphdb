@@ -135,6 +135,14 @@ Counters can be used by clients to materialize the number of edges on a node, fo
 
 Counter updates are atomic as they make use of the underlying support for counters in HBase.  
 
+## Graph Analytics with Giraph
+
+HGraphDB provides integration with [Apache Giraph](http://giraph.apache.org) by providing two input formats, `HBaseVertexInputFormat` and `HBaseEdgeInputFormat`, that can be used to read from the vertices table and the edges tables, respectively.  HGraphDB also provides two abstract output formats, `HBaseVertexOutputFormat` and `HBaseEdgeOutputFormat`, that can be used to modify the graph after a Giraph computation.
+
+Finally, HGraphDB provides a testing utility, `InternalHBaseVertexRunner`, that is similar to `InternalVertexRunner` in Giraph, and that can be used to run Giraph computations using a local Zookeeper instance running in another thread.
+
+For more information on using the HGraphDB integration with Giraph, see [this blog] (https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
+
 ## Using the Gremlin Console
 
 One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
