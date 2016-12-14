@@ -3,6 +3,8 @@ package io.hgraphdb;
 import io.hgraphdb.mutators.*;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 public final class HBaseBulkLoader {
 
@@ -23,6 +26,7 @@ public final class HBaseBulkLoader {
     private BufferedMutator edgeIndicesMutator;
     private BufferedMutator verticesMutator;
     private BufferedMutator vertexIndicesMutator;
+    private boolean skipWAL;
 
     public HBaseBulkLoader(HBaseGraphConfiguration config) throws IOException {
         this(new HBaseGraph(config, HBaseGraphUtils.getConnection(config)));
@@ -53,6 +57,8 @@ public final class HBaseBulkLoader {
             edgeIndicesMutator = graph.connection().getBufferedMutator(edgeIndicesMutatorParams);
             verticesMutator = graph.connection().getBufferedMutator(verticesMutatorParams);
             vertexIndicesMutator = graph.connection().getBufferedMutator(vertexIndicesMutatorParams);
+
+            skipWAL = config.getBulkLoaderSkipWAL();
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -75,10 +81,10 @@ public final class HBaseBulkLoader {
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
             VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
-            vertexIndicesMutator.mutate(IteratorUtils.list(writer.constructInsertions()));
+            vertexIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
 
             Creator creator = new VertexWriter(graph, vertex);
-            verticesMutator.mutate(IteratorUtils.list(creator.constructInsertions()));
+            verticesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return vertex;
         } catch (IOException e) {
@@ -100,13 +106,13 @@ public final class HBaseBulkLoader {
 
             Iterator<IndexMetadata> indices = edge.getIndices(OperationType.WRITE);
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
-            edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
+            edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
 
             EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT, null);
-            edgeIndicesMutator.mutate(IteratorUtils.list(writer.constructInsertions()));
+            edgeIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
 
             Creator creator = new EdgeWriter(graph, edge);
-            edgesMutator.mutate(IteratorUtils.list(creator.constructInsertions()));
+            edgesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return edge;
         } catch (IOException e) {
@@ -129,7 +135,7 @@ public final class HBaseBulkLoader {
                 oldValue = e.getProperty(key);
                 if (oldValue != null && !oldValue.equals(value)) {
                     EdgeIndexRemover indexRemover = new EdgeIndexRemover(graph, e, key, null);
-                    edgeIndicesMutator.mutate(IteratorUtils.list(indexRemover.constructMutations()));
+                    edgeIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
                 }
             }
 
@@ -139,11 +145,11 @@ public final class HBaseBulkLoader {
             if (hasIndex) {
                 if (oldValue == null || !oldValue.equals(value)) {
                     EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, e, key, null);
-                    edgeIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
+                    edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
                 }
             }
             PropertyWriter propertyWriter = new PropertyWriter(graph, e, key, value);
-            edgesMutator.mutate(IteratorUtils.list(propertyWriter.constructMutations()));
+            edgesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -164,7 +170,7 @@ public final class HBaseBulkLoader {
                 oldValue = v.getProperty(key);
                 if (oldValue != null && !oldValue.equals(value)) {
                     VertexIndexRemover indexRemover = new VertexIndexRemover(graph, v, key, null);
-                    vertexIndicesMutator.mutate(IteratorUtils.list(indexRemover.constructMutations()));
+                    vertexIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
                 }
             }
 
@@ -174,14 +180,19 @@ public final class HBaseBulkLoader {
             if (hasIndex) {
                 if (oldValue == null || !oldValue.equals(value)) {
                     VertexIndexWriter indexWriter = new VertexIndexWriter(graph, v, key);
-                    vertexIndicesMutator.mutate(IteratorUtils.list(indexWriter.constructInsertions()));
+                    vertexIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
                 }
             }
             PropertyWriter propertyWriter = new PropertyWriter(graph, v, key, value);
-            verticesMutator.mutate(IteratorUtils.list(propertyWriter.constructMutations()));
+            verticesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
+    }
+
+    private List<? extends Mutation> getMutationList(Iterator<? extends Mutation> mutations) {
+        return IteratorUtils.list(IteratorUtils.consume(mutations,
+                m -> m.setDurability(skipWAL ? Durability.SKIP_WAL : Durability.USE_DEFAULT)));
     }
 
     public void close() {

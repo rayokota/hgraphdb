@@ -2,11 +2,7 @@ package io.hgraphdb;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
-import org.apache.hadoop.hbase.client.Admin;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
@@ -116,6 +112,7 @@ public final class HBaseGraphUtils {
         TableName tableName = getTableName(config, name);
         if (admin.tableExists(tableName)) return;
         HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
+        tableDescriptor.setDurability(config.getTableAsyncWAL() ? Durability.ASYNC_WAL : Durability.USE_DEFAULT);
         HColumnDescriptor columnDescriptor = new HColumnDescriptor(DEFAULT_FAMILY)
                 .setCompressionType(Compression.Algorithm.valueOf(config.getCompressionAlgorithm().toUpperCase()))
                 .setBloomFilterType(BloomType.ROW)

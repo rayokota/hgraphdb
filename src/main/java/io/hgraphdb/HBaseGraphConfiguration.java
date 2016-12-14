@@ -28,15 +28,17 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         public static final String GRAPH_NAMESPACE                 = "gremlin.hbase.namespace";
         public static final String GRAPH_TABLE_PREFIX              = "gremlin.hbase.tablePrefix";
         public static final String CREATE_TABLES                   = "gremlin.hbase.createTables";
+        public static final String TABLE_ASYNC_WAL                 = "gremlin.hbase.tableAsyncWAL";
+        public static final String COMPRESSION_ALGO                = "gremlin.hbase.compression";
         public static final String EDGE_TABLE_TTL                  = "gremlin.hbase.edgeTableTTL";
         public static final String VERTEX_TABLE_TTL                = "gremlin.hbase.vertexTableTTL";
         public static final String REGION_COUNT                    = "gremlin.hbase.regionCount";
-        public static final String COMPRESSION_ALGO                = "gremlin.hbase.compression";
         public static final String GLOBAL_CACHE_MAX_SIZE           = "gremlin.hbase.globalCacheMaxSize";
         public static final String GLOBAL_CACHE_TTL_SECS           = "gremlin.hbase.globalCacheTtlSecs";
         public static final String RELATIONSHIP_CACHE_MAX_SIZE     = "gremlin.hbase.relationshipCacheMaxSize";
         public static final String RELATIONSHIP_CACHE_TTL_SECS     = "gremlin.hbase.relationshipCacheTtlSecs";
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
+        public static final String BULK_LOADER_SKIP_WAL            = "gremlin.hbase.bulkLoaderSkipWAL";
         public static final String USE_SCHEMA                      = "gremlin.hbase.useSchema";
 
         /* How often to refresh the schema cache */
@@ -127,6 +129,24 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    public boolean getTableAsyncWAL() {
+        return conf.getBoolean(Keys.TABLE_ASYNC_WAL, false);
+    }
+
+    public HBaseGraphConfiguration setTableAsyncWAL(boolean tableAsyncWAL) {
+        conf.setProperty(Keys.TABLE_ASYNC_WAL, tableAsyncWAL);
+        return this;
+    }
+
+    public String getCompressionAlgorithm() {
+        return conf.getString(Keys.COMPRESSION_ALGO, "gz");
+    }
+
+    public HBaseGraphConfiguration setCompressionAlgorithm(String compressionAlgorithm) {
+        conf.setProperty(Keys.COMPRESSION_ALGO, compressionAlgorithm);
+        return this;
+    }
+
     public int getEdgeTableTTL() {
         return conf.getInt(Keys.EDGE_TABLE_TTL, HConstants.FOREVER);
     }
@@ -151,15 +171,6 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration setRegionCount(int regionCount) {
         conf.setProperty(Keys.REGION_COUNT, regionCount);
-        return this;
-    }
-
-    public String getCompressionAlgorithm() {
-        return conf.getString(Keys.COMPRESSION_ALGO, "gz");
-    }
-
-    public HBaseGraphConfiguration setCompressionAlgorithm(String compressionAlgorithm) {
-        conf.setProperty(Keys.COMPRESSION_ALGO, compressionAlgorithm);
         return this;
     }
 
@@ -205,6 +216,15 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration setLazyLoading(boolean lazyLoading) {
         conf.setProperty(Keys.LAZY_LOADING, lazyLoading);
+        return this;
+    }
+
+    public boolean getBulkLoaderSkipWAL() {
+        return conf.getBoolean(Keys.BULK_LOADER_SKIP_WAL, false);
+    }
+
+    public HBaseGraphConfiguration setBulkLoaderSkipWAL(boolean bulkLoaderSkipWAL) {
+        conf.setProperty(Keys.BULK_LOADER_SKIP_WAL, bulkLoaderSkipWAL);
         return this;
     }
 
