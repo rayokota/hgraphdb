@@ -53,6 +53,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration() {
         conf = new PropertiesConfiguration();
+        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
     }
 
@@ -68,6 +69,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
 
     public HBaseGraphConfiguration(org.apache.hadoop.conf.Configuration config) {
         conf = new PropertiesConfiguration();
+        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
         if (config != null) {
             config.iterator().forEachRemaining(entry ->
