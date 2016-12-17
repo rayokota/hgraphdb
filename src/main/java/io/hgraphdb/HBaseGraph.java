@@ -301,7 +301,7 @@ public class HBaseGraph implements Graph {
         return findVertex(id, true);
     }
 
-    public Vertex findVertex(Object id, boolean createIfNotFound) {
+    protected Vertex findVertex(Object id, boolean createIfNotFound) {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
@@ -393,7 +393,7 @@ public class HBaseGraph implements Graph {
         return findEdge(id, true);
     }
 
-    public Edge findEdge(Object id, boolean createIfNotFound) {
+    protected Edge findEdge(Object id, boolean createIfNotFound) {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }

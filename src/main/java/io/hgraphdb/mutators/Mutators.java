@@ -73,8 +73,8 @@ public class Mutators {
     }
 
     private static Object[] write(Table table, List<Mutation> mutations) {
-        if (mutations.size() == 0) return new Object[0];
         Object[] results = new Object[mutations.size()];
+        if (mutations.size() == 0) return results;
         try {
             table.batch(mutations, results);
             for (Object result : results) {
