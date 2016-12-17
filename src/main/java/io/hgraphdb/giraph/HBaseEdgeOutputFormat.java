@@ -20,12 +20,7 @@ import java.io.IOException;
  * Base class for writing Edge mutations back to specific
  * rows in an HBase table. This class wraps an instance of TableOutputFormat
  * for easy configuration with the existing properties.
- * <p>
- * Setting conf.set(TableOutputFormat.OUTPUT_TABLE, "out_table");
- * will properly delegate to the TableOutputFormat instance contained
- * in this class. The Configurable interface prevents specific
- * wrapper methods from having to be called.
- * <p>
+ *
  * Works with {@link HBaseEdgeInputFormat}
  */
 @SuppressWarnings("rawtypes")

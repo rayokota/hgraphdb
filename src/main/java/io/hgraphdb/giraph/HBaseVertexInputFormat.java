@@ -25,7 +25,7 @@ import java.util.List;
  * the static TableInputFormat properties necessary to configure
  * an HBase job are available.
  * <p>
- * For example, setting conf.set(TableInputFormat.INPUT_TABLE, "in_table");
+ * Setting conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, "in_table");
  * from the job setup routine will properly delegate to the
  * TableInputFormat instance. The Configurable interface prevents specific
  * wrapper methods from having to be called.
