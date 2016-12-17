@@ -28,7 +28,7 @@ public final class HBaseBulkLoader {
     private BufferedMutator vertexIndicesMutator;
     private boolean skipWAL;
 
-    public HBaseBulkLoader(HBaseGraphConfiguration config) throws IOException {
+    public HBaseBulkLoader(HBaseGraphConfiguration config) {
         this(new HBaseGraph(config, HBaseGraphUtils.getConnection(config)));
     }
 

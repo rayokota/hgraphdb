@@ -60,7 +60,7 @@ public class MockHTable implements HTableInterface {
     private final List<Class<? extends Service>> coprocessorClasses = new ArrayList<>();
     private Configuration config;
 
-    private NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data
+    private final NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data
             = new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR);
 
     private static List<KeyValue> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, int maxVersions) {

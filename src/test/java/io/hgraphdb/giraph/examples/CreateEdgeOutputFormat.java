@@ -27,8 +27,7 @@ public class CreateEdgeOutputFormat extends HBaseEdgeOutputFormat {
      */
     public static class TestEdgeWriter extends HBaseEdgeWriter {
 
-        public TestEdgeWriter(TaskAttemptContext context)
-                throws IOException, InterruptedException {
+        public TestEdgeWriter(TaskAttemptContext context) {
             super(context);
         }
 

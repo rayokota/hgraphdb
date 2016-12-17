@@ -31,14 +31,6 @@ public class SimpleShortestPathsComputationTest extends HBaseGraphTest {
     @Test
     public void testToyData() throws Exception {
 
-        // a small four vertex graph
-        String[] graphx = new String[]{
-                "1 2:1.0 3:3.0",
-                "2 3:1.0 4:10.0",
-                "3 4:2.0",
-                "4"
-        };
-
         Vertex v1 = graph.addVertex(T.id, 1);
         Vertex v2 = graph.addVertex(T.id, 2);
         Vertex v3 = graph.addVertex(T.id, 3);

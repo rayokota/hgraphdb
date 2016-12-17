@@ -30,8 +30,7 @@ public class MaxPropertyVertexOutputFormat extends HBaseVertexOutputFormat {
      */
     public static class TestVertexWriter extends HBaseVertexWriter {
 
-        public TestVertexWriter(TaskAttemptContext context)
-                throws IOException, InterruptedException {
+        public TestVertexWriter(TaskAttemptContext context) {
             super(context);
         }
 

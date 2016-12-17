@@ -149,9 +149,7 @@ public class HBaseEdgeInputFormat
         @Override
         public Edge<ObjectWritable, EdgeValueWritable> getCurrentEdge()
                 throws IOException, InterruptedException {
-            Edge<ObjectWritable, EdgeValueWritable> edge = EdgeFactory.create(
-                    getCurrentTargetId(), new EdgeValueWritable(getCurrentHBaseEdge()));
-            return edge;
+            return EdgeFactory.create(getCurrentTargetId(), new EdgeValueWritable(getCurrentHBaseEdge()));
         }
 
         @SuppressWarnings("unchecked")

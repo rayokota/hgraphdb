@@ -31,10 +31,10 @@ import java.util.List;
 
 public class MockBufferedMutator implements BufferedMutator {
 
-    private Connection conn;
-    private TableName name;
-    private Configuration config;
-    private List<Mutation> mutations = new ArrayList<>();
+    private final Connection conn;
+    private final TableName name;
+    private final Configuration config;
+    private final List<Mutation> mutations = new ArrayList<>();
 
     public MockBufferedMutator(Connection conn, TableName name, Configuration config) {
         this.conn = conn;

@@ -2,10 +2,10 @@ package io.hgraphdb;
 
 public class LabelConnection {
 
-    private String outVertexLabel;
-    private String edgeLabel;
-    private String inVertexLabel;
-    private Long createdAt;
+    private final String outVertexLabel;
+    private final String edgeLabel;
+    private final String inVertexLabel;
+    private final Long createdAt;
 
     public LabelConnection(String outVertexLabel, String edgeLabel, String inVertexLabel, Long createdAt) {
         this.outVertexLabel = outVertexLabel;

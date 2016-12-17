@@ -158,7 +158,7 @@ public class EdgeIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.<Result, Edge>flatMap(
+            return IteratorUtils.flatMap(
                     IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
@@ -243,12 +243,12 @@ public class EdgeIndexModel extends BaseModel {
 
         FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
         filterList.addFilter(prefixFilter);
-        filterList.addFilter(applyEdgeLabelsRowFilter(scan, vertex, direction, key, labels));
+        filterList.addFilter(applyEdgeLabelsRowFilter(vertex, direction, key, labels));
         scan.setFilter(filterList);
         return scan;
     }
 
-    private FilterList applyEdgeLabelsRowFilter(Scan scan, Vertex vertex, Direction direction, String key, String... labels) {
+    private FilterList applyEdgeLabelsRowFilter(Vertex vertex, Direction direction, String key, String... labels) {
         FilterList rowFilters = new FilterList(FilterList.Operator.MUST_PASS_ONE);
         if (labels.length > 0) {
             Arrays.stream(labels).forEach(label -> {

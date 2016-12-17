@@ -50,15 +50,14 @@ public abstract class HBaseEdgeOutputFormat
         /**
          * Bulk loader
          */
-        private HBaseBulkLoader writer;
+        private final HBaseBulkLoader writer;
 
         /**
          * Sets up base table output format and creates a record writer.
          *
          * @param context task attempt context
          */
-        public HBaseEdgeWriter(TaskAttemptContext context)
-                throws IOException, InterruptedException {
+        public HBaseEdgeWriter(TaskAttemptContext context) {
             this.writer = new HBaseBulkLoader(new HBaseGraphConfiguration(context.getConfiguration()));
             this.graph = writer.getGraph();
         }

@@ -29,8 +29,8 @@ import java.util.concurrent.ExecutorService;
 
 public class MockConnection implements Connection {
 
-    private Configuration config;
-    private Map<TableName, Table> tables = new ConcurrentHashMap<>();
+    private final Configuration config;
+    private final Map<TableName, Table> tables = new ConcurrentHashMap<>();
 
     public MockConnection(Configuration config) {
         this.config = config;

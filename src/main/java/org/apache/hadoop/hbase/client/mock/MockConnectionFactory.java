@@ -3,8 +3,6 @@ package org.apache.hadoop.hbase.client.mock;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 
-import java.io.IOException;
-
 
 public class MockConnectionFactory {
 
@@ -13,7 +11,7 @@ public class MockConnectionFactory {
     protected MockConnectionFactory() {
     }
 
-    public static Connection createConnection(Configuration conf) throws IOException {
+    public static Connection createConnection(Configuration conf) {
         if (connection == null) {
             connection = new MockConnection(conf);
         }

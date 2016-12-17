@@ -96,7 +96,7 @@ public class VertexIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.<Result, Vertex>flatMap(
+            return IteratorUtils.flatMap(
                     IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {

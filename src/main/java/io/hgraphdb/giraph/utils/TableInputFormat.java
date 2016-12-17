@@ -25,7 +25,7 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
     @SuppressWarnings("hiding")
     private static final Log LOG = LogFactory.getLog(TableInputFormat.class);
 
-    private String tablePropertyKey;
+    private final String tablePropertyKey;
     private Connection connection;
     private Table table;
 

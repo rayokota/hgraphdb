@@ -5,9 +5,9 @@ import java.util.Map;
 public class LabelMetadata {
 
     private final Key key;
-    private ValueType idType;
-    private Map<String, ValueType> propertyTypes;
-    protected Long createdAt;
+    private final ValueType idType;
+    private final Map<String, ValueType> propertyTypes;
+    protected final Long createdAt;
     protected Long updatedAt;
 
     public LabelMetadata(ElementType type, String label, ValueType idType,

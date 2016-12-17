@@ -49,15 +49,14 @@ public abstract class HBaseVertexOutputFormat
         /**
          * Bulk loader
          */
-        private HBaseBulkLoader writer;
+        private final HBaseBulkLoader writer;
 
         /**
          * Sets up base table output format and creates a record writer.
          *
          * @param context task attempt context
          */
-        public HBaseVertexWriter(TaskAttemptContext context)
-                throws IOException, InterruptedException {
+        public HBaseVertexWriter(TaskAttemptContext context) {
             this.writer = new HBaseBulkLoader(new HBaseGraphConfiguration(context.getConfiguration()));
             this.graph = writer.getGraph();
         }
