@@ -165,6 +165,7 @@ public final class HBaseGraphUtils {
             admin.disableTable(tableName);
         }
         admin.truncateTable(tableName, true);
+        admin.enableTable(tableName);
     }
 
     private static byte[] getStartKey(int regionCount) {
