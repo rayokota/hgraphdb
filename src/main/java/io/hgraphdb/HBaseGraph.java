@@ -253,6 +253,7 @@ public class HBaseGraph implements Graph {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
+        newVertex.validate();
         newVertex.writeToIndexModel();
         newVertex.writeToModel();
 

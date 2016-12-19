@@ -40,12 +40,17 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         super(graph, id, label, createdAt, updatedAt, properties, propertiesFullyLoaded);
 
         if (graph != null) {
-            graph.validateVertex(label, id, properties);
-
             this.edgeCache = CacheBuilder.<Tuple, List<Edge>>newBuilder()
                     .maximumSize(graph.configuration().getRelationshipCacheMaxSize())
                     .expireAfterAccess(graph.configuration().getRelationshipCacheTtlSecs(), TimeUnit.SECONDS)
                     .build();
+        }
+    }
+
+    @Override
+    public void validate() {
+        if (graph != null) {
+            graph.validateVertex(label, id, properties);
         }
     }
 
@@ -79,6 +84,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
+        newEdge.validate();
         newEdge.writeEdgeEndpoints();
         newEdge.writeToModel();
 

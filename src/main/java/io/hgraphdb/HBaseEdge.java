@@ -41,7 +41,10 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
         this.inVertex = inVertex;
         this.outVertex = outVertex;
+    }
 
+    @Override
+    public void validate() {
         if (graph != null) {
             graph.validateEdge(label, id, properties, inVertex, outVertex);
         }

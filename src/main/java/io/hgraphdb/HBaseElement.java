@@ -49,6 +49,8 @@ public abstract class HBaseElement implements Element {
         this.propertiesFullyLoaded = propertiesFullyLoaded;
     }
 
+    public abstract void validate();
+
     public abstract ElementType getElementType();
 
     public Table getTable() {

@@ -78,6 +78,7 @@ public final class HBaseBulkLoader {
             long now = System.currentTimeMillis();
             HBaseVertex vertex = new HBaseVertex(graph, idValue, label, now, now,
                     HBaseGraphUtils.propertiesToMap(keyValues));
+            vertex.validate();
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
             VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
@@ -103,6 +104,7 @@ public final class HBaseBulkLoader {
             long now = System.currentTimeMillis();
             HBaseEdge edge = new HBaseEdge(graph, idValue, label, now, now,
                     HBaseGraphUtils.propertiesToMap(keyValues), inVertex, outVertex);
+            edge.validate();
 
             Iterator<IndexMetadata> indices = edge.getIndices(OperationType.WRITE);
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
