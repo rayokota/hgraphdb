@@ -1,4 +1,4 @@
-package io.hgraphdb.giraph.utils;
+package io.hgraphdb.mapreduce;
 
 import io.hgraphdb.HBaseGraphConfiguration;
 import org.apache.commons.logging.Log;
@@ -28,6 +28,10 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
     private final String tablePropertyKey;
     private Connection connection;
     private Table table;
+
+    public TableInputFormat() {
+        this(org.apache.hadoop.hbase.mapreduce.TableInputFormat.INPUT_TABLE);
+    }
 
     public TableInputFormat(String tablePropertyKey) {
         this.tablePropertyKey = tablePropertyKey;

@@ -3,7 +3,7 @@ package io.hgraphdb.giraph;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
-import io.hgraphdb.giraph.utils.TableInputFormat;
+import io.hgraphdb.mapreduce.TableInputFormat;
 import org.apache.giraph.edge.Edge;
 import org.apache.giraph.edge.EdgeFactory;
 import org.apache.giraph.io.EdgeInputFormat;
