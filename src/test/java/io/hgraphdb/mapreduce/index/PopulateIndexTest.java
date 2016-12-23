@@ -31,7 +31,7 @@ public class PopulateIndexTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(13), T.label, "a", "key1", 11);
         graph.addVertex(T.id, id(14), T.label, "b", "key1", 11);
 
-        graph.createIndex(ElementType.VERTEX, "a", "key1");
+        graph.createIndex(ElementType.VERTEX, "a", "key1", false, true, true);
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();
@@ -59,7 +59,7 @@ public class PopulateIndexTest extends HBaseGraphTest {
         v0.addEdge("a", v1, "key1", 1);
         v0.addEdge("b", v4, "key1", 4);
 
-        graph.createIndex(ElementType.EDGE, "b", "key1");
+        graph.createIndex(ElementType.EDGE, "b", "key1", false, true, true);
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();

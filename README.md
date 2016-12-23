@@ -9,7 +9,7 @@ Releases of HGraphDB are deployed to Maven Central.
 		<dependency>
 		    <groupId>io.hgraphdb</groupId>
 		    <artifactId>hgraphdb</artifactId>
-		    <version>0.4.6</version>
+		    <version>0.4.8</version>
 		</dependency>
 
 ## Setup
@@ -68,7 +68,14 @@ An index is created as follows:
 		...
 		graph.createIndex(ElementType.EDGE, "knows", "since");
 
-Indices should be created before the relevant data is populated.  A future [enhancement](#future) will allow for index creation after data population.
+The above commands should be run before the relevant data is populated.  To create an index after data has been populated, first create the index with the following parameters:
+
+		graph.createIndex(ElementType.VERTEX, "person", "name", false, /* populate */ true, /* isAsync */ true);
+		
+Then run a map-reduce job using the `hbase` command.
+
+		hbase io.hgraphdb.mapreduce.index.PopulateIndex \
+		    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
 
 Once an index is created and data has been populated, it can be used as follows:
 
@@ -156,7 +163,7 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.4.6
+        gremlin> :install io.hgraphdb hgraphdb 0.4.8
         gremlin> :plugin use io.hgraphdb
                 
 Then restart the Gremlin console and run the following:
@@ -234,7 +241,6 @@ HGraphDB was designed to support the features mentioned [here](https://rayokota.
 
 Possible future enhancements include map-reduce jobs for the following:
 
-- Populating indices after graph elements have already been added.
 - Cleaning up stale indices.
 - Deleting indices.
 
