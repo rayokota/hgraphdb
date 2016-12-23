@@ -45,8 +45,9 @@ public class EdgeIndexWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        return keys.entrySet().stream().filter(entry -> edge.keys().contains(entry.getKey())).flatMap(entry ->
-                Stream.of(constructPut(Direction.IN, entry), constructPut(Direction.OUT, entry)))
+        return keys.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(Constants.CREATED_AT) || edge.keys().contains(entry.getKey()))
+                .flatMap(entry -> Stream.of(constructPut(Direction.IN, entry), constructPut(Direction.OUT, entry)))
                 .iterator();
     }
 
