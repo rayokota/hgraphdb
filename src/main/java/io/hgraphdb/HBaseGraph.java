@@ -97,8 +97,8 @@ public class HBaseGraph implements Graph {
     static {
         TraversalStrategies.GlobalCache.registerStrategies(HBaseGraph.class,
                 TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(
-                        HBaseGraphStepStrategy.instance(),
-                        HBaseVertexStepStrategy.instance()
+                        //HBaseVertexStepStrategy.instance(),
+                        HBaseGraphStepStrategy.instance()
                 ));
     }
 
