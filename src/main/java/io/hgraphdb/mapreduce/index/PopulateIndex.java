@@ -235,8 +235,8 @@ public class PopulateIndex extends Configured implements Tool {
 
     /**
      * Submits the job and waits for completion.
-     * @param job
-     * @param outputPath
+     * @param job job
+     * @param outputPath output path
      * @throws Exception
      */
     private void configureRunnableJobUsingBulkLoad(Job job, Path outputPath, TableName outputTableName,
@@ -270,8 +270,8 @@ public class PopulateIndex extends Configured implements Tool {
      * Uses the HBase Front Door Api to write to index table. Submits the job and either returns or
      * waits for the job completion based on runForeground parameter.
      * 
-     * @param job
-     * @param outputPath
+     * @param job job
+     * @param outputPath output path
      * @param runForeground - if true, waits for job completion, else submits and returns
      *            immediately.
      * @throws Exception

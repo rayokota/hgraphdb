@@ -46,11 +46,6 @@ public class VertexIndexModel extends BaseModel {
         Mutators.create(table, writer);
     }
 
-    public void writeVertexIndex(Vertex vertex, IndexMetadata index) {
-        VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, IteratorUtils.of(index), null);
-        Mutators.create(table, writer);
-    }
-
     public void deleteVertexIndex(Vertex vertex, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseVertex) vertex).getIndices(OperationType.WRITE);
         VertexIndexRemover writer = new VertexIndexRemover(graph, vertex, indices, ts);

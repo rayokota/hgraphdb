@@ -10,7 +10,7 @@ import org.apache.hadoop.hbase.client.Table;
 
 import java.io.IOException;
 
-public abstract class BaseModel {
+public abstract class BaseModel implements AutoCloseable {
 
     protected final HBaseGraph graph;
     protected final Table table;

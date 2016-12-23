@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-public final class HBaseBulkLoader {
+public final class HBaseBulkLoader implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseBulkLoader.class);
 
@@ -81,13 +81,21 @@ public final class HBaseBulkLoader {
             vertex.validate();
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
-            VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
-            vertexIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
+            indexVertex(vertex, indices);
 
             Creator creator = new VertexWriter(graph, vertex);
             verticesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return vertex;
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    public void indexVertex(Vertex vertex, Iterator<IndexMetadata> indices) {
+        try {
+            VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
+            vertexIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -107,8 +115,7 @@ public final class HBaseBulkLoader {
             edge.validate();
 
             Iterator<IndexMetadata> indices = edge.getIndices(OperationType.WRITE);
-            EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
-            edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
+            indexEdge(edge, indices);
 
             EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
             edgeIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
@@ -117,6 +124,15 @@ public final class HBaseBulkLoader {
             edgesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return edge;
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    public void indexEdge(Edge edge, Iterator<IndexMetadata> indices) {
+        try {
+            EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
+            edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

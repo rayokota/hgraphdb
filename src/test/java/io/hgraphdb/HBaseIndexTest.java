@@ -1,9 +1,17 @@
 package io.hgraphdb;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Iterator;
 
@@ -44,6 +52,27 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = graph.verticesByLabel("a", "key1", 11);
         assertEquals(2, count(it));
+    }
+
+    @Test
+    public void testPopulateVertexIndex() throws Exception {
+        assertEquals(0, count(graph.vertices()));
+        graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
+        graph.addVertex(T.id, id(11), T.label, "a", "key1", 12);
+        graph.addVertex(T.id, id(12), T.label, "a", "key2", 12);
+        graph.addVertex(T.id, id(13), T.label, "a", "key1", 11);
+        graph.addVertex(T.id, id(14), T.label, "b", "key1", 11);
+
+
+        HBaseGraphConfiguration hconf = graph.configuration();
+        Configuration conf = hconf.toHBaseConfiguration();
+        Connection conn = MockConnectionFactory.createConnection(conf);
+        Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.VERTEX_INDICES));
+
+        graph.createIndex(ElementType.VERTEX, "a", "key1", false, true, false);
+        verifyTableCount(table, 3);
+
+        table.close();
     }
 
     @Test
@@ -160,6 +189,32 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
         it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
         assertEquals(2, count(it));
+    }
+
+    @Test
+    public void testPopulateEdgeIndex() throws Exception {
+        assertEquals(0, count(graph.vertices()));
+        Vertex v0 = graph.addVertex(T.id, id(0));
+        Vertex v1 = graph.addVertex(T.id, id(1));
+        Vertex v2 = graph.addVertex(T.id, id(2));
+        Vertex v3 = graph.addVertex(T.id, id(3));
+        Vertex v4 = graph.addVertex(T.id, id(4));
+        v0.addEdge("b", v1, "key1", 1);
+        v0.addEdge("b", v2, "key1", 2);
+        v0.addEdge("b", v3, "key2", 3);
+        v0.addEdge("a", v1, "key1", 1);
+        v0.addEdge("b", v4, "key1", 4);
+
+        HBaseGraphConfiguration hconf = graph.configuration();
+        Configuration conf = hconf.toHBaseConfiguration();
+        Connection conn = MockConnectionFactory.createConnection(conf);
+        Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.EDGE_INDICES));
+
+        verifyTableCount(table, 5*2);  // 5 edge endpoints
+        graph.createIndex(ElementType.EDGE, "b", "key1", false, true, false);
+        verifyTableCount(table, 5*2 + 3*2);  // 5 edge endpoints and 3 indices
+
+        table.close();
     }
 
     @Test
@@ -437,5 +492,17 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Iterator<Edge> it2 = v.edgesInRange(Direction.OUT, "knows", "since",
                 LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
         assertEquals(3, count(it2));
+    }
+
+    private void verifyTableCount(final Table table, final int count) throws IOException {
+        Scan scan = new Scan();
+        scan.setMaxVersions(1);
+        ResultScanner scanner = table.getScanner(scan);
+        int i = 0;
+        for (Result r : scanner) {
+            i++;
+        }
+        assertEquals(count, i);
+        scanner.close();
     }
 }

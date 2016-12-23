@@ -52,11 +52,6 @@ public class EdgeIndexModel extends BaseModel {
         Mutators.create(table, indexWriter);
     }
 
-    public void writeEdgeIndex(Edge edge, IndexMetadata index) {
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, IteratorUtils.of(index), null);
-        Mutators.create(table, indexWriter);
-    }
-
     public void deleteEdgeEndpoints(Edge edge, Long ts) {
         Iterator<IndexMetadata> indices = ((HBaseEdge) edge).getIndices(OperationType.WRITE);
         EdgeIndexRemover indexWriter = new EdgeIndexRemover(graph, edge, indices, ts);

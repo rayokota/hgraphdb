@@ -18,6 +18,7 @@ import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -487,14 +488,14 @@ public class HBaseGraph implements Graph {
     }
 
     public void createIndex(ElementType type, String label, String propertyKey) {
-        createIndex(type, label, propertyKey, false, false);
+        createIndex(type, label, propertyKey, false, false, false);
     }
 
     public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique) {
-        createIndex(type, label, propertyKey, isUnique, false);
+        createIndex(type, label, propertyKey, isUnique, false, false);
     }
 
-    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate) {
+    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate, boolean isAsync) {
         if (configuration().getUseSchema()) {
             getLabel(type, label);
             ValueType propertyType = validateProperty(type, label, propertyKey, null);
@@ -516,7 +517,12 @@ public class HBaseGraph implements Graph {
         }
         indices.put(index.key(), index);
         if (populate) {
-            populateIndex(index);
+            if (!isAsync) {
+                populateIndex(index);
+            } else {
+                // PopulateIndex job must be run to activate
+                updateIndex(indexKey, State.BUILDING);
+            }
         } else {
             updateIndex(indexKey, State.ACTIVE);
         }
@@ -525,16 +531,14 @@ public class HBaseGraph implements Graph {
     private void populateIndex(IndexMetadata index) {
         updateIndex(index.key(), State.BUILDING);
 
-        executor.schedule(
-                () -> {
-                    if (index.type() == ElementType.VERTEX) {
-                        allVertices().forEachRemaining(vertex -> vertexIndexModel.writeVertexIndex(vertex, index));
-                    } else {
-                        allEdges().forEachRemaining(edge -> edgeIndexModel.writeEdgeIndex(edge, index));
-                    }
-                    updateIndex(index.key(), State.ACTIVE);
-                },
-                configuration().getSchemaStateChangeDelaySecs(), TimeUnit.SECONDS);
+        try (HBaseBulkLoader bulkLoader = new HBaseBulkLoader(this)) {
+            if (index.type() == ElementType.VERTEX) {
+                allVertices().forEachRemaining(vertex -> bulkLoader.indexVertex(vertex, IteratorUtils.of(index)));
+            } else {
+                allEdges().forEachRemaining(edge -> bulkLoader.indexEdge(edge, IteratorUtils.of(index)));
+            }
+            updateIndex(index.key(), State.ACTIVE);
+        }
     }
 
     public boolean hasIndex(OperationType op, ElementType type, String label, String propertyKey) {
