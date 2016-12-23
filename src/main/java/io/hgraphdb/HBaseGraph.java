@@ -495,7 +495,7 @@ public class HBaseGraph implements Graph {
         createIndex(type, label, propertyKey, isUnique, false, false);
     }
 
-    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate, boolean isAsync) {
+    public void createIndex(ElementType type, String label, String propertyKey, boolean isUnique, boolean populate, boolean async) {
         if (configuration().getUseSchema()) {
             getLabel(type, label);
             ValueType propertyType = validateProperty(type, label, propertyKey, null);
@@ -517,11 +517,11 @@ public class HBaseGraph implements Graph {
         }
         indices.put(index.key(), index);
         if (populate) {
-            if (!isAsync) {
-                populateIndex(index);
-            } else {
+            if (async) {
                 // PopulateIndex job must be run to activate
                 updateIndex(indexKey, State.BUILDING);
+            } else {
+                populateIndex(index);
             }
         } else {
             updateIndex(indexKey, State.ACTIVE);
