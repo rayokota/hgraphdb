@@ -31,17 +31,20 @@ public class EdgeIndexRemover implements Mutator {
     public EdgeIndexRemover(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.edge = edge;
-        this.keys = IteratorUtils.collectMap(indices, IndexMetadata::propertyKey, IndexMetadata::isUnique);
+        this.keys = IteratorUtils.collectMap(IteratorUtils.filter(indices, i -> i.label().equals(edge.label())),
+                IndexMetadata::propertyKey, IndexMetadata::isUnique);
         this.ts = ts;
     }
 
     @Override
     public Iterator<Mutation> constructMutations() {
-        return keys.entrySet().stream().flatMap(entry -> {
-            Mutation in = constructDelete(Direction.IN, entry);
-            Mutation out = constructDelete(Direction.OUT, entry);
-            return Stream.of(in, out);
-        }).iterator();
+        return keys.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(Constants.CREATED_AT) || edge.keys().contains(entry.getKey()))
+                .flatMap(entry -> {
+                    Mutation in = constructDelete(Direction.IN, entry);
+                    Mutation out = constructDelete(Direction.OUT, entry);
+                    return Stream.of(in, out);
+                }).iterator();
     }
 
     private Delete constructDelete(Direction direction, Map.Entry<String, Boolean> entry) {
