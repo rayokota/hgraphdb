@@ -7,6 +7,10 @@
         <Class name="io.hgraphdb.Constants"/>
         <Bug pattern="MS_MUTABLE_ARRAY"/>
     </Match>
+    <Match>
+        <Class name="io.hgraphdb.mapreduce.index.PopulateIndex"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_EXCEPTION"/>
+    </Match>
 
     <!-- don't worry about name shadowing -->
     <Match>
