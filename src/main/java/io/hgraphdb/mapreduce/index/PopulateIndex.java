@@ -50,7 +50,7 @@ public class PopulateIndex extends Configured implements Tool {
             "Property key to be indexed");
     private static final Option DIRECT_API_OPTION = new Option("d", "direct", false,
             "If specified, we avoid the bulk load (optional)");
-    private static final Option RUN_FOREGROUND_OPTION = new Option("r", "run-foreground", false,
+    private static final Option RUN_FOREGROUND_OPTION = new Option("rf", "run-foreground", false,
             "Whether to populate index in foreground");
     private static final Option OUTPUT_PATH_OPTION = new Option("op", "output-path", true,
             "Output path where the files are written");
