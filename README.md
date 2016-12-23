@@ -70,7 +70,7 @@ An index is created as follows:
 
 The above commands should be run before the relevant data is populated.  To create an index after data has been populated, first create the index with the following parameters:
 
-		graph.createIndex(ElementType.VERTEX, "person", "name", false, /* populate */ true, /* isAsync */ true);
+		graph.createIndex(ElementType.VERTEX, "person", "name", false, /* populate */ true, /* async */ true);
 		
 Then run a map-reduce job using the `hbase` command.
 
