@@ -36,14 +36,10 @@ public class HBaseIndexImportDirectMapper extends TableMapper<ImmutableBytesWrit
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseIndexImportDirectMapper.class);
 
-    private ElementType indexType;
-    private String label;
-    private String propertyKey;
     private boolean skipWAL;
     private HBaseGraph graph;
     private IndexMetadata index;
     private ElementReader<?> reader;
-    private TableName outputTable;
     private BufferedMutator mutator;
 
     @Override
@@ -52,15 +48,15 @@ public class HBaseIndexImportDirectMapper extends TableMapper<ImmutableBytesWrit
 
         final Configuration configuration = context.getConfiguration();
 
-        indexType = ElementType.valueOf(configuration.get(Constants.POPULATE_INDEX_TYPE));
-        label = configuration.get(Constants.POPULATE_INDEX_LABEL);
-        propertyKey = configuration.get(Constants.POPULATE_INDEX_PROPERTY_KEY);
+        ElementType indexType = ElementType.valueOf(configuration.get(Constants.POPULATE_INDEX_TYPE));
+        String label = configuration.get(Constants.POPULATE_INDEX_LABEL);
+        String propertyKey = configuration.get(Constants.POPULATE_INDEX_PROPERTY_KEY);
         skipWAL = configuration.getBoolean(Constants.POPULATE_INDEX_SKIP_WAL, false);
 
         graph = new HBaseGraph(new HBaseGraphConfiguration(configuration));
         index = graph.getIndex(OperationType.WRITE, indexType, label, propertyKey);
         reader = indexType == ElementType.EDGE ? new EdgeReader(graph) : new VertexReader(graph);
-        outputTable = TableName.valueOf(configuration.get(TableOutputFormat.OUTPUT_TABLE));
+        TableName outputTable = TableName.valueOf(configuration.get(TableOutputFormat.OUTPUT_TABLE));
 
         BufferedMutator.ExceptionListener listener = (e, mutator) -> {
             for (int i = 0; i < e.getNumExceptions(); i++) {
@@ -76,10 +72,12 @@ public class HBaseIndexImportDirectMapper extends TableMapper<ImmutableBytesWrit
             throws IOException, InterruptedException {
 
         Element element = reader.parse(result);
-        Creator writer = indexType == ElementType.EDGE
-                ? new EdgeIndexWriter(graph, (Edge) element, propertyKey)
-                : new VertexIndexWriter(graph, (Vertex) element, propertyKey);
-        mutator.mutate(getMutationList(writer.constructInsertions()));
+        if (element.label().equals(index.label()) && element.keys().contains(index.propertyKey())) {
+            Creator writer = index.type() == ElementType.EDGE
+                    ? new EdgeIndexWriter(graph, (Edge) element, index.propertyKey())
+                    : new VertexIndexWriter(graph, (Vertex) element, index.propertyKey());
+            mutator.mutate(getMutationList(writer.constructInsertions()));
+        }
     }
 
     private List<? extends Mutation> getMutationList(Iterator<? extends Mutation> mutations) {

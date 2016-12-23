@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraphConfiguration;
-import io.hgraphdb.giraph.HBaseEdgeInputFormat;
-import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.conf.GiraphConstants;
 import org.apache.giraph.job.GiraphJob;

@@ -11,14 +11,9 @@ import io.hgraphdb.readers.VertexReader;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.BufferedMutator;
-import org.apache.hadoop.hbase.client.BufferedMutatorParams;
-import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.hbase.mapred.TableOutputFormat;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
@@ -29,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -39,10 +33,8 @@ public class HBaseIndexImportMapper extends TableMapper<ImmutableBytesWritable, 
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseIndexImportMapper.class);
 
-    private ElementType indexType;
-    private String label;
-    private String propertyKey;
     private HBaseGraph graph;
+    private IndexMetadata index;
     private ElementReader<?> reader;
 
     @Override
@@ -51,11 +43,12 @@ public class HBaseIndexImportMapper extends TableMapper<ImmutableBytesWritable, 
 
         final Configuration configuration = context.getConfiguration();
 
-        indexType = ElementType.valueOf(configuration.get(Constants.POPULATE_INDEX_TYPE));
-        label = configuration.get(Constants.POPULATE_INDEX_LABEL);
-        propertyKey = configuration.get(Constants.POPULATE_INDEX_PROPERTY_KEY);
+        ElementType indexType = ElementType.valueOf(configuration.get(Constants.POPULATE_INDEX_TYPE));
+        String label = configuration.get(Constants.POPULATE_INDEX_LABEL);
+        String propertyKey = configuration.get(Constants.POPULATE_INDEX_PROPERTY_KEY);
 
         graph = new HBaseGraph(new HBaseGraphConfiguration(configuration));
+        index = graph.getIndex(OperationType.WRITE, indexType, label, propertyKey);
         reader = indexType == ElementType.EDGE ? new EdgeReader(graph) : new VertexReader(graph);
     }
 
@@ -65,18 +58,20 @@ public class HBaseIndexImportMapper extends TableMapper<ImmutableBytesWritable, 
 
         final ImmutableBytesWritable outputKey = new ImmutableBytesWritable();
         Element element = reader.parse(result);
-        Creator writer = indexType == ElementType.EDGE
-                ? new EdgeIndexWriter(graph, (Edge) element, propertyKey)
-                : new VertexIndexWriter(graph, (Vertex) element, propertyKey);
-        List<? extends Mutation> mutations = IteratorUtils.list(writer.constructInsertions());
-        List<KeyValue> keyValueList = toKeyValues(mutations);
-        for (KeyValue kv : keyValueList) {
-            outputKey.set(kv.getRowArray(), kv.getRowOffset(), kv.getRowLength());
-            context.write(outputKey, kv);
+        if (element.label().equals(index.label()) && element.keys().contains(index.propertyKey())) {
+            Creator writer = index.type() == ElementType.EDGE
+                    ? new EdgeIndexWriter(graph, (Edge) element, index.propertyKey())
+                    : new VertexIndexWriter(graph, (Vertex) element, index.propertyKey());
+            List<? extends Mutation> mutations = IteratorUtils.list(writer.constructInsertions());
+            List<KeyValue> keyValueList = toKeyValues(mutations);
+            for (KeyValue kv : keyValueList) {
+                outputKey.set(kv.getRowArray(), kv.getRowOffset(), kv.getRowLength());
+                context.write(outputKey, kv);
+            }
         }
     }
 
-    @SuppressWarnings("deprecated")
+    @SuppressWarnings("deprecation")
     public static List<KeyValue> toKeyValues(List<? extends Mutation> mutations) {
         List<KeyValue> keyValues = Lists.newArrayListWithExpectedSize(mutations.size() * 5); // Guess-timate 5 key values per row
         for (Mutation mutation : mutations) {

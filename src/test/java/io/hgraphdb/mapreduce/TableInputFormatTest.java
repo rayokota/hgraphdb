@@ -121,12 +121,11 @@ public class TableInputFormatTest extends HBaseGraphTest {
         table.close();
     }
 
-    private void runTestOnTable()
-            throws IOException, InterruptedException, ClassNotFoundException {
+    private void runTestOnTable() throws InterruptedException, ClassNotFoundException {
         Job job = null;
         try {
             Configuration conf = graph.configuration().toHBaseConfiguration();
-            job = new Job(conf, "test123");
+            job = Job.getInstance(conf, "test123");
             job.setOutputFormatClass(NullOutputFormat.class);
             job.setNumReduceTasks(0);
             Scan scan = new Scan();

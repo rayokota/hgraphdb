@@ -1,5 +1,7 @@
 package io.hgraphdb.mapreduce.index;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import io.hgraphdb.*;
 import io.hgraphdb.mapreduce.TableInputFormat;
 import org.apache.commons.cli.*;
@@ -52,6 +54,14 @@ public class PopulateIndex extends Configured implements Tool {
             "Whether to populate index in foreground");
     private static final Option OUTPUT_PATH_OPTION = new Option("op", "output-path", true,
             "Output path where the files are written");
+    private static final Option SKIP_DEPENDENCY_JARS = new Option("sj", "skip-dependency-jars", false,
+            "Skip adding dependency jars");
+    private static final Option CUSTOM_ARGS_OPTION = new Option("ca", "customArguments", true,
+            "Provide custom" +
+            " arguments for the job configuration in the form:" +
+            " -ca <param1>=<value1>,<param2>=<value2> -ca <param3>=<value3> etc." +
+            " It can appear multiple times, and the last one has effect" +
+            " for the same param.");
     private static final Option HELP_OPTION = new Option("h", "help", false, "Help");
 
     private Options getOptions() {
@@ -62,6 +72,8 @@ public class PopulateIndex extends Configured implements Tool {
         options.addOption(DIRECT_API_OPTION);
         options.addOption(RUN_FOREGROUND_OPTION);
         options.addOption(OUTPUT_PATH_OPTION);
+        options.addOption(SKIP_DEPENDENCY_JARS);
+        options.addOption(CUSTOM_ARGS_OPTION);
         options.addOption(HELP_OPTION);
         return options;
     }
@@ -138,6 +150,7 @@ public class PopulateIndex extends Configured implements Tool {
                 printHelpAndExit(e.getMessage(), getOptions());
             }
             final Configuration configuration = HBaseConfiguration.addHbaseResources(getConf());
+
             final String type = cmdLine.getOptionValue(INDEX_TYPE_OPTION.getOpt());
             ElementType indexType;
             try {
@@ -151,6 +164,27 @@ public class PopulateIndex extends Configured implements Tool {
             configuration.set(Constants.POPULATE_INDEX_TYPE, indexType.toString());
             configuration.set(Constants.POPULATE_INDEX_LABEL, label);
             configuration.set(Constants.POPULATE_INDEX_PROPERTY_KEY, propertyKey);
+
+            boolean skipDependencyJars = cmdLine.hasOption(SKIP_DEPENDENCY_JARS.getOpt());
+
+            if (cmdLine.hasOption(CUSTOM_ARGS_OPTION.getOpt())) {
+                for (String caOptionValue : cmdLine.getOptionValues(CUSTOM_ARGS_OPTION.getOpt())) {
+                    for (String paramValue :
+                            Splitter.on(',').split(caOptionValue)) {
+                        String[] parts = Iterables.toArray(Splitter.on('=').split(paramValue),
+                                String.class);
+                        if (parts.length != 2) {
+                            throw new IllegalArgumentException("Unable to parse custom " +
+                                    " argument: " + paramValue);
+                        }
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Setting custom argument [" + parts[0] + "] to [" +
+                                    parts[1] + "] in Configuration");
+                        }
+                        configuration.set(parts[0], parts[1]);
+                    }
+                }
+            }
 
             HBaseGraphConfiguration hconf = new HBaseGraphConfiguration(configuration);
             graph = new HBaseGraph(hconf);
@@ -180,10 +214,10 @@ public class PopulateIndex extends Configured implements Tool {
             
             boolean useDirectApi = cmdLine.hasOption(DIRECT_API_OPTION.getOpt());
             if (useDirectApi) {
-                configureSubmittableJobUsingDirectApi(job, outputPath, outputTableName,
+                configureSubmittableJobUsingDirectApi(job, outputPath, outputTableName, skipDependencyJars,
                     cmdLine.hasOption(RUN_FOREGROUND_OPTION.getOpt()));
             } else {
-                configureRunnableJobUsingBulkLoad(job, outputPath, outputTableName);
+                configureRunnableJobUsingBulkLoad(job, outputPath, outputTableName, skipDependencyJars);
                 // Without direct API, we need to update the index state to ACTIVE from client.
                 graph.updateIndex(new IndexMetadata.Key(indexType, label, propertyKey), IndexMetadata.State.ACTIVE);
             }
@@ -203,10 +237,10 @@ public class PopulateIndex extends Configured implements Tool {
      * Submits the job and waits for completion.
      * @param job
      * @param outputPath
-     * @return
      * @throws Exception
      */
-    private void configureRunnableJobUsingBulkLoad(Job job, Path outputPath, TableName outputTableName) throws Exception {
+    private void configureRunnableJobUsingBulkLoad(Job job, Path outputPath, TableName outputTableName,
+                                                   boolean skipDependencyJars) throws Exception {
              job.setMapperClass(HBaseIndexImportMapper.class);
         job.setMapOutputKeyClass(ImmutableBytesWritable.class);
         job.setMapOutputValueClass(KeyValue.class);
@@ -216,6 +250,9 @@ public class PopulateIndex extends Configured implements Tool {
              Table table = conn.getTable(outputTableName);
              RegionLocator regionLocator = conn.getRegionLocator(outputTableName)) {
             HFileOutputFormat2.configureIncrementalLoad(job, table, regionLocator);
+            if (skipDependencyJars) {
+                job.getConfiguration().unset("tmpjars");
+            }
             boolean status = job.waitForCompletion(true);
             if (!status) {
                 LOG.error("IndexTool job failed!");
@@ -237,11 +274,10 @@ public class PopulateIndex extends Configured implements Tool {
      * @param outputPath
      * @param runForeground - if true, waits for job completion, else submits and returns
      *            immediately.
-     * @return
      * @throws Exception
      */
     private void configureSubmittableJobUsingDirectApi(Job job, Path outputPath, TableName outputTableName,
-                                                       boolean runForeground)
+                                                       boolean skipDependencyJars, boolean runForeground)
             throws Exception {
         job.setMapperClass(HBaseIndexImportDirectMapper.class);
         job.setReducerClass(HBaseIndexImportDirectReducer.class);
@@ -253,7 +289,9 @@ public class PopulateIndex extends Configured implements Tool {
         job.setMapOutputValueClass(IntWritable.class);
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(NullWritable.class);
-        TableMapReduceUtil.addDependencyJars(job);
+        if (!skipDependencyJars) {
+            TableMapReduceUtil.addDependencyJars(job);
+        }
         job.setNumReduceTasks(1);
 
         if (!runForeground) {

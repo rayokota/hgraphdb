@@ -34,7 +34,8 @@ public class EdgeIndexWriter implements Creator {
     public EdgeIndexWriter(HBaseGraph graph, Edge edge, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.edge = edge;
-        this.keys = IteratorUtils.collectMap(indices, IndexMetadata::propertyKey, IndexMetadata::isUnique);
+        this.keys = IteratorUtils.collectMap(IteratorUtils.filter(indices, i -> i.label().equals(edge.label())),
+                IndexMetadata::propertyKey, IndexMetadata::isUnique);
         this.ts = ts;
     }
 

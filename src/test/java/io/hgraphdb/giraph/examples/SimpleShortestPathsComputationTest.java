@@ -11,7 +11,6 @@ import io.hgraphdb.testclassification.SlowTests;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 

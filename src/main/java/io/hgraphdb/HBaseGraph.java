@@ -8,7 +8,6 @@ import io.hgraphdb.HBaseGraphConfiguration.InstanceType;
 import io.hgraphdb.IndexMetadata.State;
 import io.hgraphdb.models.*;
 import io.hgraphdb.process.strategy.optimization.HBaseGraphStepStrategy;
-import io.hgraphdb.process.strategy.optimization.HBaseVertexStepStrategy;
 import org.apache.commons.configuration.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
@@ -166,7 +165,6 @@ public class HBaseGraph implements Graph {
                 HBaseGraphUtils.createTables(config, connection);
             }
 
-            String ns = config.getGraphNamespace();
             this.edgeModel = new EdgeModel(this,
                     connection.getTable(HBaseGraphUtils.getTableName(config, Constants.EDGES)));
             this.vertexModel = new VertexModel(this,

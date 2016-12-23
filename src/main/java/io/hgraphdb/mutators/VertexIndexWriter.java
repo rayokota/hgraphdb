@@ -28,7 +28,8 @@ public class VertexIndexWriter implements Creator {
     public VertexIndexWriter(HBaseGraph graph, Vertex vertex, Iterator<IndexMetadata> indices, Long ts) {
         this.graph = graph;
         this.vertex = vertex;
-        this.keys = IteratorUtils.collectMap(indices, IndexMetadata::propertyKey, IndexMetadata::isUnique);
+        this.keys = IteratorUtils.collectMap(IteratorUtils.filter(indices, i -> i.label().equals(vertex.label())),
+                IndexMetadata::propertyKey, IndexMetadata::isUnique);
         this.ts = ts;
     }
 
