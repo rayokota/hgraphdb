@@ -7,11 +7,13 @@ import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import io.hgraphdb.giraph.utils.InternalHBaseVertexRunner;
+import io.hgraphdb.testclassification.SlowTests;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -22,12 +24,12 @@ import static org.junit.Assert.*;
 /**
  * Contains a simple unit test for {@link SimpleShortestPathsComputation}
  */
+@Category(SlowTests.class)
 public class SimpleShortestPathsComputationTest extends HBaseGraphTest {
 
     /**
      * A local integration test on toy data
      */
-    @Ignore
     @Test
     public void testToyData() throws Exception {
 
@@ -67,7 +69,6 @@ public class SimpleShortestPathsComputationTest extends HBaseGraphTest {
     /**
      * A local integration test on toy data
      */
-    @Ignore
     @Test
     public void testToyData2() throws Exception {
 

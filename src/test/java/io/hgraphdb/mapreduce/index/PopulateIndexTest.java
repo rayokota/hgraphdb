@@ -1,10 +1,7 @@
 package io.hgraphdb.mapreduce.index;
 
-import io.hgraphdb.Constants;
-import io.hgraphdb.ElementType;
-import io.hgraphdb.HBaseGraphConfiguration;
-import io.hgraphdb.HBaseGraphTest;
-import io.hgraphdb.HBaseGraphUtils;
+import io.hgraphdb.*;
+import io.hgraphdb.testclassification.SlowTests;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,9 +10,11 @@ import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 
+@Category(SlowTests.class)
 public class PopulateIndexTest extends HBaseGraphTest {
     private final static Log LOG = LogFactory.getLog(PopulateIndexTest.class);
 

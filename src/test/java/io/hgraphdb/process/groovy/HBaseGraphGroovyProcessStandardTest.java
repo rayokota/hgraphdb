@@ -11,5 +11,4 @@ import org.junit.runner.RunWith;
 @RunWith(GroovyProcessStandardSuite.class)
 @GraphProviderClass(provider = HBaseGraphProvider.class, graph = HBaseGraph.class)
 public class HBaseGraphGroovyProcessStandardTest {
-
 }

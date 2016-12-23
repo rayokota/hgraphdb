@@ -5,20 +5,22 @@ import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.giraph.HBaseEdgeInputFormat;
 import io.hgraphdb.giraph.HBaseVertexInputFormat;
 import io.hgraphdb.giraph.utils.InternalHBaseVertexRunner;
+import io.hgraphdb.testclassification.SlowTests;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test for max computation
  */
+@Category(SlowTests.class)
 public class MaxComputationWithGraphOutputTest extends HBaseGraphTest {
-    @Ignore
     @Test
     public void testMax() throws Exception {
         HBaseGraphConfiguration hconf = graph.configuration();

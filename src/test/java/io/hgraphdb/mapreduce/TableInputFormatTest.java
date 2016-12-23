@@ -2,6 +2,7 @@ package io.hgraphdb.mapreduce;
 
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraphTest;
+import io.hgraphdb.testclassification.SlowTests;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
@@ -19,6 +20,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+@Category(SlowTests.class)
 public class TableInputFormatTest extends HBaseGraphTest {
     private final static Log log = LogFactory.getLog(TableInputFormatTest.class);
 
