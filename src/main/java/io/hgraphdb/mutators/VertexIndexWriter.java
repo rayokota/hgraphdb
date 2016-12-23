@@ -39,7 +39,8 @@ public class VertexIndexWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        return keys.entrySet().stream().map(this::constructPut).iterator();
+        return keys.entrySet().stream().filter(entry -> vertex.keys().contains(entry.getKey()))
+                .map(this::constructPut).iterator();
     }
 
     private Put constructPut(Map.Entry<String, Boolean> entry) {

@@ -110,7 +110,7 @@ public final class HBaseBulkLoader {
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
             edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
 
-            EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT, null);
+            EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
             edgeIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
 
             Creator creator = new EdgeWriter(graph, edge);
@@ -146,7 +146,7 @@ public final class HBaseBulkLoader {
 
             if (hasIndex) {
                 if (oldValue == null || !oldValue.equals(value)) {
-                    EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, e, key, null);
+                    EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, e, key);
                     edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
                 }
             }

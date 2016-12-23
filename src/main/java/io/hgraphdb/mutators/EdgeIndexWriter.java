@@ -20,6 +20,10 @@ public class EdgeIndexWriter implements Creator {
     private final Map<String, Boolean> keys;
     private final Long ts;
 
+    public EdgeIndexWriter(HBaseGraph graph, Edge edge, String key) {
+        this(graph, edge, key, null);
+    }
+
     public EdgeIndexWriter(HBaseGraph graph, Edge edge, String key, Long ts) {
         this.graph = graph;
         this.edge = edge;
@@ -41,7 +45,7 @@ public class EdgeIndexWriter implements Creator {
 
     @Override
     public Iterator<Put> constructInsertions() {
-        return keys.entrySet().stream().flatMap(entry ->
+        return keys.entrySet().stream().filter(entry -> edge.keys().contains(entry.getKey())).flatMap(entry ->
                 Stream.of(constructPut(Direction.IN, entry), constructPut(Direction.OUT, entry)))
                 .iterator();
     }

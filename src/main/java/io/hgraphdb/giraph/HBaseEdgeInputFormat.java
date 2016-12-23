@@ -1,5 +1,6 @@
 package io.hgraphdb.giraph;
 
+import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
@@ -38,13 +39,11 @@ public class HBaseEdgeInputFormat
         extends EdgeInputFormat<ObjectWritable, EdgeValueWritable> {
 
 
-    public static final String EDGE_INPUT_TABLE = "hbase.mapreduce.edgetable";
-
     /**
      * delegate HBase table input format
      */
     protected static final TableInputFormat BASE_FORMAT =
-            new TableInputFormat(EDGE_INPUT_TABLE);
+            new TableInputFormat(Constants.EDGE_INPUT_TABLE);
     /**
      * logger
      */

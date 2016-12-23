@@ -450,7 +450,7 @@ public class HBaseGraph implements Graph {
         return this.config;
     }
 
-    protected Connection connection() {
+    public Connection connection() {
         return this.connection;
     }
 
@@ -577,7 +577,7 @@ public class HBaseGraph implements Graph {
         return false;
     }
 
-    private void updateIndex(IndexMetadata.Key indexKey, State newState) {
+    public void updateIndex(IndexMetadata.Key indexKey, State newState) {
         IndexMetadata oldIndex = indexMetadataModel.index(indexKey);
         if (oldIndex == null) {
             throw new HBaseGraphNotValidException("Index for " + indexKey.toString() + " does not exist");

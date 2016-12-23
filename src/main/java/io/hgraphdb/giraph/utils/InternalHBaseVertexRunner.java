@@ -118,8 +118,8 @@ public class InternalHBaseVertexRunner {
         String ns = conf.get(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE);
         String prefix = conf.get(HBaseGraphConfiguration.Keys.GRAPH_TABLE_PREFIX);
         String tablePrefix = (ns != null ? ns + TableName.NAMESPACE_DELIM : "") + (prefix != null ? prefix : "");
-        conf.set(HBaseEdgeInputFormat.EDGE_INPUT_TABLE, tablePrefix + Constants.EDGES);
-        conf.set(HBaseVertexInputFormat.VERTEX_INPUT_TABLE, tablePrefix + Constants.VERTICES);
+        conf.set(Constants.EDGE_INPUT_TABLE, tablePrefix + Constants.EDGES);
+        conf.set(Constants.VERTEX_INPUT_TABLE, tablePrefix + Constants.VERTICES);
 
         File outputDir = FileUtils.createTempDir(tmpDir, "output");
         File zkDir = FileUtils.createTempDir(tmpDir, "_bspZooKeeper");

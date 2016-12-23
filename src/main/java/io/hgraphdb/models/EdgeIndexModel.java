@@ -48,7 +48,7 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public void writeEdgeIndex(Edge edge, String key) {
-        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key, null);
+        EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, key);
         Mutators.create(table, indexWriter);
     }
 

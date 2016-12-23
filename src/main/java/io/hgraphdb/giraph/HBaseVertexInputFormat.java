@@ -1,5 +1,6 @@
 package io.hgraphdb.giraph;
 
+import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseVertex;
@@ -36,13 +37,11 @@ import java.util.List;
 public class HBaseVertexInputFormat
         extends VertexValueInputFormat<ObjectWritable, VertexValueWritable> {
 
-    public static final String VERTEX_INPUT_TABLE = "hbase.mapreduce.vertextable";
-
     /**
      * delegate HBase table input format
      */
     protected static final TableInputFormat BASE_FORMAT =
-            new TableInputFormat(VERTEX_INPUT_TABLE);
+            new TableInputFormat(Constants.VERTEX_INPUT_TABLE);
     /**
      * logger
      */
