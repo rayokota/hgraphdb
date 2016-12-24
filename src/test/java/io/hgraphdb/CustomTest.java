@@ -1,5 +1,6 @@
 package io.hgraphdb;
 
+import io.hgraphdb.testclassification.SlowTests;
 import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.LoadGraphWith;
 import org.apache.tinkerpop.gremlin.process.AbstractGremlinProcessTest;
@@ -18,8 +19,8 @@ import org.apache.tinkerpop.gremlin.structure.io.IoTest;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONIo;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,10 +33,9 @@ import java.util.Set;
 import static org.apache.tinkerpop.gremlin.LoadGraphWith.GraphData.MODERN;
 import static org.junit.Assert.*;
 
-@Ignore
+@Category(SlowTests.class)
 public class CustomTest extends AbstractGremlinProcessTest {
 
-    @Ignore
     @Test
     public void shouldNotGetConcurrentModificationException() {
         for (int i = 0; i < 25; i++) {
@@ -55,7 +55,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         tryCommit(graph, getAssertVertexEdgeCounts(0, 0));
     }
 
-    @Ignore
     @Test
     public void shouldNotHaveAConcurrentModificationExceptionWhenIteratingAndRemovingAddingEdges() {
         final Vertex v1 = graph.addVertex("name", "marko");
@@ -76,7 +75,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(0, IteratorUtils.count(v2.edges(Direction.BOTH)));
     }
 
-    @Ignore
     @Test
     public void shouldEvaluateConnectivityPatterns() {
         final Vertex a;
@@ -165,7 +163,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(4, vertexIds.size());
     }
 
-    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_V_withSideEffectXsgX_repeatXbothEXcreatedX_subgraphXsgX_outVX_timesX5X_name_dedup() throws Exception {
@@ -190,7 +187,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         return __.<A>start().bothE(edgeLabels);
     }
 
-    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_VX1X_outXknowsAsStringIdX() {
@@ -227,7 +223,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         verifyUniqueStepIds(traversal.asAdmin());
     }
 
-    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_VX1X_outEXknowsX_hasXweight_1X_asXhereX_inV_hasXname_joshX_selectXhereX() throws Exception {

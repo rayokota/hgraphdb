@@ -80,12 +80,17 @@ public class HBaseIndexTest extends HBaseGraphTest {
         assertEquals(0, count(graph.vertices()));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1", true);
+
+        long now = System.currentTimeMillis();
         graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
+
         Iterator<Vertex> it = graph.verticesByLabel("a", "key1", 11);
         Vertex v = it.next();
         assertEquals(id(10), v.id());
 
         try {
+            long prev = now;
+            while (prev == now) now = System.currentTimeMillis();  // ensure new ts
             graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
             fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException x) {
@@ -227,6 +232,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         Vertex v12 = graph.addVertex(T.id, id(12));
         Vertex v13 = graph.addVertex(T.id, id(13));
 
+        long now = System.currentTimeMillis();
         v10.addEdge("b", v11, "key1", 11);
 
         Iterator<Edge> it = ((HBaseVertex) v10).edges(Direction.OUT, "b", "key1", 11);
@@ -234,6 +240,8 @@ public class HBaseIndexTest extends HBaseGraphTest {
         assertEquals(id(11), e.inVertex().id());
 
         try {
+            long prev = now;
+            while (prev == now) now = System.currentTimeMillis();  // ensure new ts
             v10.addEdge("b", v12, "key1", 11);
             fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException x) {
