@@ -90,7 +90,11 @@ public class HBaseIndexTest extends HBaseGraphTest {
         try {
             long ts = ((HBaseVertex) v).getIndexTs();
             long now = System.currentTimeMillis();
-            while (now == ts) now = System.currentTimeMillis();  // ensure new ts
+            if (now <= ts) {
+                try {
+                    Thread.sleep(ts - now + 1);
+                } catch (InterruptedException ignored) { }
+            }
             graph.addVertex(T.id, id(11), T.label, "a", "key1", 11);
             fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException ignored) {
@@ -239,9 +243,13 @@ public class HBaseIndexTest extends HBaseGraphTest {
         assertEquals(id(11), e.inVertex().id());
 
         try {
-            long now = System.currentTimeMillis();
             long ts = ((HBaseEdge) e).getIndexTs();
-            while (now == ts) now = System.currentTimeMillis();  // ensure new ts
+            long now = System.currentTimeMillis();
+            if (now <= ts) {
+                try {
+                    Thread.sleep(ts - now + 1);
+                } catch (InterruptedException ignored) { }
+            }
             v10.addEdge("b", v12, "key1", 11);
             fail("should reject non-unique key");
         } catch (HBaseGraphNotUniqueException ignored) {
