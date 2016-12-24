@@ -36,8 +36,14 @@ public final class HBaseVertexStep<E extends Element> extends VertexStep<E> impl
     @Override
     protected Iterator<E> flatMap(final Traverser.Admin<Vertex> traverser) {
         return Vertex.class.isAssignableFrom(getReturnClass()) ?
-                (Iterator<E>) traverser.get().vertices(getDirection(), getEdgeLabels()) :
+                (Iterator<E>) lookupVertices(traverser, this.hasContainers) :
                 (Iterator<E>) lookupEdges(traverser, this.hasContainers);
+    }
+
+    private Iterator<Vertex> lookupVertices(final Traverser.Admin<Vertex> traverser, final List<HasContainer> hasContainers) {
+        // linear scan
+        return IteratorUtils.filter(traverser.get().vertices(getDirection(), getEdgeLabels()),
+                vertex -> HasContainer.testAll(vertex, hasContainers));
     }
 
     private Iterator<Edge> lookupEdges(final Traverser.Admin<Vertex> traverser, final List<HasContainer> hasContainers) {

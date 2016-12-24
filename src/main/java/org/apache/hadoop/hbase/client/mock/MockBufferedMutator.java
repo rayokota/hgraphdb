@@ -98,6 +98,7 @@ public class MockBufferedMutator implements BufferedMutator {
      * @throws IOException if a remote or network exception occurs.
      */
     public void flush() throws IOException {
+        //noinspection EmptyCatchBlock
         try {
             Object[] results = new Object[mutations.size()];
             conn.getTable(name).batch(mutations, results);

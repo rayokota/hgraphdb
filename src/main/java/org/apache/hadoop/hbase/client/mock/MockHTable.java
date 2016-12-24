@@ -144,10 +144,16 @@ public class MockHTable implements HTableInterface {
     public void mutateRow(RowMutations rm) throws IOException {
         // currently only support Put and Delete
         for (Mutation mutation : rm.getMutations()) {
+            long now = System.currentTimeMillis();
             if (mutation instanceof Put) {
                 put((Put) mutation);
             } else if (mutation instanceof Delete) {
                 delete((Delete) mutation);
+            }
+            // wait to ensure the next Put or Delete gets a different ts
+            long prev = now;
+            while (now == prev) {
+                now = System.currentTimeMillis();
             }
         }
     }
@@ -161,7 +167,7 @@ public class MockHTable implements HTableInterface {
     }
 
     private static List<KeyValue> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd, int maxVersions) {
-        List<KeyValue> ret = new ArrayList<KeyValue>();
+        List<KeyValue> ret = new ArrayList<>();
         for (byte[] family : rowdata.keySet())
             for (byte[] qualifier : rowdata.get(family).keySet()) {
                 int versionsAdded = 0;
@@ -208,9 +214,7 @@ public class MockHTable implements HTableInterface {
     @Override
     public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException {
         Object[] rows = batch(actions);
-        for (int i = 0; i < rows.length; i++) {
-            results[i] = rows[i];
-        }
+        System.arraycopy(rows, 0, results, 0, rows.length);
     }
 
     /**
@@ -274,7 +278,7 @@ public class MockHTable implements HTableInterface {
         if (!data.containsKey(get.getRow()))
             return new Result();
         byte[] row = get.getRow();
-        List<KeyValue> kvs = new ArrayList<KeyValue>();
+        List<KeyValue> kvs = new ArrayList<>();
         Filter filter = get.getFilter();
         int maxResults = get.getMaxResultsPerColumnFamily();
 
@@ -293,7 +297,7 @@ public class MockHTable implements HTableInterface {
                 NavigableSet<byte[]> qualifiers = get.getFamilyMap().get(family);
                 if (qualifiers == null || qualifiers.isEmpty())
                     qualifiers = data.get(row).get(family).navigableKeySet();
-                List<KeyValue> familyKvs = new ArrayList<KeyValue>();
+                List<KeyValue> familyKvs = new ArrayList<>();
                 for (byte[] qualifier : qualifiers) {
                     if (qualifier == null)
                         qualifier = "".getBytes();
@@ -321,7 +325,7 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public Result[] get(List<Get> gets) throws IOException {
-        List<Result> results = new ArrayList<Result>();
+        List<Result> results = new ArrayList<>();
         for (Get g : gets) {
             results.add(get(g));
         }
@@ -342,7 +346,7 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public ResultScanner getScanner(Scan scan) throws IOException {
-        final List<Result> ret = new ArrayList<Result>();
+        final List<Result> ret = new ArrayList<>();
         byte[] st = scan.getStartRow();
         byte[] sp = scan.getStopRow();
         Filter filter = scan.getFilter();
@@ -376,7 +380,7 @@ public class MockHTable implements HTableInterface {
                 }
             }
 
-            List<KeyValue> kvs = null;
+            List<KeyValue> kvs;
             if (!scan.hasFamilies()) {
                 kvs = toKeyValue(row, data.get(row), scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
                 if (filter != null) {
@@ -386,18 +390,18 @@ public class MockHTable implements HTableInterface {
                     kvs = kvs.subList(0, maxResults);
                 }
             } else {
-                kvs = new ArrayList<KeyValue>();
+                kvs = new ArrayList<>();
                 for (byte[] family : scan.getFamilyMap().keySet()) {
                     if (data.get(row).get(family) == null)
                         continue;
                     NavigableSet<byte[]> qualifiers = scan.getFamilyMap().get(family);
                     if (qualifiers == null || qualifiers.isEmpty())
                         qualifiers = data.get(row).get(family).navigableKeySet();
-                    List<KeyValue> familyKvs = new ArrayList<KeyValue>();
+                    List<KeyValue> familyKvs = new ArrayList<>();
                     for (byte[] qualifier : qualifiers) {
                         if (data.get(row).get(family).get(qualifier) == null)
                             continue;
-                        List<KeyValue> tsKvs = new ArrayList<KeyValue>();
+                        List<KeyValue> tsKvs = new ArrayList<>();
                         for (Long timestamp : data.get(row).get(family).get(qualifier).descendingKeySet()) {
                             if (timestamp < scan.getTimeRange().getMin())
                                 continue;
@@ -437,7 +441,7 @@ public class MockHTable implements HTableInterface {
             }
 
             public Result[] next(int nbRows) throws IOException {
-                ArrayList<Result> resultSets = new ArrayList<Result>(nbRows);
+                ArrayList<Result> resultSets = new ArrayList<>(nbRows);
                 for (int i = 0; i < nbRows; i++) {
                     Result next = next();
                     if (next != null) {
@@ -472,7 +476,7 @@ public class MockHTable implements HTableInterface {
     private List<KeyValue> filter(Filter filter, List<KeyValue> kvs) throws IOException {
         filter.reset();
 
-        List<KeyValue> tmp = new ArrayList<KeyValue>(kvs.size());
+        List<KeyValue> tmp = new ArrayList<>(kvs.size());
         tmp.addAll(kvs);
 
       /*
@@ -504,9 +508,7 @@ public class MockHTable implements HTableInterface {
         if (filter.hasFilterRow() && !filteredOnRowKey) {
             //filter.filterRow(nkvs);  // deprecated API
             List<Cell> cells = new ArrayList<>(nkvs.size());
-            for (KeyValue kv : nkvs) {
-                cells.add(kv);
-            }
+            cells.addAll(nkvs);
             filter.filterRowCells(cells);
             nkvs.clear();
             for (Cell cell : cells) {
@@ -554,22 +556,18 @@ public class MockHTable implements HTableInterface {
     @Override
     public void put(Put put) throws IOException {
         byte[] row = put.getRow();
-        NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row, new ConcurrentSkipListMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>(Bytes.BYTES_COMPARATOR));
+        NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row, new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR));
         for (byte[] family : put.getFamilyMap().keySet()) {
             if (!columnFamilies.contains(new String(family))) {
                 throw new RuntimeException("Not Exists columnFamily : " + new String(family));
             }
-            NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new ConcurrentSkipListMap<byte[], NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
+            NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR));
             for (KeyValue kv : put.getFamilyMap().get(family)) {
                 long ts = put.getTimeStamp();
                 if (ts == HConstants.LATEST_TIMESTAMP) ts = System.currentTimeMillis();
                 kv.updateLatestStamp(Bytes.toBytes(ts));
-                try {
-                    Thread.sleep(1);  // sleep for 1 millis so timestamps don't conflict
-                } catch (InterruptedException e) {
-                }
                 byte[] qualifier = kv.getQualifier();
-                NavigableMap<Long, byte[]> qualifierData = forceFind(familyData, qualifier, new ConcurrentSkipListMap<Long, byte[]>());
+                NavigableMap<Long, byte[]> qualifierData = forceFind(familyData, qualifier, new ConcurrentSkipListMap<>());
                 qualifierData.put(kv.getTimestamp(), kv.getValue());
             }
         }
@@ -730,7 +728,7 @@ public class MockHTable implements HTableInterface {
      */
     @Override
     public Result increment(Increment increment) throws IOException {
-        List<KeyValue> kvs = new ArrayList<KeyValue>();
+        List<KeyValue> kvs = new ArrayList<>();
         Map<byte[], NavigableMap<byte[], Long>> famToVal = increment.getFamilyMapOfLongs();
         for (Map.Entry<byte[], NavigableMap<byte[], Long>> ef : famToVal.entrySet()) {
             byte[] family = ef.getKey();
@@ -816,7 +814,7 @@ public class MockHTable implements HTableInterface {
     @Override
     public <T extends Service, R> Map<byte[], R> coprocessorService(final Class<T> service,
                                                                     byte[] startKey, byte[] endKey, final Batch.Call<T, R> callable)
-            throws ServiceException, Throwable {
+            throws ServiceException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
@@ -835,7 +833,7 @@ public class MockHTable implements HTableInterface {
     @Override
     public <T extends Service, R> void coprocessorService(final Class<T> service,
                                                           byte[] startKey, byte[] endKey, final Batch.Call<T, R> callable,
-                                                          final Batch.Callback<R> callback) throws ServiceException, Throwable {
+                                                          final Batch.Callback<R> callback) throws ServiceException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
@@ -885,7 +883,7 @@ public class MockHTable implements HTableInterface {
     @Override
     public <R extends Message> Map<byte[], R> batchCoprocessorService(
             Descriptors.MethodDescriptor methodDescriptor, Message request,
-            byte[] startKey, byte[] endKey, R responsePrototype) throws ServiceException, Throwable {
+            byte[] startKey, byte[] endKey, R responsePrototype) throws ServiceException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
@@ -895,7 +893,7 @@ public class MockHTable implements HTableInterface {
     @Override
     public <R extends Message> void batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor,
                                                             Message request, byte[] startKey, byte[] endKey, R responsePrototype,
-                                                            Batch.Callback<R> callback) throws ServiceException, Throwable {
+                                                            Batch.Callback<R> callback) throws ServiceException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 }
