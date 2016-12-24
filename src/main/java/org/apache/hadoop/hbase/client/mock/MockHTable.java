@@ -144,15 +144,15 @@ public class MockHTable implements HTableInterface {
     public void mutateRow(RowMutations rm) throws IOException {
         // currently only support Put and Delete
         for (Mutation mutation : rm.getMutations()) {
-            long now = System.currentTimeMillis();
             if (mutation instanceof Put) {
                 put((Put) mutation);
             } else if (mutation instanceof Delete) {
                 delete((Delete) mutation);
             }
             // wait to ensure the next Put or Delete gets a different ts
-            long prev = now;
-            while (now == prev) {
+            long ts = mutation.getTimeStamp();
+            long now = System.currentTimeMillis();
+            while (now == ts) {
                 now = System.currentTimeMillis();
             }
         }
