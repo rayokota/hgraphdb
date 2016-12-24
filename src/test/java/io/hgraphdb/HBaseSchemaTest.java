@@ -33,7 +33,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
             fail("Vertex should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         graph.createLabel(ElementType.VERTEX, "b", ValueType.LONG, "key2", ValueType.LONG);
@@ -43,19 +43,19 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         try {
             graph.addVertex(T.id, id(10), T.label, "a", "key1", 11);
             fail("Vertex should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addVertex(T.id, 10L, T.label, "b", "key1", 11);
             fail("Vertex should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addVertex(T.id, 10L, T.label, "b", "key2", 11);
             fail("Vertex should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
@@ -77,7 +77,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
 
         try {
             v1.property("key3", "hi");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         graph.updateLabel(ElementType.VERTEX, "b", "key3", ValueType.STRING);
@@ -111,7 +111,7 @@ public class HBaseSchemaTest extends HBaseGraphTest {
 
         try {
             e.property("key3", "hi");
-        } catch (HBaseGraphNotValidException x) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         graph.updateLabel(ElementType.EDGE, "knows", "key3", ValueType.STRING);
@@ -143,31 +143,31 @@ public class HBaseSchemaTest extends HBaseGraphTest {
         try {
             graph.addEdge(v3, v4, "foo", "blah", 11);
             fail("Edge should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addEdge(v1, v4, "foo", "blah", 11);
             fail("Edge should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addEdge(v1, v2, "foo", "blah", 11);
             fail("Edge should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addEdge(v1, v2, "knows", "blah", 11);
             fail("Edge should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         try {
             graph.addEdge(v1, v2, "knows", "since", 11);
             fail("Edge should be invalid");
-        } catch (HBaseGraphNotValidException e) {
+        } catch (HBaseGraphNotValidException ignored) {
         }
 
         graph.addEdge(v1, v2, "knows", "since", LocalDate.now());
