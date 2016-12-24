@@ -90,7 +90,7 @@ public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInp
             if (table == null) {
                 initialize(context);
             }
-            List<InputSplit> splits = new ArrayList<InputSplit>(1);
+            List<InputSplit> splits = new ArrayList<>(1);
             TableSplit split = new TableSplit(getTable().getName(), getScan(),
                     HConstants.EMPTY_BYTE_ARRAY, HConstants.EMPTY_BYTE_ARRAY, "", 0);
             splits.add(split);

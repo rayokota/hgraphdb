@@ -28,7 +28,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
     }
 
     private Iterator<? extends Edge> edges() {
-        return IteratorUtils.filter(this.getTraversal().getGraph().get().edges(this.ids), edge -> HasContainer.testAll((Edge) edge, this.hasContainers));
+        return IteratorUtils.filter(this.getTraversal().getGraph().get().edges(this.ids), edge -> HasContainer.testAll(edge, this.hasContainers));
     }
 
     private Iterator<? extends Vertex> vertices() {

@@ -7,6 +7,7 @@ import org.junit.runners.model.RunnerBuilder;
 
 public class CustomSuite extends AbstractGremlinSuite {
 
+    @SuppressWarnings("deprecation")
     public CustomSuite(final Class<?> klass, final RunnerBuilder builder) throws InitializationError {
         super(klass, builder,
                 new Class<?>[]{

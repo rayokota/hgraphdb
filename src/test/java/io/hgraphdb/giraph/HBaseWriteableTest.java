@@ -46,7 +46,7 @@ public class HBaseWriteableTest {
     @Test
     public void testObjectWritable() throws Exception {
         Integer o = 1;
-        ObjectWritable<Integer> writable = new ObjectWritable<Integer>(o);
+        ObjectWritable<Integer> writable = new ObjectWritable<>(o);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(baos);
         writable.write(output);

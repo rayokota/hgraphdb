@@ -36,7 +36,7 @@ public class TableInputFormatTest extends HBaseGraphTest {
 
     private static final byte[] KEY = Bytes.toBytes("row1");
     private static final NavigableMap<Long, Boolean> TIMESTAMP =
-            new TreeMap<Long, Boolean>();
+            new TreeMap<>();
 
     static {
         TIMESTAMP.put((long) 1245620000, false);
@@ -66,7 +66,7 @@ public class TableInputFormatTest extends HBaseGraphTest {
         public void map(ImmutableBytesWritable key, Result result,
                         Context context)
                 throws IOException {
-            List<Long> tsList = new ArrayList<Long>();
+            List<Long> tsList = new ArrayList<>();
             for (Cell kv : result.listCells()) {
                 tsList.add(kv.getTimestamp());
             }
@@ -105,7 +105,7 @@ public class TableInputFormatTest extends HBaseGraphTest {
         final HColumnDescriptor col = new HColumnDescriptor(FAMILY_NAME);
         col.setMaxVersions(Integer.MAX_VALUE);
         desc.addFamily(col);
-        List<Put> puts = new ArrayList<Put>();
+        List<Put> puts = new ArrayList<>();
         for (Map.Entry<Long, Boolean> entry : TIMESTAMP.entrySet()) {
             Put put = new Put(KEY);
             put.setDurability(Durability.SKIP_WAL);
