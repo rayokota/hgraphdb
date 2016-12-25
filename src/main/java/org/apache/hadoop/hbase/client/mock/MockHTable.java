@@ -447,7 +447,6 @@ public class MockHTable implements Table {
      * @param kvs    List of a row's KeyValues
      * @return List of KeyValues that were not filtered.
      */
-    @SuppressWarnings("deprecation")
     private List<Cell> filter(Filter filter, List<Cell> kvs) throws IOException {
         filter.reset();
 
@@ -468,7 +467,7 @@ public class MockHTable implements Table {
             }
             Filter.ReturnCode filterResult = filter.filterKeyValue(kv);
             if (filterResult == Filter.ReturnCode.INCLUDE || filterResult == Filter.ReturnCode.INCLUDE_AND_NEXT_COL) {
-                nkvs.add(KeyValueUtil.ensureKeyValue(filter.transformCell(kv)));
+                nkvs.add(filter.transformCell(kv));
             } else if (filterResult == Filter.ReturnCode.NEXT_ROW) {
                 break;
             } else if (filterResult == Filter.ReturnCode.NEXT_COL || filterResult == Filter.ReturnCode.SKIP) {
