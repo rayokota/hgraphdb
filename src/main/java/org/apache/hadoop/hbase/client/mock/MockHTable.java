@@ -153,7 +153,7 @@ public class MockHTable implements Table {
 
     private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd, int maxVersions) {
         List<Cell> ret = new ArrayList<>();
-        for (byte[] family : rowdata.keySet())
+        for (byte[] family : rowdata.keySet()) {
             for (byte[] qualifier : rowdata.get(family).keySet()) {
                 int versionsAdded = 0;
                 for (Map.Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).descendingMap().entrySet()) {
@@ -168,6 +168,7 @@ public class MockHTable implements Table {
                     ret.add(new KeyValue(row, family, qualifier, timestamp, value));
                 }
             }
+        }
         return ret;
     }
 
@@ -544,7 +545,6 @@ public class MockHTable implements Table {
         for (Put put : puts) {
             put(put);
         }
-
     }
 
     private boolean check(byte[] row, byte[] family, byte[] qualifier, CompareFilter.CompareOp compareOp, byte[] value) {
@@ -734,7 +734,6 @@ public class MockHTable implements Table {
      */
     @Override
     public void close() throws IOException {
-
     }
 
     /**
@@ -778,7 +777,6 @@ public class MockHTable implements Table {
      */
     @Override
     public void setWriteBufferSize(long writeBufferSize) throws IOException {
-
     }
 
     /**
