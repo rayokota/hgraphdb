@@ -3,6 +3,7 @@ package io.hgraphdb.mutators;
 import com.google.common.collect.ImmutableMap;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseVertex;
 import io.hgraphdb.IndexMetadata;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -37,7 +38,7 @@ public class VertexIndexRemover implements Mutator {
     @Override
     public Iterator<Mutation> constructMutations() {
         return keys.entrySet().stream()
-                .filter(entry -> vertex.keys().contains(entry.getKey()))
+                .filter(entry -> ((HBaseVertex) vertex).hasProperty(entry.getKey()))
                 .map(entry -> (Mutation) constructDelete(entry)).iterator();
     }
 

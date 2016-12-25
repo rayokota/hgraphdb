@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EdgeReader extends ElementReader<Edge> {
+public class EdgeReader extends LoadingElementReader<Edge> {
 
     public EdgeReader(HBaseGraph graph) {
         super(graph);

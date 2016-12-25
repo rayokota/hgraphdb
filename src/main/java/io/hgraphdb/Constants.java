@@ -50,10 +50,10 @@ public class Constants {
     /**
      * Map-Reduce
      */
-    public static final String EDGE_INPUT_TABLE            = "hbase.mapreduce.edgetable";
-    public static final String VERTEX_INPUT_TABLE          = "hbase.mapreduce.vertextable";
-    public static final String POPULATE_INDEX_TYPE         = "hbase.mapreduce.index.type";
-    public static final String POPULATE_INDEX_LABEL        = "hbase.mapreduce.index.label";
-    public static final String POPULATE_INDEX_PROPERTY_KEY = "hbase.mapreduce.index.key";
-    public static final String POPULATE_INDEX_SKIP_WAL     = "hbase.mapreduce.index.skipwal";
+    public static final String EDGE_INPUT_TABLE             = "hbase.mapreduce.edgetable";
+    public static final String VERTEX_INPUT_TABLE           = "hbase.mapreduce.vertextable";
+    public static final String MAPREDUCE_INDEX_TYPE         = "hbase.mapreduce.index.type";
+    public static final String MAPREDUCE_INDEX_LABEL        = "hbase.mapreduce.index.label";
+    public static final String MAPREDUCE_INDEX_PROPERTY_KEY = "hbase.mapreduce.index.key";
+    public static final String MAPREDUCE_INDEX_SKIP_WAL     = "hbase.mapreduce.index.skipwal";
 }

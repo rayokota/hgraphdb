@@ -4,12 +4,10 @@ import io.hgraphdb.HBaseGraph;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public class VertexIndexReader implements Reader<Vertex> {
-
-    private final HBaseGraph graph;
+public class VertexIndexReader extends ElementReader<Vertex> {
 
     public VertexIndexReader(HBaseGraph graph) {
-        this.graph = graph;
+        super(graph);
     }
 
     @Override

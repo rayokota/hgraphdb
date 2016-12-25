@@ -4,12 +4,10 @@ import io.hgraphdb.HBaseGraph;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 
-public class EdgeIndexReader implements Reader<Edge> {
-
-    private final HBaseGraph graph;
+public class EdgeIndexReader extends ElementReader<Edge> {
 
     public EdgeIndexReader(HBaseGraph graph) {
-        this.graph = graph;
+        super(graph);
     }
 
     @Override

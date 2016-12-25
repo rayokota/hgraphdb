@@ -2,6 +2,7 @@ package io.hgraphdb.mutators;
 
 import com.google.common.collect.ImmutableMap;
 import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseEdge;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.IndexMetadata;
 import org.apache.hadoop.hbase.client.Delete;
@@ -39,7 +40,7 @@ public class EdgeIndexRemover implements Mutator {
     @Override
     public Iterator<Mutation> constructMutations() {
         return keys.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(Constants.CREATED_AT) || edge.keys().contains(entry.getKey()))
+                .filter(entry -> entry.getKey().equals(Constants.CREATED_AT) || ((HBaseEdge) edge).hasProperty(entry.getKey()))
                 .flatMap(entry -> {
                     Mutation in = constructDelete(Direction.IN, entry);
                     Mutation out = constructDelete(Direction.OUT, entry);

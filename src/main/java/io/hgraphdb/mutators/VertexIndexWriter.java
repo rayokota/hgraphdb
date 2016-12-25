@@ -41,7 +41,7 @@ public class VertexIndexWriter implements Creator {
     @Override
     public Iterator<Put> constructInsertions() {
         return keys.entrySet().stream()
-                .filter(entry -> vertex.keys().contains(entry.getKey()))
+                .filter(entry -> ((HBaseVertex) vertex).hasProperty(entry.getKey()))
                 .map(this::constructPut).iterator();
     }
 

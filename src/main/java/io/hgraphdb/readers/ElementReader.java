@@ -11,6 +11,4 @@ public abstract class ElementReader<T extends Element> implements Reader<T> {
     public ElementReader(HBaseGraph graph) {
         this.graph = graph;
     }
-
-    public abstract void load(T element, Result result);
 }

@@ -136,6 +136,15 @@ public abstract class HBaseElement implements Element {
         return (V) getProperties().get(key);
     }
 
+    public boolean hasProperty(String key) {
+        if (properties != null) {
+            // optimization for partially loaded properties
+            Object val = properties.get(key);
+            if (val != null) return true;
+        }
+        return keys().contains(key);
+    }
+
     @Override
     public Set<String> keys() {
         return getPropertyKeys();

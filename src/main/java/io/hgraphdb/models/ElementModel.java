@@ -8,6 +8,7 @@ import io.hgraphdb.mutators.PropertyIncrementer;
 import io.hgraphdb.mutators.PropertyRemover;
 import io.hgraphdb.mutators.PropertyWriter;
 import io.hgraphdb.readers.ElementReader;
+import io.hgraphdb.readers.LoadingElementReader;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -30,7 +31,7 @@ public abstract class ElementModel extends BaseModel {
         super(graph, table);
     }
 
-    public abstract ElementReader getReader();
+    public abstract LoadingElementReader getReader();
 
     /**
      * Load the element from the backing table.

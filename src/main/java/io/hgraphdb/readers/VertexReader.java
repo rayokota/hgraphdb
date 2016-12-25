@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class VertexReader extends ElementReader<Vertex> {
+public class VertexReader extends LoadingElementReader<Vertex> {
 
     public VertexReader(HBaseGraph graph) {
         super(graph);

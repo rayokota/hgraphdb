@@ -1,12 +1,15 @@
 package io.hgraphdb.mapreduce.index;
 
-import io.hgraphdb.*;
-import io.hgraphdb.mutators.Creator;
-import io.hgraphdb.mutators.EdgeIndexWriter;
-import io.hgraphdb.mutators.VertexIndexWriter;
-import io.hgraphdb.readers.EdgeReader;
+import io.hgraphdb.ElementType;
+import io.hgraphdb.HBaseElement;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.IndexMetadata;
+import io.hgraphdb.mutators.EdgeIndexRemover;
+import io.hgraphdb.mutators.Mutator;
+import io.hgraphdb.mutators.VertexIndexRemover;
+import io.hgraphdb.readers.EdgeIndexReader;
 import io.hgraphdb.readers.ElementReader;
-import io.hgraphdb.readers.VertexReader;
+import io.hgraphdb.readers.VertexIndexReader;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -20,18 +23,18 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * Mapper that hands over rows from data table to the index table.
+ * Mapper that drops index rows.
  */
-public class HBaseIndexImportMapper extends HBaseIndexMapperBase {
+public class HBaseIndexDropMapper extends HBaseIndexBulkMapperBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseIndexImportMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseIndexDropMapper.class);
 
     private ElementReader<?> reader;
 
     @Override
     protected void setup(final Context context) throws IOException, InterruptedException {
         super.setup(context);
-        reader = getIndex().type() == ElementType.EDGE ? new EdgeReader(getGraph()) : new VertexReader(getGraph());
+        reader = getIndex().type() == ElementType.EDGE ? new EdgeIndexReader(getGraph()) : new VertexIndexReader(getGraph());
     }
 
     @Override
@@ -46,10 +49,10 @@ public class HBaseIndexImportMapper extends HBaseIndexMapperBase {
 
         Element element = reader.parse(result);
         if (element.label().equals(index.label()) && ((HBaseElement) element).hasProperty(index.propertyKey())) {
-            Creator writer = index.type() == ElementType.EDGE
-                    ? new EdgeIndexWriter(graph, (Edge) element, index.propertyKey())
-                    : new VertexIndexWriter(graph, (Vertex) element, index.propertyKey());
-            return writer.constructInsertions();
+            Mutator remover = index.type() == ElementType.EDGE
+                    ? new EdgeIndexRemover(graph, (Edge) element, index.propertyKey(), null)
+                    : new VertexIndexRemover(graph, (Vertex) element, index.propertyKey(), null);
+            return remover.constructMutations();
         }
         return Collections.emptyIterator();
     }

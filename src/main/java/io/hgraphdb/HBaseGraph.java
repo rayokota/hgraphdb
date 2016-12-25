@@ -520,7 +520,6 @@ public class HBaseGraph implements Graph {
         if (populate) {
             if (async) {
                 // PopulateIndex job must be run to activate
-                updateIndex(indexKey, State.BUILDING);
             } else {
                 populateIndex(index);
             }
@@ -576,6 +575,8 @@ public class HBaseGraph implements Graph {
                 return state == State.ACTIVE;
             case WRITE:
                 return state == State.CREATED || state == State.BUILDING || state == State.ACTIVE;
+            case REMOVE:
+                return state != State.DROPPED;
         }
         return false;
     }
