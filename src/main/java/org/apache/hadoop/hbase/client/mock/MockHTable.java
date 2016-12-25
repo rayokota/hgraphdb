@@ -56,7 +56,6 @@ public class MockHTable implements Table {
 
     private final TableName tableName;
     private final List<String> columnFamilies = new ArrayList<>();
-    private final List<Class<? extends Service>> coprocessorClasses = new ArrayList<>();
     private Configuration config;
 
     private final NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data
@@ -66,6 +65,7 @@ public class MockHTable implements Table {
         return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public MockHTable(TableName tableName) {
         this.tableName = tableName;
     }
@@ -75,16 +75,10 @@ public class MockHTable implements Table {
         this.columnFamilies.addAll(Arrays.asList(columnFamilies));
     }
 
+    @SuppressWarnings("WeakerAccess")
     public MockHTable(TableName tableName, List<String> columnFamilies) {
         this.tableName = tableName;
         this.columnFamilies.addAll(columnFamilies);
-    }
-
-    public MockHTable(TableName tableName, List<String> columnFamilies,
-                      List<Class<? extends Service>> coprocessorClasses) {
-        this.tableName = tableName;
-        this.columnFamilies.addAll(columnFamilies);
-        this.coprocessorClasses.addAll(coprocessorClasses);
     }
 
     public void clear() {
@@ -335,6 +329,7 @@ public class MockHTable implements Table {
                     Bytes.BYTES_COMPARATOR.compare(st, row) != 0) {
                 if (scan.isReversed()) {
                     // if row is before startRow do not emit, pass to next row
+                    //noinspection ConstantConditions
                     if (st != null && st.length > 0 &&
                             Bytes.BYTES_COMPARATOR.compare(st, row) <= 0)
                         continue;
@@ -344,6 +339,7 @@ public class MockHTable implements Table {
                         break;
                 } else {
                     // if row is before startRow do not emit, pass to next row
+                    //noinspection ConstantConditions
                     if (st != null && st.length > 0 &&
                             Bytes.BYTES_COMPARATOR.compare(st, row) > 0)
                         continue;
@@ -480,12 +476,7 @@ public class MockHTable implements Table {
            */
         }
         if (filter.hasFilterRow() && !filteredOnRowKey) {
-            //filter.filterRow(nkvs);  // deprecated API
-            List<Cell> cells = new ArrayList<>(nkvs.size());
-            cells.addAll(nkvs);
-            filter.filterRowCells(cells);
-            nkvs.clear();
-            nkvs.addAll(cells);
+            filter.filterRowCells(nkvs);
         }
         if (filter.filterRow() || filteredOnRowKey) {
             nkvs.clear();
@@ -703,6 +694,7 @@ public class MockHTable implements Table {
             byte[] family = ef.getKey();
             NavigableMap<byte[], Long> qToVal = ef.getValue();
             for (Map.Entry<byte[], Long> eq : qToVal.entrySet()) {
+                //noinspection UnusedAssignment
                 long newValue = incrementColumnValue(increment.getRow(), family, eq.getKey(), eq.getValue());
                 Map.Entry<Long, byte[]> timestampAndValue = data.get(increment.getRow()).get(family).get(eq.getKey()).lastEntry();
                 kvs.add(new KeyValue(increment.getRow(), family, eq.getKey(), timestampAndValue.getKey(), timestampAndValue.getValue()));
@@ -716,22 +708,6 @@ public class MockHTable implements Table {
      */
     @Override
     public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount) throws IOException {
-        return incrementColumnValue(row, family, qualifier, amount, true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
-                                     long amount, Durability durability) throws IOException {
-        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount, boolean writeToWAL) throws IOException {
         if (check(row, family, qualifier, CompareFilter.CompareOp.EQUAL, null)) {
             Put put = new Put(row);
             put.addColumn(family, qualifier, Bytes.toBytes(amount));
@@ -742,6 +718,15 @@ public class MockHTable implements Table {
         data.get(row).get(family).get(qualifier).put(System.currentTimeMillis(),
                 Bytes.toBytes(newValue));
         return newValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
+                                     long amount, Durability durability) throws IOException {
+        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
     /**
