@@ -9,7 +9,7 @@ Releases of HGraphDB are deployed to Maven Central.
 		<dependency>
 		    <groupId>io.hgraphdb</groupId>
 		    <artifactId>hgraphdb</artifactId>
-		    <version>0.4.9</version>
+		    <version>0.4.10</version>
 		</dependency>
 
 ## Setup
@@ -92,6 +92,11 @@ An index can also be specified as a unique index.  For a vertex index, this mean
 
 		graph.createIndex(ElementType.VERTEX, "person", "name", /* unique */ true);
 
+To drop an index, invoke a map-reduce job using the `hbase` command.
+
+		hbase io.hgraphdb.mapreduce.index.DropIndex \
+		    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+		    
 ## Pagination
 
 Once an index is defined, results can be paginated.  HGraphDB supports [keyset pagination] (http://use-the-index-luke.com/no-offset), for both vertex and edge indices. 
@@ -163,7 +168,7 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
         gremlin> :install org.apache.hbase hbase-client 1.2.0
         gremlin> :install org.apache.hbase hbase-common 1.2.0
         gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.4.9
+        gremlin> :install io.hgraphdb hgraphdb 0.4.10
         gremlin> :plugin use io.hgraphdb
                 
 Then restart the Gremlin console and run the following:
@@ -242,6 +247,5 @@ HGraphDB was designed to support the features mentioned [here](https://rayokota.
 Possible future enhancements include map-reduce jobs for the following:
 
 - Cleaning up stale indices.
-- Deleting indices.
 
 

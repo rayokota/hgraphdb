@@ -7,7 +7,6 @@ import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.PropertyIncrementer;
 import io.hgraphdb.mutators.PropertyRemover;
 import io.hgraphdb.mutators.PropertyWriter;
-import io.hgraphdb.readers.ElementReader;
 import io.hgraphdb.readers.LoadingElementReader;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;

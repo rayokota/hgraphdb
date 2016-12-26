@@ -8,7 +8,7 @@
         <Bug pattern="MS_MUTABLE_ARRAY"/>
     </Match>
     <Match>
-        <Class name="io.hgraphdb.mapreduce.index.PopulateIndex"/>
+        <Class name="io.hgraphdb.mapreduce.index.IndexTool"/>
         <Bug pattern="NP_NULL_ON_SOME_PATH_EXCEPTION"/>
     </Match>
 
