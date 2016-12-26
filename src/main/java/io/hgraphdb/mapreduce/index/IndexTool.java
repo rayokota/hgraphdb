@@ -238,8 +238,9 @@ public abstract class IndexTool extends Configured implements Tool {
                     cmdLine.hasOption(RUN_FOREGROUND_OPTION.getOpt()));
             } else {
                 configureRunnableJobUsingBulkLoad(job, outputPath, outputTableName, skipDependencyJars);
+                // Without direct API, we need to update the index state from client.
+                cleanup(graph, index);
             }
-            cleanup(graph, index);
             return 0;
         } catch (Exception ex) {
             LOG.error("An exception occurred while performing the indexing job: "
