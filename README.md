@@ -6,54 +6,56 @@ HGraphDB is a client layer for using HBase as a graph database.  It is an implem
 
 Releases of HGraphDB are deployed to Maven Central.
 
-		<dependency>
-		    <groupId>io.hgraphdb</groupId>
-		    <artifactId>hgraphdb</artifactId>
-		    <version>0.4.10</version>
-		</dependency>
+```xml
+<dependency>
+    <groupId>io.hgraphdb</groupId>
+    <artifactId>hgraphdb</artifactId>
+    <version>0.4.10</version>
+</dependency>
+```
 
 ## Setup
 
 To initialize HGraphDB, create an `HBaseGraphConfiguration` instance, and then use a static factory method to create an `HBaseGraph` instance.
 
-		...
-		Configuration cfg = new HBaseGraphConfiguration()
-   			.setInstanceType(InstanceType.Distributed)
-  			.setGraphNamespace("mygraph")
-  			.setCreateTables(true)
-  			.setRegionCount(numRegionServers)
-  			.set("hbase.zookeeper.quorum", "127.0.0.1")
-  			.set("zookeeper.znode.parent", "/hbase-unsecure");
-		HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);
-		...
+```java
+Configuration cfg = new HBaseGraphConfiguration()
+    .setInstanceType(InstanceType.Distributed)
+    .setGraphNamespace("mygraph")
+    .setCreateTables(true)
+    .setRegionCount(numRegionServers)
+    .set("hbase.zookeeper.quorum", "127.0.0.1")
+    .set("zookeeper.znode.parent", "/hbase-unsecure");
+HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);
+```
 
 As you can see above, HBase-specific configuration parameters can be passed directly.  These will be used when obtaining an HBase connection. 
 
 The resulting graph can be used like any other TinkerPop graph instance.
 
-		...
-		Vertex v1 = graph.addVertex(T.id, 1, T.label, "person", "name", "John");
-		Vertex v2 = graph.addVertex(T.id, 2, T.label, "person", "name", "Sally");
-		v1.addEdge("knows", v2, T.id, "edge1", "since", LocalDate.now());
-		...
-		
+```java
+Vertex v1 = graph.addVertex(T.id, 1, T.label, "person", "name", "John");
+Vertex v2 = graph.addVertex(T.id, 2, T.label, "person", "name", "Sally");
+v1.addEdge("knows", v2, T.id, "edge1", "since", LocalDate.now());
+```
+
 A few things to note from the above example :
 
 - HGraphDB accepts user-supplied IDs, for both vertices and edges.
 - The following types can be used for both IDs and property values:
-	- boolean
-	- String
-	- numbers (byte, short, int long, float, double)
-	- java.math.BigDecimal
-	- java.time.LocalDate
-	- java.time.LocalTime
-	- java.time.LocalDateTime
-	- java.time.Duration
-	- java.util.UUID
-	- byte arrays
-	- Enum instances
-	- [Kryo](https://github.com/EsotericSoftware/kryo)-serializable instances
-	- Java-serializable instances
+  - boolean
+  - String
+  - numbers (byte, short, int long, float, double)
+  - java.math.BigDecimal
+  - java.time.LocalDate
+  - java.time.LocalTime
+  - java.time.LocalDateTime
+  - java.time.Duration
+  - java.util.UUID
+  - byte arrays
+  - Enum instances
+  - [Kryo](https://github.com/EsotericSoftware/kryo)-serializable instances
+  - Java-serializable instances
 
 ## Creating Indices
 
@@ -64,82 +66,104 @@ Two types of indices are supported by HGraphDB:
 
 An index is created as follows:
 
-		graph.createIndex(ElementType.VERTEX, "person", "name");
-		...
-		graph.createIndex(ElementType.EDGE, "knows", "since");
+```java
+graph.createIndex(ElementType.VERTEX, "person", "name");
+...
+graph.createIndex(ElementType.EDGE, "knows", "since");
+```
 
 The above commands should be run before the relevant data is populated.  To create an index after data has been populated, first create the index with the following parameters:
 
-		graph.createIndex(ElementType.VERTEX, "person", "name", false, /* populate */ true, /* async */ true);
-		
-Then run a map-reduce job using the `hbase` command.
+```java
+graph.createIndex(ElementType.VERTEX, "person", "name", false, /* populate */ true, /* async */ true);
+```
 
-		hbase io.hgraphdb.mapreduce.index.PopulateIndex \
-		    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+Then run a MapReduce job using the `hbase` command:
+
+```bash
+hbase io.hgraphdb.mapreduce.index.PopulateIndex \
+    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+```
 
 Once an index is created and data has been populated, it can be used as follows:
 
-		// get persons named John
-		Iterator<Vertex> it = graph.verticesByLabel("person", "name", "John");
-		...
-		// get persons first known by John between 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
-		Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", 
-			LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
-		
+```java
+// get persons named John
+Iterator<Vertex> it = graph.verticesByLabel("person", "name", "John");
+...
+// get persons first known by John between 2007-01-01 (inclusive) and 2008-01-01 (exclusive)
+Iterator<Edge> it = johnV.edges(Direction.OUT, "knows", "since", 
+    LocalDate.parse("2007-01-01"), LocalDate.parse("2008-01-01"));
+```
+
 Note that the indices support range queries, where the start of the range is inclusive and the end of the range is exclusive.
 
 An index can also be specified as a unique index.  For a vertex index, this means only one vertex can have a particular property name-value for the given vertex label.  For an edge index, this means only one edge of a specific vertex can have a particular property name-value for a given edge label.
 
-		graph.createIndex(ElementType.VERTEX, "person", "name", /* unique */ true);
+```java
+graph.createIndex(ElementType.VERTEX, "person", "name", /* unique */ true);
+```
 
-To drop an index, invoke a map-reduce job using the `hbase` command.
+To drop an index, invoke a MapReduce job using the `hbase` command:
 
-		hbase io.hgraphdb.mapreduce.index.DropIndex \
-		    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
-		    
+```bash
+hbase io.hgraphdb.mapreduce.index.DropIndex \
+    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+```
+
 ## Pagination
 
 Once an index is defined, results can be paginated.  HGraphDB supports [keyset pagination] (http://use-the-index-luke.com/no-offset), for both vertex and edge indices. 
 
-		// get first page of persons (note that null is passed as start key)
-		final int pageSize = 20;
-		Iterator<Vertex> it = graph.verticesWithLimit("person", "name", null, pageSize);
-		...
-		// get next page using start key of last person from previous page
-		it = graph.verticesWithLimit("person", "name", "John", pageSize + 1);
-		...
-		// get first page of persons most recently known by John
-		Iterator<Edge> it = johnV.edgesWithLimit(Direction.OUT, "knows", "since", 
-			null, pageSize, /* reversed */ true);
-			 
+```java
+// get first page of persons (note that null is passed as start key)
+final int pageSize = 20;
+Iterator<Vertex> it = graph.verticesWithLimit("person", "name", null, pageSize);
+...
+// get next page using start key of last person from previous page
+it = graph.verticesWithLimit("person", "name", "John", pageSize + 1);
+...
+// get first page of persons most recently known by John
+Iterator<Edge> it = johnV.edgesWithLimit(Direction.OUT, "knows", "since", 
+    null, pageSize, /* reversed */ true);
+```
+
 Also note that indices can be paginated in descending order by passing `reversed` as `true`.
 
 ## Schema Management
 
 By default HGraphDB does not use a schema.  Schema management can be enabled by calling `HBaseGraphConfiguration.useSchema(true)`.  Once schema management is enabled, the schema for vertex and edge labels can be defined.
 
-		graph.createLabel(ElementType.VERTEX, "author", /* id */ ValueType.STRING, "age", ValueType.INT);
-		graph.createLabel(ElementType.VERTEX, "book", /* id */ ValueType.STRING, "publisher", ValueType.STRING);
-		graph.createLabel(ElementType.EDGE, "writes", /* id */ ValueType.STRING, "since", ValueType.DATE);   
-	
+```java
+graph.createLabel(ElementType.VERTEX, "author", /* id */ ValueType.STRING, "age", ValueType.INT);
+graph.createLabel(ElementType.VERTEX, "book", /* id */ ValueType.STRING, "publisher", ValueType.STRING);
+graph.createLabel(ElementType.EDGE, "writes", /* id */ ValueType.STRING, "since", ValueType.DATE);   
+```
+
 Edge labels must be explicitly connected to vertex labels before edges are added to the graph.
 
-		graph.connectLabels("author", "writes", "book"); 
+```java
+graph.connectLabels("author", "writes", "book"); 
+```
 
 Additional properties can be added to labels at a later time; otherwise labels cannot be changed.
 
-		graph.updateLabel("author", "height", ValueType.DOUBLE);
-		
+```java
+graph.updateLabel("author", "height", ValueType.DOUBLE);
+```
+
 Whenever vertices or edges are added to the graph, they will first be validated against the schema.    
 
 ## Counters
 
 One unique feature of HGraphDB is support for counters.  The use of counters requires that schema management is enabled.
 
-       graph.createLabel(ElementType.VERTEX, "author", ValueType.STRING, "bookCount", ValueType.COUNTER);
+```java
+graph.createLabel(ElementType.VERTEX, "author", ValueType.STRING, "bookCount", ValueType.COUNTER);
 
-       HBaseVertex v = (HBaseVertex) graph.addVertex(T.id, "Kierkegaard", T.label, "author");
-       v.incrementProperty("bookCount", 1L);
+HBaseVertex v = (HBaseVertex) graph.addVertex(T.id, "Kierkegaard", T.label, "author");
+v.incrementProperty("bookCount", 1L);
+```
 
 One caveat is that indices on counters are not supported.
 
@@ -153,28 +177,31 @@ HGraphDB provides integration with [Apache Giraph](http://giraph.apache.org) by 
 
 Finally, HGraphDB provides a testing utility, `InternalHBaseVertexRunner`, that is similar to `InternalVertexRunner` in Giraph, and that can be used to run Giraph computations using a local Zookeeper instance running in another thread.
 
-For more information on using the HGraphDB integration with Giraph, see [this blog] (https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
+For more information on using the HGraphDB integration with Giraph, see [this blog post] (https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
 
 ## Using the Gremlin Console
 
 One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
 
-                 \,,,/
-                 (o o)
-        -----oOOo-(3)-oOOo-----
-        plugin activated: tinkerpop.server
-        plugin activated: tinkerpop.utilities
-        plugin activated: tinkerpop.tinkergraph
-        gremlin> :install org.apache.hbase hbase-client 1.2.0
-        gremlin> :install org.apache.hbase hbase-common 1.2.0
-        gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-        gremlin> :install io.hgraphdb hgraphdb 0.4.10
-        gremlin> :plugin use io.hgraphdb
-                
+```
+         \,,,/
+         (o o)
+-----oOOo-(3)-oOOo-----
+plugin activated: tinkerpop.server
+plugin activated: tinkerpop.utilities
+plugin activated: tinkerpop.tinkergraph
+gremlin> :install org.apache.hbase hbase-client 1.2.0
+gremlin> :install org.apache.hbase hbase-common 1.2.0
+gremlin> :install org.apache.hadoop hadoop-common 2.5.1
+gremlin> :install io.hgraphdb hgraphdb 0.4.10
+gremlin> :plugin use io.hgraphdb
+```
+
 Then restart the Gremlin console and run the following:
 
-		gremlin> g = HBaseGraph.open("mygraph", "127.0.0.1", "/hbase-unsecure")
-
+```
+gremlin> g = HBaseGraph.open("mygraph", "127.0.0.1", "/hbase-unsecure")
+```
 
 ## Performance Tuning
 
@@ -211,7 +238,7 @@ HGraphDB uses a tall table schema.  The schema is created in the namespace speci
 | Row Key | Column: createdAt | Column: vertexID |
 |---|---|---|
 | [vertex label, isUnique, property key, property value, vertex ID (if not unique)] | [createdAt value] | [vertex ID (if unique)] |
-	
+
 ### Edge Index Table
 
 | Row Key | Column: createdAt | Column: vertexID | Column: edgeID |
@@ -244,8 +271,6 @@ HGraphDB was designed to support the features mentioned [here](https://rayokota.
 
 ## <a name="future"></a>Future Enhancements 
 
-Possible future enhancements include map-reduce jobs for the following:
+Possible future enhancements include MapReduce jobs for the following:
 
 - Cleaning up stale indices.
-
-
