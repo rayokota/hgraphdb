@@ -71,7 +71,7 @@ public class EdgeIndexModel extends BaseModel {
         if (edges != null) {
             return edges;
         }
-        Scan scan = getEdgesEndpointScan(vertex, direction, Constants.CREATED_AT, labels);
+        Scan scan = getEdgesEndpointScan(vertex, direction, labels);
         return performEdgesScan(vertex, scan, cacheKey, false, edge -> true);
     }
 
@@ -90,7 +90,7 @@ public class EdgeIndexModel extends BaseModel {
         }
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, index.isUnique(), key, label, value)
-                : getEdgesEndpointScan(vertex, direction, Constants.CREATED_AT, label);
+                : getEdgesEndpointScan(vertex, direction, label);
         return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
@@ -113,7 +113,7 @@ public class EdgeIndexModel extends BaseModel {
         }
         Scan scan = useIndex
                 ? getEdgesScanInRange(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, exclusiveToValue)
-                : getEdgesEndpointScan(vertex, direction, Constants.CREATED_AT, label);
+                : getEdgesEndpointScan(vertex, direction, label);
         return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
@@ -220,10 +220,11 @@ public class EdgeIndexModel extends BaseModel {
         };
     }
 
-    private Scan getEdgesEndpointScan(Vertex vertex, Direction direction, String key, String... labels) {
+    private Scan getEdgesEndpointScan(Vertex vertex, Direction direction, String... labels) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
-        byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, null);
+        final String key = Constants.CREATED_AT;
+        byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, false, key, null, null);
         Scan scan = new Scan(startRow);
         FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
         filterList.addFilter(new PrefixFilter(startRow));
@@ -294,10 +295,6 @@ public class EdgeIndexModel extends BaseModel {
         scan.setFilter(filterList);
         scan.setReversed(reversed);
         return scan;
-    }
-
-    public byte[] serializeForRead(Vertex vertex, Direction direction, String label) {
-        return serializeForRead(vertex, direction, false, Constants.CREATED_AT, label, null);
     }
 
     public byte[] serializeForRead(Vertex vertex, Direction direction, boolean isUnique, String key, String label, Object value) {
