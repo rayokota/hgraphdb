@@ -223,21 +223,10 @@ public class EdgeIndexModel extends BaseModel {
     private Scan getEdgesEndpointScan(Vertex vertex, Direction direction, String key, String... labels) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
-        Scan scan;
-        PrefixFilter prefixFilter;
-        if (direction == Direction.BOTH) {
-            byte[] startRow = serializeForRead(vertex, null, null);
-            byte[] prefix = serializeForRead(vertex, null, null);
-            scan = new Scan(startRow);
-            prefixFilter = new PrefixFilter(prefix);
-        } else {
-            byte[] startRow = serializeForRead(vertex, direction, null);
-            scan = new Scan(startRow);
-            prefixFilter = new PrefixFilter(startRow);
-        }
-
+        byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, null);
+        Scan scan = new Scan(startRow);
         FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-        filterList.addFilter(prefixFilter);
+        filterList.addFilter(new PrefixFilter(startRow));
         filterList.addFilter(applyEdgeLabelsRowFilter(vertex, direction, key, labels));
         scan.setFilter(filterList);
         return scan;
