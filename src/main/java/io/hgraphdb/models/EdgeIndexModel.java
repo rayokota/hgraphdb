@@ -224,7 +224,8 @@ public class EdgeIndexModel extends BaseModel {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
         final String key = Constants.CREATED_AT;
-        byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, false, key, null, null);
+        byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, false,
+                key, labels.length == 1 ? labels[0] : null, null);
         Scan scan = new Scan(startRow);
         FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
         filterList.addFilter(new PrefixFilter(startRow));
