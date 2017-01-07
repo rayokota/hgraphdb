@@ -10,7 +10,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>0.4.10</version>
+    <version>0.4.11</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ A few things to note from the above example :
   - [Kryo](https://github.com/EsotericSoftware/kryo)-serializable instances
   - Java-serializable instances
 
-## Creating Indices
+## Using Indices
 
 Two types of indices are supported by HGraphDB:
 
@@ -193,7 +193,7 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.2.0
 gremlin> :install org.apache.hbase hbase-common 1.2.0
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 0.4.10
+gremlin> :install io.hgraphdb hgraphdb 0.4.11
 gremlin> :plugin use io.hgraphdb
 ```
 
