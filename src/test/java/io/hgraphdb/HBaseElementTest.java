@@ -98,7 +98,10 @@ public class HBaseElementTest extends HBaseGraphTest {
         graph.addVertex(T.id, id(3), T.label, "a", "key1", 1);
         graph.addVertex(T.id, id(4), T.label, "b", "key1", 1);
 
-        Iterator<Vertex> it = graph.verticesByLabel("a", "key1", 1);
+        Iterator<Vertex> it = graph.verticesByLabel("a");
+        assertEquals(4, count(it));
+
+        it = graph.verticesByLabel("a", "key1", 1);
         assertEquals(2, count(it));
     }
 

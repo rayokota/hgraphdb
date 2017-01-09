@@ -12,6 +12,8 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
@@ -24,38 +26,45 @@ import static io.hgraphdb.HBaseGraphConfiguration.Keys.*;
 
 public final class HBaseGraphUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseGraphUtils.class);
+
     private static final Map<String, Connection> connections = new ConcurrentHashMap<>();
 
     public static Connection getConnection(HBaseGraphConfiguration config) {
         Connection conn = connections.get(config.getGraphNamespace());
         if (conn != null) return conn;
         Configuration hbaseConfig = config.toHBaseConfiguration();
-        try {
-            if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) {
-                return MockConnectionFactory.createConnection(hbaseConfig);
-            }
-            UserGroupInformation ugi = null;
-            if ("kerberos".equals(hbaseConfig.get(HBASE_SECURITY_AUTHENTICATION))) {
-                String principal = hbaseConfig.get(HBASE_CLIENT_KERBEROS_PRINCIPAL);
-                String keytab = hbaseConfig.get(HBASE_CLIENT_KEYTAB_FILE);
-                if (principal != null && keytab != null) {
-                    UserGroupInformation.setConfiguration(hbaseConfig);
-                    UserGroupInformation.loginUserFromKeytab(principal, keytab);
-                    ugi = UserGroupInformation.getLoginUser();
-                }
-            }
-            if (ugi != null) {
-                conn = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
-                    @Override
-                    public Connection run() throws Exception {
-                        return ConnectionFactory.createConnection(hbaseConfig);
+        switch (config.getInstanceType()) {
+            case MOCK:
+                conn = MockConnectionFactory.createConnection(hbaseConfig);
+                break;
+            case BIGTABLE:
+            case DISTRIBUTED:
+                try {
+                    UserGroupInformation ugi = null;
+                    if ("kerberos".equals(hbaseConfig.get(HBASE_SECURITY_AUTHENTICATION))) {
+                        String principal = hbaseConfig.get(HBASE_CLIENT_KERBEROS_PRINCIPAL);
+                        String keytab = hbaseConfig.get(HBASE_CLIENT_KEYTAB_FILE);
+                        if (principal != null && keytab != null) {
+                            UserGroupInformation.setConfiguration(hbaseConfig);
+                            UserGroupInformation.loginUserFromKeytab(principal, keytab);
+                            ugi = UserGroupInformation.getLoginUser();
+                        }
                     }
-                });
-            } else {
-                conn = ConnectionFactory.createConnection(hbaseConfig);
-            }
-        } catch (Exception e) {
-            throw new HBaseGraphException(e);
+                    if (ugi != null) {
+                        conn = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
+                            @Override
+                            public Connection run() throws Exception {
+                                return ConnectionFactory.createConnection(hbaseConfig);
+                            }
+                        });
+                    } else {
+                        conn = ConnectionFactory.createConnection(hbaseConfig);
+                    }
+                    break;
+                } catch (Exception e) {
+                    throw new HBaseGraphException(e);
+                }
         }
         connections.put(config.getGraphNamespace(), conn);
         return conn;
@@ -67,7 +76,9 @@ public final class HBaseGraphUtils {
         if (!tablePrefix.isEmpty()) {
             name = tablePrefix + "_" + name;
         }
-        return TableName.valueOf(ns, name);
+        return config.getInstanceType() == HBaseGraphConfiguration.InstanceType.BIGTABLE
+                ? TableName.valueOf(name)
+                : TableName.valueOf(ns, name);
     }
 
     public static void createTables(HBaseGraphConfiguration config, Connection conn) {
@@ -75,7 +86,9 @@ public final class HBaseGraphUtils {
         Admin admin = null;
         try {
             admin = conn.getAdmin();
-            createNamespace(config, admin);
+            if (config.getInstanceType() != HBaseGraphConfiguration.InstanceType.BIGTABLE) {
+                createNamespace(config, admin);
+            }
             createTables(config, admin);
         } catch (Exception e) {
             throw new HBaseGraphException(e);
@@ -111,23 +124,28 @@ public final class HBaseGraphUtils {
     private static void createTable(HBaseGraphConfiguration config, Admin admin, String name, int ttl) throws IOException {
         TableName tableName = getTableName(config, name);
         if (admin.tableExists(tableName)) return;
-        HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-        tableDescriptor.setDurability(config.getTableAsyncWAL() ? Durability.ASYNC_WAL : Durability.USE_DEFAULT);
-        HColumnDescriptor columnDescriptor = new HColumnDescriptor(DEFAULT_FAMILY)
-                .setCompressionType(Compression.Algorithm.valueOf(config.getCompressionAlgorithm().toUpperCase()))
-                .setBloomFilterType(BloomType.ROW)
-                .setDataBlockEncoding(DataBlockEncoding.FAST_DIFF)
-                .setMaxVersions(1)
-                .setMinVersions(0)
-                .setBlocksize(32768)
-                .setBlockCacheEnabled(true)
-                .setTimeToLive(ttl);
-        tableDescriptor.addFamily(columnDescriptor);
-        int regionCount = config.getRegionCount();
-        if (regionCount <= 1) {
-            admin.createTable(tableDescriptor);
-        } else {
-            admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);
+        try {
+            HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
+            tableDescriptor.setDurability(config.getTableAsyncWAL() ? Durability.ASYNC_WAL : Durability.USE_DEFAULT);
+            HColumnDescriptor columnDescriptor = new HColumnDescriptor(DEFAULT_FAMILY)
+                    .setCompressionType(Compression.Algorithm.valueOf(config.getCompressionAlgorithm().toUpperCase()))
+                    .setBloomFilterType(BloomType.ROW)
+                    .setDataBlockEncoding(DataBlockEncoding.FAST_DIFF)
+                    .setMaxVersions(1)
+                    .setMinVersions(0)
+                    .setBlocksize(32768)
+                    .setBlockCacheEnabled(true)
+                    .setTimeToLive(ttl);
+            tableDescriptor.addFamily(columnDescriptor);
+            int regionCount = config.getRegionCount();
+            if (regionCount <= 1) {
+                admin.createTable(tableDescriptor);
+            } else {
+                admin.createTable(tableDescriptor, getStartKey(regionCount), getEndKey(regionCount), regionCount);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Could not create table " + tableName, e);
+            throw e;
         }
     }
 

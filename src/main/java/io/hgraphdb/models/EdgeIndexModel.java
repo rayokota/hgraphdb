@@ -71,8 +71,13 @@ public class EdgeIndexModel extends BaseModel {
         if (edges != null) {
             return edges;
         }
-        Scan scan = getEdgesEndpointScan(vertex, direction, labels);
-        return performEdgesScan(vertex, scan, cacheKey, false, edge -> true);
+        Scan scan = getEdgeEndpointsScan(vertex, direction, labels);
+        Predicate<HBaseEdge> filter = System.getenv("BIGTABLE_EMULATOR_HOST") != null
+                // Bigtable emulator has a bug regarding matching nonexistent labels
+                // (see shouldTraverseInOutFromVertexWithMultipleEdgeLabelFilter)
+                ? edge -> labels.length == 0 || Arrays.stream(labels).anyMatch(label -> label.equals(edge.label()))
+                : null;
+        return performEdgesScan(vertex, scan, cacheKey, false, filter);
     }
 
     public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String label,
@@ -90,11 +95,12 @@ public class EdgeIndexModel extends BaseModel {
         }
         Scan scan = useIndex
                 ? getEdgesScan(vertex, direction, index.isUnique(), key, label, value)
-                : getEdgesEndpointScan(vertex, direction, label);
-        return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
+                : getEdgeEndpointsScan(vertex, direction, label);
+        Predicate<HBaseEdge> filter = edge -> {
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
-        });
+        };
+        return performEdgesScan(vertex, scan, cacheKey, useIndex, filter);
     }
 
     public Iterator<Edge> edgesInRange(HBaseVertex vertex, Direction direction, String label,
@@ -113,12 +119,13 @@ public class EdgeIndexModel extends BaseModel {
         }
         Scan scan = useIndex
                 ? getEdgesScanInRange(vertex, direction, index.isUnique(), key, label, inclusiveFromValue, exclusiveToValue)
-                : getEdgesEndpointScan(vertex, direction, label);
-        return performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
+                : getEdgeEndpointsScan(vertex, direction, label);
+        Predicate<HBaseEdge> filter = edge -> {
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             return Bytes.compareTo(propValueBytes, fromBytes) >= 0
                     && Bytes.compareTo(propValueBytes, toBytes) < 0;
-        });
+        };
+        return performEdgesScan(vertex, scan, cacheKey, useIndex, filter);
     }
 
     public Iterator<Edge> edgesWithLimit(HBaseVertex vertex, Direction direction, String label,
@@ -220,17 +227,15 @@ public class EdgeIndexModel extends BaseModel {
         };
     }
 
-    private Scan getEdgesEndpointScan(Vertex vertex, Direction direction, String... labels) {
+    private Scan getEdgeEndpointsScan(Vertex vertex, Direction direction, String... labels) {
         LOGGER.trace("Executing Scan, type: {}, id: {}", "key", vertex.id());
 
         final String key = Constants.CREATED_AT;
         byte[] startRow = serializeForRead(vertex, direction != Direction.BOTH ? direction : null, false,
                 key, labels.length == 1 ? labels[0] : null, null);
         Scan scan = new Scan(startRow);
-        FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-        filterList.addFilter(new PrefixFilter(startRow));
-        filterList.addFilter(applyEdgeLabelsRowFilter(vertex, direction, key, labels));
-        scan.setFilter(filterList);
+        scan.setRowPrefixFilter(startRow);
+        scan.setFilter(applyEdgeLabelsRowFilter(vertex, direction, key, labels));
         return scan;
     }
 
@@ -257,9 +262,8 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     private void applyEdgeLabelRowFilter(FilterList filters, Vertex vertex, Direction direction, String key, String label) {
-        RowFilter rowFilter = new RowFilter(CompareFilter.CompareOp.EQUAL,
-                new BinaryPrefixComparator(serializeForRead(vertex, direction, false, key, label, null)));
-        filters.addFilter(rowFilter);
+        PrefixFilter prefixFilter = new PrefixFilter(serializeForRead(vertex, direction, false, key, label, null));
+        filters.addFilter(prefixFilter);
     }
 
     private Scan getEdgesScan(Vertex vertex, Direction direction, boolean isUnique, String key, String label, Object value) {
@@ -267,7 +271,7 @@ public class EdgeIndexModel extends BaseModel {
 
         byte[] startRow = serializeForRead(vertex, direction, isUnique, key, label, value);
         Scan scan = new Scan(startRow);
-        scan.setFilter(new PrefixFilter(startRow));
+        scan.setRowPrefixFilter(startRow);
         return scan;
     }
 
@@ -288,8 +292,18 @@ public class EdgeIndexModel extends BaseModel {
         byte[] startRow = fromValue != null
                 ? serializeForRead(vertex, direction, isUnique, key, label, fromValue)
                 : prefix;
+        byte[] stopRow = HConstants.EMPTY_END_ROW;
+        if (graph.configuration().getInstanceType() == HBaseGraphConfiguration.InstanceType.BIGTABLE) {
+            if (reversed) {
+                throw new UnsupportedOperationException("Reverse scans not supported by Bigtable");
+            } else {
+                // PrefixFilter in Bigtable does not automatically stop
+                // See https://github.com/GoogleCloudPlatform/cloud-bigtable-client/issues/1087
+                stopRow = HBaseGraphUtils.incrementBytes(startRow);
+            }
+        }
         if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);
-        Scan scan = new Scan(startRow);
+        Scan scan = new Scan(startRow, stopRow);
         FilterList filterList = new FilterList();
         filterList.addFilter(new PrefixFilter(prefix));
         filterList.addFilter(new PageFilter(limit));

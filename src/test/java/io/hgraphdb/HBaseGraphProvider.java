@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class HBaseGraphProvider extends AbstractGraphProvider {
 
-    private static final boolean useMock = true;
+    private static final HBaseGraphConfiguration.InstanceType type = HBaseGraphConfiguration.InstanceType.MOCK;
 
     private static final Set<Class> IMPLEMENTATIONS = new HashSet<Class>() {{
         add(HBaseEdge.class);
@@ -26,23 +26,40 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
 
     @Override
     public Map<String, Object> getBaseConfiguration(final String graphName, final Class<?> test, final String testMethodName, final LoadGraphWith.GraphData graphData) {
-        if (useMock) {
-            return new HashMap<String, Object>() {{
-                put(Graph.GRAPH, HBaseGraph.class.getName());
-                put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
-                put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
-                put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
-            }};
-        } else {
-            return new HashMap<String, Object>() {{
-                put(Graph.GRAPH, HBaseGraph.class.getName());
-                put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.DISTRIBUTED.toString());
-                put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
-                put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
-                put("hbase.zookeeper.quorum", "127.0.0.1");
-                put("zookeeper.znode.parent", "/hbase-unsecure");
-            }};
+        Map<String, Object> config = null;
+        switch (type) {
+            case MOCK:
+                config = new HashMap<String, Object>() {{
+                    put(Graph.GRAPH, HBaseGraph.class.getName());
+                    put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
+                    put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
+                    put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                }};
+                break;
+            case BIGTABLE:
+                config = new HashMap<String, Object>() {{
+                    put(Graph.GRAPH, HBaseGraph.class.getName());
+                    put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.BIGTABLE.toString());
+                    put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
+                    put(HBaseGraphConfiguration.Keys.GRAPH_TABLE_PREFIX, graphName);
+                    put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                    put("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection");
+                    put("google.bigtable.instance.id", "hgraphdb-bigtable");
+                    put("google.bigtable.project.id", "rayokota2");
+                }};
+                break;
+            case DISTRIBUTED:
+                config = new HashMap<String, Object>() {{
+                    put(Graph.GRAPH, HBaseGraph.class.getName());
+                    put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.DISTRIBUTED.toString());
+                    put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
+                    put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                    put("hbase.zookeeper.quorum", "127.0.0.1");
+                    put("zookeeper.znode.parent", "/hbase-unsecure");
+                }};
+                break;
         }
+        return config;
     }
 
     @Override

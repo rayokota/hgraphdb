@@ -122,7 +122,7 @@ public class VertexIndexModel extends BaseModel {
     private Scan getVertexIndexScan(String label, boolean isUnique, String key, Object value) {
         byte[] startRow = serializeForRead(label, isUnique, key, value);
         Scan scan = new Scan(startRow);
-        scan.setFilter(new PrefixFilter(startRow));
+        scan.setRowPrefixFilter(startRow);
         return scan;
     }
 
@@ -137,8 +137,18 @@ public class VertexIndexModel extends BaseModel {
         byte[] startRow = from != null
                 ? serializeForRead(label, isUnique, key, from)
                 : prefix;
+        byte[] stopRow = HConstants.EMPTY_END_ROW;
+        if (graph.configuration().getInstanceType() == HBaseGraphConfiguration.InstanceType.BIGTABLE) {
+            if (reversed) {
+                throw new UnsupportedOperationException("Reverse scans not supported by Bigtable");
+            } else {
+                // PrefixFilter in Bigtable does not automatically stop
+                // See https://github.com/GoogleCloudPlatform/cloud-bigtable-client/issues/1087
+                stopRow = HBaseGraphUtils.incrementBytes(startRow);
+            }
+        }
         if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);
-        Scan scan = new Scan(startRow);
+        Scan scan = new Scan(startRow, stopRow);
         FilterList filterList = new FilterList();
         filterList.addFilter(new PrefixFilter(prefix));
         filterList.addFilter(new PageFilter(limit));

@@ -18,6 +18,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
             HBASE_GRAPH_CLASS.getCanonicalName();
 
     public enum InstanceType {
+        BIGTABLE,
         DISTRIBUTED,
         MOCK
     }

@@ -6,7 +6,7 @@ import org.junit.Before;
 
 public class HBaseGraphTest {
 
-    protected static final boolean useMock = true;
+    protected static final HBaseGraphConfiguration.InstanceType type = HBaseGraphConfiguration.InstanceType.MOCK;
 
     protected HBaseGraph graph;
 
@@ -20,13 +20,23 @@ public class HBaseGraphTest {
                 .setGraphNamespace(graphNamespace)
                 .setCreateTables(true)
                 .setRegionCount(1);
-        if (useMock) {
-            return config.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
-        } else {
-            config.set("hbase.zookeeper.quorum", "127.0.0.1");
-            config.set("zookeeper.znode.parent", "/hbase-unsecure");
-            return config.setInstanceType(HBaseGraphConfiguration.InstanceType.DISTRIBUTED);
+        switch (type) {
+            case MOCK:
+                config.setInstanceType(HBaseGraphConfiguration.InstanceType.MOCK);
+                break;
+            case BIGTABLE:
+                config.setInstanceType(HBaseGraphConfiguration.InstanceType.BIGTABLE);
+                config.set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection");
+                config.set("google.bigtable.instance.id", "hgraphdb-bigtable");
+                config.set("google.bigtable.project.id", "rayokota2");
+                break;
+            case DISTRIBUTED:
+                config.setInstanceType(HBaseGraphConfiguration.InstanceType.DISTRIBUTED);
+                config.set("hbase.zookeeper.quorum", "127.0.0.1");
+                config.set("zookeeper.znode.parent", "/hbase-unsecure");
+                break;
         }
+        return config;
     }
 
     @After

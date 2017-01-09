@@ -4,6 +4,8 @@ import io.hgraphdb.testclassification.SlowTests;
 import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.LoadGraphWith;
 import org.apache.tinkerpop.gremlin.process.AbstractGremlinProcessTest;
+import org.apache.tinkerpop.gremlin.process.traversal.Order;
+import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -19,23 +21,22 @@ import org.apache.tinkerpop.gremlin.structure.io.IoTest;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONIo;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.tinkerpop.gremlin.LoadGraphWith.GraphData.MODERN;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.both;
 import static org.junit.Assert.*;
 
 @Category(SlowTests.class)
 public class CustomTest extends AbstractGremlinProcessTest {
 
+    @Ignore
     @Test
     public void shouldNotGetConcurrentModificationException() {
         for (int i = 0; i < 25; i++) {
@@ -55,6 +56,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         tryCommit(graph, getAssertVertexEdgeCounts(0, 0));
     }
 
+    @Ignore
     @Test
     public void shouldNotHaveAConcurrentModificationExceptionWhenIteratingAndRemovingAddingEdges() {
         final Vertex v1 = graph.addVertex("name", "marko");
@@ -75,6 +77,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(0, IteratorUtils.count(v2.edges(Direction.BOTH)));
     }
 
+    @Ignore
     @Test
     public void shouldEvaluateConnectivityPatterns() {
         final Vertex a;
@@ -163,6 +166,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         assertEquals(4, vertexIds.size());
     }
 
+    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_V_withSideEffectXsgX_repeatXbothEXcreatedX_subgraphXsgX_outVX_timesX5X_name_dedup() throws Exception {
@@ -187,6 +191,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         return __.<A>start().bothE(edgeLabels);
     }
 
+    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_VX1X_outXknowsAsStringIdX() {
@@ -223,6 +228,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
         verifyUniqueStepIds(traversal.asAdmin());
     }
 
+    @Ignore
     @Test
     @LoadGraphWith(MODERN)
     public void g_VX1X_outEXknowsX_hasXweight_1X_asXhereX_inV_hasXname_joshX_selectXhereX() throws Exception {
@@ -257,6 +263,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
 
     public String fileExtension = ".json";
 
+    @Ignore
     @Test
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void shouldReadWriteModern() throws Exception {
@@ -281,5 +288,91 @@ public class CustomTest extends AbstractGremlinProcessTest {
 
             graphProvider.clear(g1, configuration);
         }
+    }
+
+    @Test
+    public void shouldTraverseInOutFromVertexWithMultipleEdgeLabelFilter() {
+        final Vertex a = graph.addVertex();
+        final Vertex b = graph.addVertex();
+        final Vertex c = graph.addVertex();
+
+        final String labelFriend = graphProvider.convertLabel("friend");
+        final String labelHate = graphProvider.convertLabel("hate");
+
+        final Edge aFriendB = a.addEdge(labelFriend, b);
+        final Edge aFriendC = a.addEdge(labelFriend, c);
+        final Edge aHateC = a.addEdge(labelHate, c);
+        final Edge cHateA = c.addEdge(labelHate, a);
+        final Edge cHateB = c.addEdge(labelHate, b);
+
+        List<Edge> results = IteratorUtils.list(a.edges(Direction.OUT, labelFriend, labelHate));
+        assertEquals(3, results.size());
+        assertTrue(results.contains(aFriendB));
+        assertTrue(results.contains(aFriendC));
+        assertTrue(results.contains(aHateC));
+
+        results = IteratorUtils.list(a.edges(Direction.IN, labelFriend, labelHate));
+        assertEquals(1, results.size());
+        assertTrue(results.contains(cHateA));
+
+        results = IteratorUtils.list(b.edges(Direction.IN, labelFriend, labelHate));
+        assertEquals(2, results.size());
+        assertTrue(results.contains(aFriendB));
+        assertTrue(results.contains(cHateB));
+
+        results = IteratorUtils.list(b.edges(Direction.IN, graphProvider.convertLabel("blah1"), graphProvider.convertLabel("blah2")));
+        assertEquals(0, results.size());
+    }
+
+    @Ignore
+    @Test
+    @LoadGraphWith(MODERN)
+    public void g_V_repeatXboth_simplePathX_timesX3X_path() {
+        final Traversal<Vertex, Path> traversal = get_g_V_repeatXboth_simplePathX_timesX3X_path();
+        printTraversalForm(traversal);
+        int counter = 0;
+        String s = null;
+        while (traversal.hasNext()) {
+            counter++;
+            assertTrue(traversal.next().isSimple());
+        }
+        assertEquals(18, counter);
+        assertFalse(traversal.hasNext());
+    }
+
+    public Traversal<Vertex, Path> get_g_V_repeatXboth_simplePathX_timesX3X_path() {
+        return g.V().repeat(both().simplePath()).times(3).path();
+    }
+
+    @Ignore
+    @Test
+    @LoadGraphWith(MODERN)
+    public void g_V_both_hasLabelXpersonX_order_byXage_decrX_limitX5X_name() {
+        final Traversal<Vertex, String> traversal = get_g_V_both_hasLabelXpersonX_order_byXage_decrX_limitX5X_name();
+        printTraversalForm(traversal);
+        checkOrderedResults(Arrays.asList("peter", "josh", "josh", "josh", "marko"), traversal);
+    }
+
+    public Traversal<Vertex, String> get_g_V_both_hasLabelXpersonX_order_byXage_decrX_limitX5X_name() {
+        return g.V().both().hasLabel("person").order().by("age", Order.decr).limit(5).values("name");
+    }
+
+    @Ignore
+    @Test
+    @LoadGraphWith(MODERN)
+    public void g_VX1X_repeatXboth_simplePathX_untilXhasXname_peterX_or_loops_isX2XX_hasXname_peterX_path_byXnameX() {
+        final Traversal<Vertex, Path> traversal = get_g_VX1X_repeatXboth_simplePathX_untilXhasXname_peterX_or_loops_isX2XX_hasXname_peterX_path_byXnameX(convertToVertexId("marko"));
+        printTraversalForm(traversal);
+        assertTrue(traversal.hasNext());
+        final Path path = traversal.next();
+        assertEquals(3, path.size());
+        assertEquals("marko", path.get(0));
+        assertEquals("lop", path.get(1));
+        assertEquals("peter", path.get(2));
+        assertFalse(traversal.hasNext());
+    }
+
+    public Traversal<Vertex, Path> get_g_VX1X_repeatXboth_simplePathX_untilXhasXname_peterX_or_loops_isX2XX_hasXname_peterX_path_byXnameX(final Object v1Id) {
+        return g.V(v1Id).repeat(__.both().simplePath()).until(__.has("name", "peter").or().loops().is(2)).has("name", "peter").path().by("name");
     }
 }

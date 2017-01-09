@@ -3,7 +3,6 @@ package io.hgraphdb.mapreduce.index;
 import io.hgraphdb.*;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
@@ -63,7 +62,7 @@ public class DropIndex extends IndexTool {
             byte[] startRow = graph.getVertexIndexModel().serializeForRead(
                     index.label(), index.isUnique(), index.propertyKey(), null);
             Scan scan = new Scan(startRow);
-            scan.setFilter(new PrefixFilter(startRow));
+            scan.setRowPrefixFilter(startRow);
             return scan;
         }
     }
