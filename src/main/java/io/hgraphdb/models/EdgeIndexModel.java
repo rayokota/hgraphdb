@@ -72,7 +72,9 @@ public class EdgeIndexModel extends BaseModel {
             return edges;
         }
         Scan scan = getEdgeEndpointsScan(vertex, direction, labels);
-        Predicate<HBaseEdge> filter = System.getenv("BIGTABLE_EMULATOR_HOST") != null
+        Predicate<HBaseEdge> filter =
+                graph.configuration().getInstanceType() == HBaseGraphConfiguration.InstanceType.BIGTABLE
+                        && System.getenv("BIGTABLE_EMULATOR_HOST") != null
                 // Bigtable emulator has a bug regarding matching nonexistent labels
                 // (see shouldTraverseInOutFromVertexWithMultipleEdgeLabelFilter)
                 ? edge -> labels.length == 0 || Arrays.stream(labels).anyMatch(label -> label.equals(edge.label()))
