@@ -10,7 +10,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>0.4.11</version>
+    <version>0.4.12</version>
 </dependency>
 ```
 
@@ -20,7 +20,7 @@ To initialize HGraphDB, create an `HBaseGraphConfiguration` instance, and then u
 
 ```java
 Configuration cfg = new HBaseGraphConfiguration()
-    .setInstanceType(InstanceType.Distributed)
+    .setInstanceType(InstanceType.DISTRIBUTED)
     .setGraphNamespace("mygraph")
     .setCreateTables(true)
     .setRegionCount(numRegionServers)
@@ -179,6 +179,21 @@ Finally, HGraphDB provides a testing utility, `InternalHBaseVertexRunner`, that 
 
 For more information on using the HGraphDB integration with Giraph, see [this blog post] (https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
 
+## Support for Google Cloud Bigtable
+
+HGraphDB can be used with [Google Cloud Bigtable] (https://cloud.google.com/bigtable/).  Since Bigtable does not support namespaces, we set the name of the graph as the table prefix below.
+
+```java
+Configuration cfg = new HBaseGraphConfiguration()
+    .setInstanceType(InstanceType.BIGTABLE)
+    .setGraphTablePrefix("mygraph")
+    .setCreateTables(true)
+    .set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection")
+    .set("google.bigtable.instance.id", "my-instance-id")
+    .set("google.bigtable.project.id", "my-project-id");
+HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);
+```
+
 ## Using the Gremlin Console
 
 One benefit of having a TinkerPop layer to HBase is that a number of graph-related tools become available, which are all part of the TinkerPop ecosystem.  These tools include the Gremlin DSL and the Gremlin console.  To use HGraphDB in the Gremlin console, run the following commands:
@@ -193,7 +208,7 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.2.0
 gremlin> :install org.apache.hbase hbase-common 1.2.0
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 0.4.11
+gremlin> :install io.hgraphdb hgraphdb 0.4.12
 gremlin> :plugin use io.hgraphdb
 ```
 
