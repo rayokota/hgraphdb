@@ -65,8 +65,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
 
 
         HBaseGraphConfiguration hconf = graph.configuration();
-        Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.VERTEX_INDICES));
 
         graph.createIndex(ElementType.VERTEX, "a", "key1", false, true, false);
@@ -215,8 +214,7 @@ public class HBaseIndexTest extends HBaseGraphTest {
         v0.addEdge("b", v4, "key1", 4);
 
         HBaseGraphConfiguration hconf = graph.configuration();
-        Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.EDGE_INDICES));
 
         verifyTableCount(table, 5*2);  // 5 edge endpoints

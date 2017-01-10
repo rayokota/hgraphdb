@@ -35,7 +35,7 @@ public class PopulateIndexTest extends HBaseGraphTest {
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.VERTEX_INDICES));
 
         runPopulateIndex(conf, new String[] {"-t", "vertex", "-l", "a", "-p", "key1",
@@ -63,7 +63,7 @@ public class PopulateIndexTest extends HBaseGraphTest {
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.EDGE_INDICES));
 
         verifyTableCount(table, 5*2);  // 5 edge endpoints

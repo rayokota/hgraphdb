@@ -1,6 +1,8 @@
 package io.hgraphdb.mapreduce;
 
 import io.hgraphdb.Constants;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphConfiguration;
 import io.hgraphdb.HBaseGraphTest;
 import io.hgraphdb.testclassification.SlowTests;
 import org.apache.commons.logging.Log;
@@ -90,7 +92,8 @@ public class TableInputFormatTest extends HBaseGraphTest {
         public void setConf(Configuration configuration) {
             this.conf = configuration;
             try {
-                Connection connection = MockConnectionFactory.createConnection(conf);
+                HBaseGraph graph = new HBaseGraph(new HBaseGraphConfiguration(conf));
+                Connection connection = graph.connection();
                 table = connection.getTable(TABLE_NAME);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -112,8 +115,7 @@ public class TableInputFormatTest extends HBaseGraphTest {
             put.addColumn(FAMILY_NAME, COLUMN_NAME, entry.getKey(), Bytes.toBytes(false));
             puts.add(put);
         }
-        Configuration conf = graph.configuration().toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(desc.getTableName());
         table.put(puts);
         runTestOnTable();

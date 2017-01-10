@@ -44,7 +44,7 @@ public class DropIndexTest extends HBaseGraphTest {
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.VERTEX_INDICES));
 
         verifyTableCount(table, 4);
@@ -74,7 +74,7 @@ public class DropIndexTest extends HBaseGraphTest {
 
         HBaseGraphConfiguration hconf = graph.configuration();
         Configuration conf = hconf.toHBaseConfiguration();
-        Connection conn = MockConnectionFactory.createConnection(conf);
+        Connection conn = graph.connection();
         Table table = conn.getTable(HBaseGraphUtils.getTableName(hconf, Constants.EDGE_INDICES));
 
         verifyTableCount(table, 5*2 + 4*2);  // 5 edge endpoints and 4 indices
