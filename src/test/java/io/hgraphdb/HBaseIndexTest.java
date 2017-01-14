@@ -149,11 +149,13 @@ public class HBaseIndexTest extends HBaseGraphTest {
         it = graph.verticesWithLimit("a", "key1", 11, 3);
         assertEquals(3, count(it));
 
-        it = graph.verticesWithLimit("a", "key1", 12, 3, true);
-        assertEquals(3, count(it));
+        if (graph.configuration().getInstanceType() != HBaseGraphConfiguration.InstanceType.BIGTABLE) {
+            it = graph.verticesWithLimit("a", "key1", 12, 3, true);
+            assertEquals(3, count(it));
 
-        it = graph.verticesWithLimit("a", "key1", null, 20, true);
-        assertEquals(8, count(it));
+            it = graph.verticesWithLimit("a", "key1", null, 20, true);
+            assertEquals(8, count(it));
+        }
     }
 
     @Test
@@ -323,11 +325,13 @@ public class HBaseIndexTest extends HBaseGraphTest {
         it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4);
         assertEquals(4, count(it));
 
-        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, true);
-        assertEquals(3, count(it));
+        if (graph.configuration().getInstanceType() != HBaseGraphConfiguration.InstanceType.BIGTABLE) {
+            it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", 12, 4, true);
+            assertEquals(3, count(it));
 
-        it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 10, true);
-        assertEquals(7, count(it));
+            it = ((HBaseVertex) v10).edgesWithLimit(Direction.OUT, "b", "key1", null, 10, true);
+            assertEquals(7, count(it));
+        }
     }
 
     @Test

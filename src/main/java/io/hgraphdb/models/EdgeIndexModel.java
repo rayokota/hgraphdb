@@ -72,6 +72,7 @@ public class EdgeIndexModel extends BaseModel {
             return edges;
         }
         Scan scan = getEdgeEndpointsScan(vertex, direction, labels);
+        /*
         Predicate<HBaseEdge> filter =
                 graph.configuration().getInstanceType() == HBaseGraphConfiguration.InstanceType.BIGTABLE
                         && System.getenv("BIGTABLE_EMULATOR_HOST") != null
@@ -80,6 +81,8 @@ public class EdgeIndexModel extends BaseModel {
                 ? edge -> labels.length == 0 || Arrays.stream(labels).anyMatch(label -> label.equals(edge.label()))
                 : null;
         return performEdgesScan(vertex, scan, cacheKey, false, filter);
+        */
+        return performEdgesScan(vertex, scan, cacheKey, false, null);
     }
 
     public Iterator<Edge> edges(HBaseVertex vertex, Direction direction, String label,
@@ -301,7 +304,7 @@ public class EdgeIndexModel extends BaseModel {
             } else {
                 // PrefixFilter in Bigtable does not automatically stop
                 // See https://github.com/GoogleCloudPlatform/cloud-bigtable-client/issues/1087
-                stopRow = HBaseGraphUtils.incrementBytes(startRow);
+                stopRow = HBaseGraphUtils.incrementBytes(prefix);
             }
         }
         if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);

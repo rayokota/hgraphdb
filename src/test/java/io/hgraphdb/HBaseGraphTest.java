@@ -6,7 +6,9 @@ import org.junit.Before;
 
 public class HBaseGraphTest {
 
-    protected static final HBaseGraphConfiguration.InstanceType type = HBaseGraphConfiguration.InstanceType.MOCK;
+    protected static final HBaseGraphConfiguration.InstanceType type = System.getenv("HGRAPHDB_INSTANCE_TYPE") != null
+            ? HBaseGraphConfiguration.InstanceType.valueOf(System.getenv("HGRAPHDB_INSTANCE_TYPE"))
+            : HBaseGraphConfiguration.InstanceType.MOCK;
 
     protected HBaseGraph graph;
 

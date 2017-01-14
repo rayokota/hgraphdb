@@ -13,7 +13,9 @@ import java.util.Set;
 
 public class HBaseGraphProvider extends AbstractGraphProvider {
 
-    private static final HBaseGraphConfiguration.InstanceType type = HBaseGraphConfiguration.InstanceType.MOCK;
+    protected static final HBaseGraphConfiguration.InstanceType type = System.getenv("HGRAPHDB_INSTANCE_TYPE") != null
+            ? HBaseGraphConfiguration.InstanceType.valueOf(System.getenv("HGRAPHDB_INSTANCE_TYPE"))
+            : HBaseGraphConfiguration.InstanceType.MOCK;
 
     private static final Set<Class> IMPLEMENTATIONS = new HashSet<Class>() {{
         add(HBaseEdge.class);

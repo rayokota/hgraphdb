@@ -144,7 +144,7 @@ public class VertexIndexModel extends BaseModel {
             } else {
                 // PrefixFilter in Bigtable does not automatically stop
                 // See https://github.com/GoogleCloudPlatform/cloud-bigtable-client/issues/1087
-                stopRow = HBaseGraphUtils.incrementBytes(startRow);
+                stopRow = HBaseGraphUtils.incrementBytes(prefix);
             }
         }
         if (reversed) startRow = HBaseGraphUtils.incrementBytes(startRow);
