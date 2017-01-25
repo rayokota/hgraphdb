@@ -183,6 +183,9 @@ public abstract class HBaseElement implements Element {
     }
 
     public void incrementProperty(String key, long value) {
+        if (!graph.configuration().getUseSchema()) {
+            throw new HBaseGraphNoSchemaException("Schema not enabled");
+        }
         ElementHelper.validateProperty(key, value);
 
         graph.validateProperty(getElementType(), label, key, value);

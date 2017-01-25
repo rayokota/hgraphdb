@@ -105,6 +105,19 @@ public class HBaseElementTest extends HBaseGraphTest {
         assertEquals(2, count(it));
     }
 
+    @Test
+    public void testCountersNotSupportedWithoutSchema() {
+        assertEquals(0, count(graph.vertices()));
+
+        HBaseVertex v1 = (HBaseVertex) graph.addVertex(T.id, 10L, T.label, "b", "key2", 11L);
+
+        try {
+            v1.incrementProperty("key2", 1L);
+            fail("should reject counter op");
+        } catch (HBaseGraphNoSchemaException ignored) {
+        }
+    }
+
     private static class KryoObject implements KryoSerializable {
         private ValueType id;
 
