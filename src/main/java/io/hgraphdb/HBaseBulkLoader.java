@@ -1,6 +1,7 @@
 package io.hgraphdb;
 
 import io.hgraphdb.mutators.*;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
 import org.apache.hadoop.hbase.client.Durability;
@@ -21,47 +22,53 @@ public final class HBaseBulkLoader implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBaseBulkLoader.class);
 
-    private HBaseGraph graph;
-    private BufferedMutator edgesMutator;
-    private BufferedMutator edgeIndicesMutator;
-    private BufferedMutator verticesMutator;
-    private BufferedMutator vertexIndicesMutator;
-    private boolean skipWAL;
+    private static final BufferedMutator.ExceptionListener LISTENER = (e, mutator) -> {
+        for (int i = 0; i < e.getNumExceptions(); i++) {
+            LOGGER.warn("Failed to send put: " + e.getRow(i));
+        }
+    };
+
+    private final HBaseGraph graph;
+    private final BufferedMutator edgesMutator;
+    private final BufferedMutator edgeIndicesMutator;
+    private final BufferedMutator verticesMutator;
+    private final BufferedMutator vertexIndicesMutator;
+    private final boolean skipWAL;
 
     public HBaseBulkLoader(HBaseGraphConfiguration config) {
         this(new HBaseGraph(config, HBaseGraphUtils.getConnection(config)));
     }
 
     public HBaseBulkLoader(HBaseGraph graph) {
+        this(graph,
+                getBufferedMutator(graph, Constants.EDGES),
+                getBufferedMutator(graph, Constants.EDGE_INDICES),
+                getBufferedMutator(graph, Constants.VERTICES),
+                getBufferedMutator(graph, Constants.VERTEX_INDICES));
+    }
+
+    private static BufferedMutator getBufferedMutator(HBaseGraph graph, String tableName) {
         try {
-            this.graph = graph;
-
-            BufferedMutator.ExceptionListener listener = (e, mutator) -> {
-                for (int i = 0; i < e.getNumExceptions(); i++) {
-                    LOGGER.warn("Failed to send put: " + e.getRow(i));
-                }
-            };
-
             HBaseGraphConfiguration config = graph.configuration();
-
-            BufferedMutatorParams edgesMutatorParams =
-                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.EDGES)).listener(listener);
-            BufferedMutatorParams edgeIndicesMutatorParams =
-                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.EDGE_INDICES)).listener(listener);
-            BufferedMutatorParams verticesMutatorParams =
-                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.VERTICES)).listener(listener);
-            BufferedMutatorParams vertexIndicesMutatorParams =
-                    new BufferedMutatorParams(HBaseGraphUtils.getTableName(config, Constants.VERTEX_INDICES)).listener(listener);
-
-            edgesMutator = graph.connection().getBufferedMutator(edgesMutatorParams);
-            edgeIndicesMutator = graph.connection().getBufferedMutator(edgeIndicesMutatorParams);
-            verticesMutator = graph.connection().getBufferedMutator(verticesMutatorParams);
-            vertexIndicesMutator = graph.connection().getBufferedMutator(vertexIndicesMutatorParams);
-
-            skipWAL = config.getBulkLoaderSkipWAL();
+            TableName name = HBaseGraphUtils.getTableName(config, tableName);
+            BufferedMutatorParams params = new BufferedMutatorParams(name).listener(LISTENER);
+            return graph.connection().getBufferedMutator(params);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
+    }
+
+    public HBaseBulkLoader(HBaseGraph graph,
+                           BufferedMutator edgesMutator,
+                           BufferedMutator edgeIndicesMutator,
+                           BufferedMutator verticesMutator,
+                           BufferedMutator vertexIndicesMutator) {
+        this.graph = graph;
+        this.edgesMutator = edgesMutator;
+        this.edgeIndicesMutator = edgeIndicesMutator;
+        this.verticesMutator = verticesMutator;
+        this.vertexIndicesMutator = vertexIndicesMutator;
+        this.skipWAL = graph.configuration().getBulkLoaderSkipWAL();
     }
 
     public HBaseGraph getGraph() {
