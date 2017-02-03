@@ -91,7 +91,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
             indexVertex(vertex, indices);
 
             Creator creator = new VertexWriter(graph, vertex);
-            verticesMutator.mutate(getMutationList(creator.constructInsertions()));
+            if (verticesMutator != null) verticesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return vertex;
         } catch (IOException e) {
@@ -102,7 +102,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
     public void indexVertex(Vertex vertex, Iterator<IndexMetadata> indices) {
         try {
             VertexIndexWriter writer = new VertexIndexWriter(graph, vertex, indices, null);
-            vertexIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
+            if (vertexIndicesMutator != null) vertexIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -125,10 +125,10 @@ public final class HBaseBulkLoader implements AutoCloseable {
             indexEdge(edge, indices);
 
             EdgeIndexWriter writer = new EdgeIndexWriter(graph, edge, Constants.CREATED_AT);
-            edgeIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
+            if (edgeIndicesMutator != null) edgeIndicesMutator.mutate(getMutationList(writer.constructInsertions()));
 
             Creator creator = new EdgeWriter(graph, edge);
-            edgesMutator.mutate(getMutationList(creator.constructInsertions()));
+            if (edgesMutator != null) edgesMutator.mutate(getMutationList(creator.constructInsertions()));
 
             return edge;
         } catch (IOException e) {
@@ -139,7 +139,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
     public void indexEdge(Edge edge, Iterator<IndexMetadata> indices) {
         try {
             EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, edge, indices, null);
-            edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
+            if (edgeIndicesMutator != null) edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -160,7 +160,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
                 oldValue = e.getProperty(key);
                 if (oldValue != null && !oldValue.equals(value)) {
                     EdgeIndexRemover indexRemover = new EdgeIndexRemover(graph, e, key, null);
-                    edgeIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
+                    if (edgeIndicesMutator != null) edgeIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
                 }
             }
 
@@ -170,11 +170,11 @@ public final class HBaseBulkLoader implements AutoCloseable {
             if (hasIndex) {
                 if (oldValue == null || !oldValue.equals(value)) {
                     EdgeIndexWriter indexWriter = new EdgeIndexWriter(graph, e, key);
-                    edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
+                    if (edgeIndicesMutator != null) edgeIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
                 }
             }
             PropertyWriter propertyWriter = new PropertyWriter(graph, e, key, value);
-            edgesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
+            if (edgesMutator != null) edgesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -195,7 +195,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
                 oldValue = v.getProperty(key);
                 if (oldValue != null && !oldValue.equals(value)) {
                     VertexIndexRemover indexRemover = new VertexIndexRemover(graph, v, key, null);
-                    vertexIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
+                    if (vertexIndicesMutator != null) vertexIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
                 }
             }
 
@@ -205,11 +205,11 @@ public final class HBaseBulkLoader implements AutoCloseable {
             if (hasIndex) {
                 if (oldValue == null || !oldValue.equals(value)) {
                     VertexIndexWriter indexWriter = new VertexIndexWriter(graph, v, key);
-                    vertexIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
+                    if (vertexIndicesMutator != null) vertexIndicesMutator.mutate(getMutationList(indexWriter.constructInsertions()));
                 }
             }
             PropertyWriter propertyWriter = new PropertyWriter(graph, v, key, value);
-            verticesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
+            if (verticesMutator != null) verticesMutator.mutate(getMutationList(propertyWriter.constructMutations()));
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
@@ -222,10 +222,10 @@ public final class HBaseBulkLoader implements AutoCloseable {
 
     public void close() {
         try {
-            edgesMutator.close();
-            edgeIndicesMutator.close();
-            verticesMutator.close();
-            vertexIndicesMutator.close();
+            if (edgesMutator != null) edgesMutator.close();
+            if (edgeIndicesMutator != null) edgeIndicesMutator.close();
+            if (verticesMutator != null) verticesMutator.close();
+            if (vertexIndicesMutator != null) vertexIndicesMutator.close();
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
