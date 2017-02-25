@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.*;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.util.DefaultCloseableIterator;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class VertexIndexModel extends BaseModel {
 
     public Iterator<Vertex> verticesWithLimit(String label, boolean isUnique, String key, Object from, int limit, boolean reversed) {
         byte[] fromBytes = from != null ? ValueUtils.serialize(from) : HConstants.EMPTY_BYTE_ARRAY;
-        return IteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, from, limit, reversed), vertex -> {
+        return CloseableIteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, from, limit, reversed), vertex -> {
             if (fromBytes == HConstants.EMPTY_BYTE_ARRAY) return true;
             byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
             int compare = Bytes.compareTo(propValueBytes, fromBytes);
@@ -91,8 +92,8 @@ public class VertexIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.flatMap(
-                    IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
+            Iterator<Vertex> iterator = CloseableIteratorUtils.flatMap(
+                    CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
                             scanner.close();
@@ -114,6 +115,12 @@ public class VertexIndexModel extends BaseModel {
                             return Collections.emptyIterator();
                         }
                     });
+            return new DefaultCloseableIterator<Vertex>(iterator) {
+                @Override
+                public void close() {
+                    scanner.close();
+                }
+            };
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

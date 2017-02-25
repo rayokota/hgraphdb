@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.util.*;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.util.DefaultCloseableIterator;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.javatuples.Pair;
 import org.javatuples.*;
@@ -149,7 +150,7 @@ public class EdgeIndexModel extends BaseModel {
             throw new HBaseGraphNotValidException("Method edgesWithLimit requires an index be defined");
         }
         Scan scan = getEdgesScanWithLimit(vertex, direction, index.isUnique(), key, label, fromValue, limit, reversed);
-        return IteratorUtils.limit(performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
+        return CloseableIteratorUtils.limit(performEdgesScan(vertex, scan, cacheKey, useIndex, edge -> {
             if (fromBytes == HConstants.EMPTY_BYTE_ARRAY) return true;
             byte[] propValueBytes = ValueUtils.serialize(edge.getProperty(key));
             int compare = Bytes.compareTo(propValueBytes, fromBytes);
@@ -165,8 +166,8 @@ public class EdgeIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.flatMap(
-                    IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
+            Iterator<Edge> iterator = CloseableIteratorUtils.flatMap(
+                    CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
                             vertex.cacheEdges(cacheKey, cached);
@@ -190,29 +191,35 @@ public class EdgeIndexModel extends BaseModel {
                             return Collections.emptyIterator();
                         }
                     });
+            return new DefaultCloseableIterator<Edge>(iterator) {
+                @Override
+                public void close() {
+                    scanner.close();
+                }
+            };
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String... labels) {
-        return IteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
+        return CloseableIteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,
                                      String edgeKey, Object edgeValue) {
-        return IteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
+        return CloseableIteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
     }
 
     public Iterator<Vertex> verticesInRange(HBaseVertex vertex, Direction direction, String label,
                                             String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
-        return IteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
+        return CloseableIteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
                 inclusiveFromEdgeValue, exclusiveToEdgeValue), transformEdge(vertex));
     }
 
     public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
                                               String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
-        return IteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
+        return CloseableIteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
                 fromEdgeValue, limit, reversed), transformEdge(vertex));
     }
 

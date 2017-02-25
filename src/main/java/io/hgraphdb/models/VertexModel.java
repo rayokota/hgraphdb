@@ -14,7 +14,6 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
-import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +62,7 @@ public class VertexModel extends ElementModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.limit(HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse), limit);
+            return CloseableIteratorUtils.limit(HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse), limit);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

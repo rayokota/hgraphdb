@@ -1,5 +1,6 @@
 package io.hgraphdb.process.step.sideEffect;
 
+import io.hgraphdb.CloseableIteratorUtils;
 import io.hgraphdb.ElementType;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.OperationType;
@@ -28,7 +29,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
     }
 
     private Iterator<? extends Edge> edges() {
-        return IteratorUtils.filter(this.getTraversal().getGraph().get().edges(this.ids), edge -> HasContainer.testAll(edge, this.hasContainers));
+        return CloseableIteratorUtils.filter(this.getTraversal().getGraph().get().edges(this.ids), edge -> HasContainer.testAll(edge, this.hasContainers));
     }
 
     private Iterator<? extends Vertex> vertices() {
@@ -39,7 +40,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
     private Iterator<Vertex> lookupVertices(final HBaseGraph graph, final List<HasContainer> hasContainers, final Object... ids) {
         // ids are present, filter on them first
         if (ids.length > 0)
-            return IteratorUtils.filter(graph.vertices(ids), vertex -> HasContainer.testAll(vertex, hasContainers));
+            return CloseableIteratorUtils.filter(graph.vertices(ids), vertex -> HasContainer.testAll(vertex, hasContainers));
         ////// do index lookups //////
         // get a label being search on
         Optional<String> label = hasContainers.stream()
@@ -62,7 +63,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
                     .filter(vertex -> HasContainer.testAll(vertex, hasContainers)).iterator();
         } else {
             // linear scan
-            return IteratorUtils.filter(graph.vertices(), vertex -> HasContainer.testAll(vertex, hasContainers));
+            return CloseableIteratorUtils.filter(graph.vertices(), vertex -> HasContainer.testAll(vertex, hasContainers));
         }
     }
 

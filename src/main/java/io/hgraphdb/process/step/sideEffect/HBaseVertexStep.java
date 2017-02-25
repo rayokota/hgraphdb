@@ -1,5 +1,6 @@
 package io.hgraphdb.process.step.sideEffect;
 
+import io.hgraphdb.CloseableIteratorUtils;
 import io.hgraphdb.ElementType;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseVertex;
@@ -42,7 +43,7 @@ public final class HBaseVertexStep<E extends Element> extends VertexStep<E> impl
 
     private Iterator<Vertex> lookupVertices(final Traverser.Admin<Vertex> traverser, final List<HasContainer> hasContainers) {
         // linear scan
-        return IteratorUtils.filter(traverser.get().vertices(getDirection(), getEdgeLabels()),
+        return CloseableIteratorUtils.filter(traverser.get().vertices(getDirection(), getEdgeLabels()),
                 vertex -> HasContainer.testAll(vertex, hasContainers));
     }
 
@@ -62,7 +63,7 @@ public final class HBaseVertexStep<E extends Element> extends VertexStep<E> impl
         }
 
         // linear scan
-        return IteratorUtils.filter(traverser.get().edges(getDirection(), getEdgeLabels()),
+        return CloseableIteratorUtils.filter(traverser.get().edges(getDirection(), getEdgeLabels()),
                 edge -> HasContainer.testAll(edge, hasContainers));
     }
 

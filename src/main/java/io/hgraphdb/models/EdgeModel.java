@@ -1,5 +1,6 @@
 package io.hgraphdb.models;
 
+import io.hgraphdb.CloseableIteratorUtils;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
 import io.hgraphdb.HBaseGraphUtils;
@@ -15,7 +16,6 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -61,7 +61,7 @@ public class EdgeModel extends ElementModel {
         ResultScanner scanner = null;
         try {
             scanner = table.getScanner(scan);
-            return IteratorUtils.limit(HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse), limit);
+            return CloseableIteratorUtils.limit(HBaseGraphUtils.mapWithCloseAtEnd(scanner, parser::parse), limit);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

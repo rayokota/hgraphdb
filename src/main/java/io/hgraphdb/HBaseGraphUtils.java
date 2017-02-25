@@ -10,6 +10,7 @@ import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.util.DefaultCloseableIterator;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.slf4j.Logger;
@@ -254,15 +255,20 @@ public final class HBaseGraphUtils {
 
     @SuppressWarnings("unchecked")
     public static <E> Iterator<E> mapWithCloseAtEnd(ResultScanner scanner, final Function<Result, E> function) {
-        return IteratorUtils.flatMap(
-                IteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
+        Iterator<E> iterator = CloseableIteratorUtils.flatMap(
+                CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                 result -> {
                     if (result == Result.EMPTY_RESULT) {
                         scanner.close();
                         return Collections.emptyIterator();
                     }
                     return IteratorUtils.of(function.apply(result));
-                }
-        );
+                });
+        return new DefaultCloseableIterator<E>(iterator) {
+            @Override
+            public void close() {
+                scanner.close();
+            }
+        };
     }
 }
