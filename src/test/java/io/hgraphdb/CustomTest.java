@@ -9,6 +9,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalMetrics;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -19,8 +20,11 @@ import org.apache.tinkerpop.gremlin.structure.io.GraphWriter;
 import org.apache.tinkerpop.gremlin.structure.io.Io;
 import org.apache.tinkerpop.gremlin.structure.io.IoTest;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONIo;
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONTokens;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.apache.tinkerpop.shaded.jackson.core.type.TypeReference;
+import org.apache.tinkerpop.shaded.jackson.databind.ObjectMapper;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -374,5 +378,30 @@ public class CustomTest extends AbstractGremlinProcessTest {
 
     public Traversal<Vertex, Path> get_g_VX1X_repeatXboth_simplePathX_untilXhasXname_peterX_or_loops_isX2XX_hasXname_peterX_path_byXnameX(final Object v1Id) {
         return g.V(v1Id).repeat(__.both().simplePath()).until(__.has("name", "peter").or().loops().is(2)).has("name", "peter").path().by("name");
+    }
+
+    private final TypeReference<HashMap<String, Object>> mapTypeReference = new TypeReference<HashMap<String, Object>>() {
+    };
+
+    @Ignore
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void shouldSerializeTraversalMetrics() throws Exception {
+        final ObjectMapper mapper = graph.io(GraphSONIo.build()).mapper().create().createMapper();
+        final TraversalMetrics tm = (TraversalMetrics) g.V().both().profile().next();
+        final String json = mapper.writeValueAsString(tm);
+        final Map<String, Object> m = mapper.readValue(json, mapTypeReference);
+
+        assertTrue(m.containsKey(GraphSONTokens.DURATION));
+        assertTrue(m.containsKey(GraphSONTokens.METRICS));
+
+        final List<Map<String, Object>> metrics = (List<Map<String, Object>>) m.get(GraphSONTokens.METRICS);
+        assertEquals(2, metrics.size());
+
+        final Map<String, Object> metrics0 = metrics.get(0);
+        assertTrue(metrics0.containsKey(GraphSONTokens.ID));
+        assertTrue(metrics0.containsKey(GraphSONTokens.NAME));
+        assertTrue(metrics0.containsKey(GraphSONTokens.COUNTS));
+        assertTrue(metrics0.containsKey(GraphSONTokens.DURATION));
     }
 }
