@@ -36,14 +36,7 @@ public final class CloseableIteratorUtils {
 
             @Override
             public void close() {
-                if (iterator instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) iterator).close();
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CloseableIterator.closeIterator(iterator);
             }
         };
     }
@@ -67,14 +60,7 @@ public final class CloseableIteratorUtils {
 
             @Override
             public void close() {
-                if (iterator instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) iterator).close();
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CloseableIterator.closeIterator(iterator);
             }
         };
     }
@@ -128,14 +114,7 @@ public final class CloseableIteratorUtils {
 
             @Override
             public void close() {
-                if (iterator instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) iterator).close();
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CloseableIterator.closeIterator(iterator);
             }
         };
     }
@@ -174,14 +153,7 @@ public final class CloseableIteratorUtils {
 
             @Override
             public void close() {
-                if (iterator instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) iterator).close();
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CloseableIterator.closeIterator(iterator);
             }
         };
     }
@@ -253,15 +225,7 @@ public final class CloseableIteratorUtils {
 
         @Override
         public void close() {
-            this.iterators.forEach(iterator -> {
-                if (iterator instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) iterator).close();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            this.iterators.forEach(CloseableIterator::closeIterator);
         }
     }
 }
