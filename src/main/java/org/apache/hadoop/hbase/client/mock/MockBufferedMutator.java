@@ -59,6 +59,10 @@ public class MockBufferedMutator implements BufferedMutator {
         return config;
     }
 
+    public List<Mutation> getMutations() {
+        return mutations;
+    }
+
     /**
      * Sends a {@link Mutation} to the table. The mutations will be buffered and sent over the
      * wire as part of a batch. Currently only supports {@link Put} and {@link Delete} mutations.
@@ -100,8 +104,10 @@ public class MockBufferedMutator implements BufferedMutator {
     public void flush() throws IOException {
         //noinspection EmptyCatchBlock
         try {
-            Object[] results = new Object[mutations.size()];
-            conn.getTable(name).batch(mutations, results);
+            if (conn != null) {
+                Object[] results = new Object[mutations.size()];
+                conn.getTable(name).batch(mutations, results);
+            }
             mutations.clear();
         } catch (InterruptedException e) {
         }
