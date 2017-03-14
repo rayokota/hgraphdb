@@ -45,7 +45,7 @@ A few things to note from the above example :
 - The following types can be used for both IDs and property values:
   - boolean
   - String
-  - numbers (byte, short, int long, float, double)
+  - numbers (byte, short, int, long, float, double)
   - java.math.BigDecimal
   - java.time.LocalDate
   - java.time.LocalTime
