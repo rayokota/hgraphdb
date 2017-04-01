@@ -278,7 +278,7 @@ If schema management is enabled, two additional tables are used:
 
 ### Label Connections Table
 
-| Row Key | Column: createdAt 
+| Row Key | Column: createdAt |
 |---|---|---|---|---|---|
 | [from vertex label, edge label, to vertex label] | [createdAt value] |
 
