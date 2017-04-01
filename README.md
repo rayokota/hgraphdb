@@ -113,7 +113,7 @@ hbase io.hgraphdb.mapreduce.index.DropIndex \
 
 ## Pagination
 
-Once an index is defined, results can be paginated.  HGraphDB supports [keyset pagination] (http://use-the-index-luke.com/no-offset), for both vertex and edge indices. 
+Once an index is defined, results can be paginated.  HGraphDB supports [keyset pagination](http://use-the-index-luke.com/no-offset), for both vertex and edge indices. 
 
 ```java
 // get first page of persons (note that null is passed as start key)
@@ -177,11 +177,11 @@ HGraphDB provides integration with [Apache Giraph](http://giraph.apache.org) by 
 
 Finally, HGraphDB provides a testing utility, `InternalHBaseVertexRunner`, that is similar to `InternalVertexRunner` in Giraph, and that can be used to run Giraph computations using a local Zookeeper instance running in another thread.
 
-For more information on using the HGraphDB integration with Giraph, see [this blog post] (https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
+For more information on using the HGraphDB integration with Giraph, see [this blog post](https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
 
 ## Support for Google Cloud Bigtable
 
-HGraphDB can be used with [Google Cloud Bigtable] (https://cloud.google.com/bigtable/).  Since Bigtable does not support namespaces, we set the name of the graph as the table prefix below.
+HGraphDB can be used with [Google Cloud Bigtable](https://cloud.google.com/bigtable/).  Since Bigtable does not support namespaces, we set the name of the graph as the table prefix below.
 
 ```java
 Configuration cfg = new HBaseGraphConfiguration()
