@@ -177,7 +177,17 @@ HGraphDB provides integration with [Apache Giraph](http://giraph.apache.org) by 
 
 Finally, HGraphDB provides a testing utility, `InternalHBaseVertexRunner`, that is similar to `InternalVertexRunner` in Giraph, and that can be used to run Giraph computations using a local Zookeeper instance running in another thread.
 
-For more information on using the HGraphDB integration with Giraph, see [this blog post](https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/).
+See [this blog post](https://yokota.blog/2016/12/13/graph-analytics-on-hbase-with-hgraphdb-and-giraph/) for more details on using Giraph with HGraphDB.
+
+## Graph Analytics with Spark GraphFrames
+
+[Apache Spark GraphFrames](https://graphframes.github.io) can be used to analyze graphs stored in HGraphDB.  First the vertices and edges need to be wrapped with Spark DataFrames using the [Spark-on-HBase Connector](https://github.com/hortonworks-spark/shc) and a custom [SHCDataType](https://github.com/rayokota/shc/blob/master/core/src/main/scala/org/apache/spark/sql/execution/datasources/hbase/types/HGraphDB.scala).  Once the vertex and edge DataFrames are available, obtaining a GraphFrame is as simple as the following:
+
+```scala
+val g = GraphFrame(verticesDataFrame, edgesDataFrame)
+```
+
+See [this blog post](https://yokota.blog/2017/04/02/graph-analytics-on-hbase-with-hgraphdb-and-spark-graphframes/) for more details on using Spark GraphFrames with HGraphDB.
 
 ## Support for Google Cloud Bigtable
 
