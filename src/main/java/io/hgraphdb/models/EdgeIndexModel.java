@@ -166,7 +166,7 @@ public class EdgeIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            Iterator<Edge> iterator = CloseableIteratorUtils.flatMap(
+            Iterator<Edge> iterator = ClosGraphiteeableIteratorUtils.flatMap(
                     CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
