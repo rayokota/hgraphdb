@@ -1,5 +1,13 @@
 # HGraphDB - HBase as a TinkerPop Graph Database
 
+[![Maven][maven-shield]][maven-link]
+[![Javadoc][javadoc-shield]][javadoc-link]
+
+[maven-shield]: https://img.shields.io/maven-central/v/io.hgraphdb/hgraphdb.svg
+[maven-link]: https://search.maven.org/#search%7Cga%7C1%7Cio.hgraphdb
+[javadoc-shield]: https://javadoc.io/badge/io.hgraphdb/hgraphdb.svg?color=blue
+[javadoc-link]: https://javadoc.io/doc/io.hgraphdb/hgraphdb
+
 HGraphDB is a client layer for using HBase as a graph database.  It is an implementation of the [Apache TinkerPop 3](http://tinkerpop.apache.org) interfaces.
 
 ## Installing
