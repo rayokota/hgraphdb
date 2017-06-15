@@ -1,8 +1,11 @@
 # HGraphDB - HBase as a TinkerPop Graph Database
 
+[![Build Status][travis-shield]][travis-link]
 [![Maven][maven-shield]][maven-link]
 [![Javadoc][javadoc-shield]][javadoc-link]
 
+[travis-shield]: https://travis-ci.org/rayokota/hgraphdb.svg?branch=master
+[travis-link]: https://travis-ci.org/rayokota/hgraphdb
 [maven-shield]: https://img.shields.io/maven-central/v/io.hgraphdb/hgraphdb.svg
 [maven-link]: https://search.maven.org/#search%7Cga%7C1%7Cio.hgraphdb
 [javadoc-shield]: https://javadoc.io/badge/io.hgraphdb/hgraphdb.svg?color=blue
