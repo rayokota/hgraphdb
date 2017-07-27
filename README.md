@@ -21,7 +21,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>0.4.16</version>
+    <version>0.4.17</version>
 </dependency>
 ```
 
@@ -200,6 +200,17 @@ val g = GraphFrame(verticesDataFrame, edgesDataFrame)
 
 See [this blog post](https://yokota.blog/2017/04/02/graph-analytics-on-hbase-with-hgraphdb-and-spark-graphframes/) for more details on using Spark GraphFrames with HGraphDB.
 
+## Graph Analytics with Flink Gelly
+
+HGraphDB provides support for analyzing graphs with [Apache Flink Gelly](https://flink.apache.org/news/2015/08/24/introducing-flink-gelly.html).  First the vertices and edges need to be wrapped with Flink DataSets by importing graph data with instances of `HBaseVertexInputFormat` and `HBaseEdgeInputFormat`.  After obtaining the DataSets, a Gelly graph can be created as follows:
+
+```java
+ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+Graph gelly = Graph.fromTupleDataSet(vertices, edges, env);
+```
+
+See [this blog post](https://yokota.blog/2017/07/27/graph-analytics-on-hbase-with-hgraphdb-and-apache-flink-gelly/) for more details on using Flink Gelly with HGraphDB.
+
 ## Support for Google Cloud Bigtable
 
 HGraphDB can be used with [Google Cloud Bigtable](https://cloud.google.com/bigtable/).  Since Bigtable does not support namespaces, we set the name of the graph as the table prefix below.
@@ -229,7 +240,7 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.2.0
 gremlin> :install org.apache.hbase hbase-common 1.2.0
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 0.4.16
+gremlin> :install io.hgraphdb hgraphdb 0.4.17
 gremlin> :plugin use io.hgraphdb
 ```
 
