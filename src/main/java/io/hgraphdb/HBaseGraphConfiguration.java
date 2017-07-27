@@ -5,12 +5,19 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Function;
 
-public class HBaseGraphConfiguration extends AbstractConfiguration {
+public class HBaseGraphConfiguration extends AbstractConfiguration implements Serializable {
 
-    private final PropertiesConfiguration conf;
+    private static final long serialVersionUID = -7150699702127992270L;
+
+    private PropertiesConfiguration conf;
 
     public static final Class<? extends Graph> HBASE_GRAPH_CLASS = HBaseGraph.class;
 
@@ -299,5 +306,30 @@ public class HBaseGraphConfiguration extends AbstractConfiguration {
         org.apache.hadoop.conf.Configuration c = new org.apache.hadoop.conf.Configuration();
         conf.getKeys().forEachRemaining(key -> c.set(key, conf.getProperty(key).toString()));
         return c;
+    }
+
+    private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        PropertiesConfiguration conf = new PropertiesConfiguration();
+        int size = stream.readInt();
+        for (int i = 0; i < size; i++) {
+            conf.setProperty(stream.readUTF(), stream.readObject());
+        }
+        this.conf = conf;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream stream) throws IOException {
+        Map<String, Object> props = IteratorUtils.collectMap(
+                conf.getKeys(),
+                Function.identity(),
+                key -> conf.getProperty(key));
+        stream.writeInt(props.size());
+        props.entrySet().forEach(entry -> {
+            try {
+                stream.writeUTF(entry.getKey());
+                stream.writeObject(entry.getValue());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

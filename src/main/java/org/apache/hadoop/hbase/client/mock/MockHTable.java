@@ -1,4 +1,4 @@
-/**
+/*
  * This file is licensed to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the
  * License. You may obtain a copy of the License at
@@ -24,12 +24,16 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.util.Pair;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
+
+import static org.mockito.AdditionalAnswers.delegatesTo;
 
 /**
  * MockHTable.
@@ -83,6 +87,10 @@ public class MockHTable implements Table {
 
     public void clear() {
         data.clear();
+    }
+
+    public byte[] getTableName() {
+        return getName().getName();
     }
 
     /**
@@ -797,5 +805,58 @@ public class MockHTable implements Table {
                                                             Message request, byte[] startKey, byte[] endKey, R responsePrototype,
                                                             Batch.Callback<R> callback) throws ServiceException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
+    }
+
+    public RegionLocator getRegionLocator() {
+        return new RegionLocator() {
+            @Override
+            public HRegionLocation getRegionLocation(byte[] bytes) throws IOException {
+                return new HRegionLocation(null, ServerName.valueOf("localhost:0", 0));
+            }
+
+            @Override
+            public HRegionLocation getRegionLocation(byte[] bytes, boolean b) throws IOException {
+                return new HRegionLocation(null, ServerName.valueOf("localhost:0", 0));
+            }
+
+            @Override
+            public List<HRegionLocation> getAllRegionLocations() throws IOException {
+                return null;
+            }
+
+            @Override
+            public byte[][] getStartKeys() throws IOException {
+                return getStartEndKeys().getFirst();
+            }
+
+            @Override
+            public byte[][] getEndKeys() throws IOException {
+                return getStartEndKeys().getSecond();
+            }
+
+            @Override
+            public Pair<byte[][], byte[][]> getStartEndKeys() throws IOException {
+                final byte[][] startKeyList = new byte[1][];
+                final byte[][] endKeyList = new byte[1][];
+
+                startKeyList[0] = new byte[0];
+                endKeyList[0] = new byte[]{(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
+
+                return new Pair<>(startKeyList, endKeyList);
+            }
+
+            @Override
+            public TableName getName() {
+                return MockHTable.this.getName();
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
+        };
+    }
+
+    public HTable asHTable() {
+        return Mockito.mock(HTable.class, delegatesTo(this));
     }
 }
