@@ -34,13 +34,7 @@ import java.util.stream.Stream;
 
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_INTEGRATE)
-@Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_PERFORMANCE)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
-@Graph.OptIn(Graph.OptIn.SUITE_PROCESS_PERFORMANCE)
-@Graph.OptIn(Graph.OptIn.SUITE_GROOVY_PROCESS_STANDARD)
-@Graph.OptIn(Graph.OptIn.SUITE_GROOVY_ENVIRONMENT)
-@Graph.OptIn(Graph.OptIn.SUITE_GROOVY_ENVIRONMENT_INTEGRATE)
-@Graph.OptIn(Graph.OptIn.SUITE_GROOVY_ENVIRONMENT_PERFORMANCE)
 @Graph.OptIn("io.hgraphdb.StructureBasicSuite")
 @Graph.OptIn("io.hgraphdb.CustomSuite")
 @Graph.OptOut(
@@ -65,30 +59,6 @@ import java.util.stream.Stream;
         reason = "Requires metaproperties")
 @Graph.OptOut(
         test = "org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.SubgraphTest$Traversals",
-        method = "g_V_withSideEffectXsgX_outEXknowsX_subgraphXsgX_name_capXsgX",
-        reason = "Requires metaproperties")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.filter.GroovyHasTest$Traversals",
-        method = "g_VX1AsStringX_out_hasXid_2AsStringX",
-        reason = "Attempts to retrieve an element that has a numeric id with a String")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.filter.GroovyHasTest$Traversals",
-        method = "g_EX11X_outV_outE_hasXid_10AsStringX",
-        reason = "Attempts to retrieve an element that has a numeric id with a String")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.map.GroovyVertexTest$Traversals",
-        method = "g_VX1X_outXknowsAsStringIdX",
-        reason = "Attempts to retrieve an element that has a numeric id with a String")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.map.GroovyVertexTest$Traversals",
-        method = "g_EX11AsStringX",
-        reason = "Attempts to retrieve an element that has a numeric id with a String")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.GroovySubgraphTest$Traversals",
-        method = "g_V_withSideEffectXsgX_repeatXbothEXcreatedX_subgraphXsgX_outVX_timesX5X_name_dedup",
-        reason = "Requires metaproperties")
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.GroovySubgraphTest$Traversals",
         method = "g_V_withSideEffectXsgX_outEXknowsX_subgraphXsgX_name_capXsgX",
         reason = "Requires metaproperties")
 public class HBaseGraph implements Graph {
