@@ -22,7 +22,7 @@ import java.util.Iterator;
 /**
  * Mapper that hands over rows from data table to the index table.
  */
-public class HBaseIndexImportMapper extends HBaseIndexMapperBase {
+public class HBaseIndexImportMapper extends HBaseIndexBulkMapperBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseIndexImportMapper.class);
 
