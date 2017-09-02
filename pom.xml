@@ -266,31 +266,26 @@
             </build>
         </profile>
         <profile>
-            <id>fatjar-without-provided</id>
+            <id>fatruntimejar</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>2.3</version>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/runtime-jar-with-dependencies.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                         <executions>
                             <execution>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>shade</goal>
+                                    <goal>single</goal>
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.apache.flink:*</exclude>
-                                    <exclude>org.apache.giraph:*</exclude>
-                                    <exclude>org.apache.hadoop:*</exclude>
-                                    <exclude>org.apache.hbase:*</exclude>
-                                </excludes>
-                            </artifactSet>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
