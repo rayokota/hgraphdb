@@ -21,7 +21,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -93,7 +93,7 @@ Then run a MapReduce job using the `hbase` command:
 
 ```bash
 hbase io.hgraphdb.mapreduce.index.PopulateIndex \
-    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=mygraph
 ```
 
 Once an index is created and data has been populated, it can be used as follows:
@@ -119,7 +119,7 @@ To drop an index, invoke a MapReduce job using the `hbase` command:
 
 ```bash
 hbase io.hgraphdb.mapreduce.index.DropIndex \
-    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=testgraph
+    -t vertex -l person -p name -op /tmp -ca gremlin.hbase.namespace=mygraph
 ```
 
 ## Pagination
@@ -240,14 +240,14 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.2.0
 gremlin> :install org.apache.hbase hbase-common 1.2.0
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 1.0.0
+gremlin> :install io.hgraphdb hgraphdb 1.0.1
 gremlin> :plugin use io.hgraphdb
 ```
 
 Then restart the Gremlin console and run the following:
 
 ```
-gremlin> g = HBaseGraph.open("mygraph", "127.0.0.1", "/hbase-unsecure")
+gremlin> graph = HBaseGraph.open("mygraph", "127.0.0.1", "/hbase-unsecure")
 ```
 
 ## Performance Tuning
