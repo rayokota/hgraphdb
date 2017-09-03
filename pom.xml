@@ -54,11 +54,6 @@
             <version>${tinkerpop.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-            <version>${tinkerpop.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>${kryo.version}</version>
@@ -100,12 +95,6 @@
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
             <version>${hbase.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
