@@ -160,7 +160,7 @@ graph.connectLabels("author", "writes", "book");
 Additional properties can be added to labels at a later time; otherwise labels cannot be changed.
 
 ```java
-graph.updateLabel("author", "height", ValueType.DOUBLE);
+graph.updateLabel(ElementType.VERTEX, "author", "height", ValueType.DOUBLE);
 ```
 
 Whenever vertices or edges are added to the graph, they will first be validated against the schema.    
