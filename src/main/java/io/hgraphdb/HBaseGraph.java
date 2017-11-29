@@ -677,7 +677,7 @@ public class HBaseGraph implements Graph {
         if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
             throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
-        properties.entrySet().stream().forEach(entry ->
+        properties.entrySet().forEach(entry ->
             getPropertyType(labelMetadata, entry.getKey(), entry.getValue(), true)
         );
     }
