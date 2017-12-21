@@ -47,7 +47,7 @@ import java.util.stream.Stream;
         reason = "Attempts to retrieve an element that has a numeric id with a String")
 @Graph.OptOut(
         test = "org.apache.tinkerpop.gremlin.process.traversal.step.map.VertexTest$Traversals",
-        method = "g_VX1X_outXknowsAsStringIdX",
+        method = "g_VX1AsStringX_outXknowsX",
         reason = "Attempts to retrieve an element that has a numeric id with a String")
 @Graph.OptOut(
         test = "org.apache.tinkerpop.gremlin.process.traversal.step.map.VertexTest$Traversals",

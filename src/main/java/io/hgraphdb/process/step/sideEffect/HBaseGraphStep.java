@@ -5,9 +5,11 @@ import io.hgraphdb.ElementType;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.OperationType;
 import org.apache.tinkerpop.gremlin.process.traversal.Compare;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
+import org.apache.tinkerpop.gremlin.process.traversal.util.AndP;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.T;
@@ -29,10 +31,14 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
     }
 
     private Iterator<? extends Edge> edges() {
+        if (null == this.ids)
+            return Collections.emptyIterator();
         return CloseableIteratorUtils.filter(this.getTraversal().getGraph().get().edges(this.ids), edge -> HasContainer.testAll(edge, this.hasContainers));
     }
 
     private Iterator<? extends Vertex> vertices() {
+        if (null == this.ids)
+            return Collections.emptyIterator();
         final HBaseGraph graph = (HBaseGraph) this.getTraversal().getGraph().get();
         return lookupVertices(graph, this.hasContainers, this.ids);
     }
@@ -84,7 +90,12 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
 
     @Override
     public void addHasContainer(final HasContainer hasContainer) {
-        this.hasContainers.add(hasContainer);
+        if (hasContainer.getPredicate() instanceof AndP) {
+            for (final P<?> predicate : ((AndP<?>) hasContainer.getPredicate()).getPredicates()) {
+                this.addHasContainer(new HasContainer(hasContainer.getKey(), predicate));
+            }
+        } else
+            this.hasContainers.add(hasContainer);
     }
 
     @Override
