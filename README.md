@@ -45,8 +45,8 @@ As you can see above, HBase-specific configuration parameters can be passed dire
 The resulting graph can be used like any other TinkerPop graph instance.
 
 ```java
-Vertex v1 = graph.addVertex(T.id, 1, T.label, "person", "name", "John");
-Vertex v2 = graph.addVertex(T.id, 2, T.label, "person", "name", "Sally");
+Vertex v1 = graph.addVertex(T.id, 1L, T.label, "person", "name", "John");
+Vertex v2 = graph.addVertex(T.id, 2L, T.label, "person", "name", "Sally");
 v1.addEdge("knows", v2, T.id, "edge1", "since", LocalDate.now());
 ```
 
