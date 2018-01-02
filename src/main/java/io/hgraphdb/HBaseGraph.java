@@ -276,6 +276,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
+        id = HBaseGraphUtils.generateIdIfNeeded(id);
         ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Vertex cachedVertex = vertexCache.getIfPresent(key);
         if (cachedVertex != null && !((HBaseVertex) cachedVertex).isDeleted()) {
@@ -368,6 +369,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
+        id = HBaseGraphUtils.generateIdIfNeeded(id);
         ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Edge cachedEdge = edgeCache.getIfPresent(key);
         if (cachedEdge != null && !((HBaseEdge) cachedEdge).isDeleted()) {
