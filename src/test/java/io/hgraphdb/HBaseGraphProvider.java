@@ -45,7 +45,7 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
                     put(HBaseGraphConfiguration.Keys.GRAPH_TABLE_PREFIX, graphName);
                     put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
-                    put("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection");
+                    put("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_x.BigtableConnection");
                     put("google.bigtable.instance.id", "hgraphdb-bigtable");
                     put("google.bigtable.project.id", "rayokota2");
                 }};

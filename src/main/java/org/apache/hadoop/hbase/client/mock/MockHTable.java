@@ -20,6 +20,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
+import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
@@ -442,6 +443,14 @@ public class MockHTable implements Table {
 
             public void close() {
             }
+
+            public ScanMetrics getScanMetrics() {
+                return null;
+            }
+
+            public boolean renewLease() {
+                return false;
+            }
         };
     }
 
@@ -858,5 +867,45 @@ public class MockHTable implements Table {
 
     public HTable asHTable() {
         return Mockito.mock(HTable.class, delegatesTo(this));
+    }
+
+    @Override
+    public void setOperationTimeout(int i) {
+        throw new UnsupportedOperationException("setOperationTimeout");
+    }
+
+    @Override
+    public int getOperationTimeout() {
+        throw new UnsupportedOperationException("getOperationTimeout");
+    }
+
+    @Override
+    public void setRpcTimeout(int i) {
+        throw new UnsupportedOperationException("setRpcTimeout");
+    }
+
+    @Override
+    public int getReadRpcTimeout() {
+        throw new UnsupportedOperationException("getReadRpcTimeout");
+    }
+
+    @Override
+    public void setReadRpcTimeout(int i) {
+        throw new UnsupportedOperationException("setReadRpcTimeout");
+    }
+
+    @Override
+    public int getWriteRpcTimeout() {
+        throw new UnsupportedOperationException("getWriteRpcTimeout");
+    }
+
+    @Override
+    public void setWriteRpcTimeout(int i) {
+        throw new UnsupportedOperationException("setWriteRpcTimeout");
+    }
+
+    @Override
+    public int getRpcTimeout() {
+        throw new UnsupportedOperationException("getRpcTimeout");
     }
 }

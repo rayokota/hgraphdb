@@ -220,7 +220,7 @@ Configuration cfg = new HBaseGraphConfiguration()
     .setInstanceType(InstanceType.BIGTABLE)
     .setGraphTablePrefix("mygraph")
     .setCreateTables(true)
-    .set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection")
+    .set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_x.BigtableConnection")
     .set("google.bigtable.instance.id", "my-instance-id")
     .set("google.bigtable.project.id", "my-project-id");
 HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);

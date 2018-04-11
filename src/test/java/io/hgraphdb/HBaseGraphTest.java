@@ -28,7 +28,7 @@ public class HBaseGraphTest {
                 break;
             case BIGTABLE:
                 config.setInstanceType(HBaseGraphConfiguration.InstanceType.BIGTABLE);
-                config.set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_2.BigtableConnection");
+                config.set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_x.BigtableConnection");
                 config.set("google.bigtable.instance.id", "hgraphdb-bigtable");
                 config.set("google.bigtable.project.id", "rayokota2");
                 break;
