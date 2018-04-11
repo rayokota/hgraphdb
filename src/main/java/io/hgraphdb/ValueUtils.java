@@ -5,6 +5,7 @@ import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.util.*;
 
 import java.io.*;
@@ -172,7 +173,7 @@ public final class ValueUtils {
     }
 
     public static byte[] serialize(Object o) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         serialize(buffer, o);
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);
@@ -266,7 +267,7 @@ public final class ValueUtils {
     }
 
     public static byte[] serializeWithSalt(Object o) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         serializeWithSalt(buffer, o);
         buffer.setLength(buffer.getPosition());
         buffer.setPosition(0);

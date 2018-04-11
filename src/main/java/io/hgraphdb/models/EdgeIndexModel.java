@@ -6,6 +6,7 @@ import io.hgraphdb.mutators.EdgeIndexWriter;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.EdgeIndexReader;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
@@ -325,7 +326,7 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public byte[] serializeForRead(Vertex vertex, Direction direction, boolean isUnique, String key, String label, Object value) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         ValueUtils.serializeWithSalt(buffer, vertex.id());
         if (direction != null) {
             OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
@@ -350,7 +351,7 @@ public class EdgeIndexModel extends BaseModel {
     public byte[] serializeForWrite(Edge edge, Direction direction, boolean isUnique, String key) {
         Object inVertexId = edge.inVertex().id();
         Object outVertexId = edge.outVertex().id();
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         ValueUtils.serializeWithSalt(buffer, direction == Direction.IN ? inVertexId : outVertexId);
         OrderedBytes.encodeInt8(buffer, direction == Direction.IN ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);

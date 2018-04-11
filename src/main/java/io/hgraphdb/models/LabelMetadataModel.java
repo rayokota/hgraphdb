@@ -3,6 +3,7 @@ package io.hgraphdb.models;
 import io.hgraphdb.*;
 import io.hgraphdb.mutators.*;
 import io.hgraphdb.readers.LabelMetadataReader;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -64,7 +65,7 @@ public class LabelMetadataModel extends BaseModel {
     }
 
     public byte[] serialize(LabelMetadata.Key label) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, label.label(), Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, label.type() == ElementType.VERTEX ? (byte) 1 : (byte) 0, Order.ASCENDING);
         buffer.setLength(buffer.getPosition());

@@ -7,6 +7,7 @@ import io.hgraphdb.mutators.LabelConnectionWriter;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.LabelConnectionReader;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -62,7 +63,7 @@ public class LabelConnectionModel extends BaseModel {
     }
 
     public byte[] serialize(String outVertexLabel, String edgeLabel, String inVertexLabel) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, outVertexLabel, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, edgeLabel, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, inVertexLabel, Order.ASCENDING);

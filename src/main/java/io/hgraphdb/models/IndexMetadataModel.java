@@ -8,6 +8,7 @@ import io.hgraphdb.mutators.IndexMetadataWriter;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.IndexMetadataReader;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -68,7 +69,7 @@ public class IndexMetadataModel extends BaseModel {
     }
 
     public byte[] serialize(IndexMetadata.Key index) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, index.label(), Order.ASCENDING);
         OrderedBytes.encodeString(buffer, index.propertyKey(), Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, index.type() == ElementType.VERTEX ? (byte) 1 : (byte) 0, Order.ASCENDING);

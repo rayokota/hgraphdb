@@ -6,6 +6,7 @@ import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.mutators.VertexIndexRemover;
 import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.readers.VertexIndexReader;
+import io.hgraphdb.util.DynamicPositionedMutableByteRange;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
@@ -165,7 +166,7 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public byte[] serializeForRead(String label, boolean isUnique, String key, Object value) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
@@ -180,7 +181,7 @@ public class VertexIndexModel extends BaseModel {
     }
 
     public byte[] serializeForWrite(Vertex vertex, boolean isUnique, String key) {
-        PositionedByteRange buffer = new SimplePositionedMutableByteRange(4096);
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
         OrderedBytes.encodeString(buffer, vertex.label(), Order.ASCENDING);
         OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
         OrderedBytes.encodeString(buffer, key, Order.ASCENDING);

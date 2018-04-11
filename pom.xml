@@ -36,7 +36,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <hbase.version>1.2.1</hbase.version>
         <hadoop.version>2.5.1</hadoop.version>
-        <tinkerpop.version>3.3.1</tinkerpop.version>
+        <tinkerpop.version>3.3.2</tinkerpop.version>
         <kryo.version>4.0.0</kryo.version>
         <giraph.version>1.2.0-hadoop2</giraph.version>
         <flink.version>1.3.1</flink.version>
