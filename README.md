@@ -21,7 +21,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -237,10 +237,10 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
 plugin activated: tinkerpop.server
 plugin activated: tinkerpop.utilities
 plugin activated: tinkerpop.tinkergraph
-gremlin> :install org.apache.hbase hbase-client 1.2.0
-gremlin> :install org.apache.hbase hbase-common 1.2.0
+gremlin> :install org.apache.hbase hbase-client 1.4.1
+gremlin> :install org.apache.hbase hbase-common 1.4.1
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 1.0.4
+gremlin> :install io.hgraphdb hgraphdb 1.0.5
 gremlin> :plugin use io.hgraphdb
 ```
 
