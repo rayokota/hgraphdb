@@ -171,6 +171,7 @@ public class HBaseEdgeInputFormat
          */
         public void close() throws IOException {
             reader.close();
+            graph.close();
         }
 
         /**

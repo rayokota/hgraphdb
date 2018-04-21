@@ -15,6 +15,8 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.mock.MockHTable;
 import org.apache.hadoop.util.StringUtils;
 
+import java.io.IOException;
+
 public abstract class HBaseElementInputFormat<T extends Tuple> extends TableInputFormat<T> {
 
     private static final long serialVersionUID = 6633419799225743575L;
@@ -93,6 +95,14 @@ public abstract class HBaseElementInputFormat<T extends Tuple> extends TableInpu
             return (V) element.label();
         } else {
             return (V) element.property(propertyName).value();
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        if (graph != null) {
+            graph.close();
         }
     }
 }
