@@ -79,6 +79,7 @@ public final class HBaseGraphUtils {
                 LOGGER.warn("Could not close connection");
             }
         }
+        connections.clear();
     }
 
     public static TableName getTableName(HBaseGraphConfiguration config, String name) {
