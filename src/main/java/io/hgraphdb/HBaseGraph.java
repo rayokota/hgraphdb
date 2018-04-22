@@ -732,6 +732,7 @@ public class HBaseGraph implements Graph {
         if (this.labelConnectionModel != null) {
             this.labelConnectionModel.close(clear);
         }
+        HBaseGraphUtils.closeConnections();
         executor.shutdown();
     }
 

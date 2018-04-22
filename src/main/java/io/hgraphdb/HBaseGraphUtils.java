@@ -33,7 +33,7 @@ public final class HBaseGraphUtils {
 
     public static Connection getConnection(HBaseGraphConfiguration config) {
         Connection conn = connections.get(config.getGraphNamespace());
-        if (conn != null) return conn;
+        if (conn != null && !conn.isClosed()) return conn;
         Configuration hbaseConfig = config.toHBaseConfiguration();
         switch (config.getInstanceType()) {
             case MOCK:
@@ -69,6 +69,16 @@ public final class HBaseGraphUtils {
         }
         connections.put(config.getGraphNamespace(), conn);
         return conn;
+    }
+
+    public static void closeConnections() {
+        for (Connection conn : connections.values()) {
+            try {
+                conn.close();
+            } catch (IOException e) {
+                LOGGER.warn("Could not close connection");
+            }
+        }
     }
 
     public static TableName getTableName(HBaseGraphConfiguration config, String name) {
