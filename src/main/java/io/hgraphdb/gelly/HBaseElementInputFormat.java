@@ -99,8 +99,8 @@ public abstract class HBaseElementInputFormat<T extends Tuple> extends TableInpu
     }
 
     @Override
-    public void close() throws IOException {
-        super.close();
+    public void closeInputFormat() throws IOException {
+        super.closeInputFormat();
         if (graph != null) {
             graph.close();
         }

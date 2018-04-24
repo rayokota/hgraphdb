@@ -721,6 +721,7 @@ public class HBaseGraph implements Graph {
 
     @VisibleForTesting
     protected void close(boolean clear) {
+        executor.shutdown();
         this.edgeModel.close(clear);
         this.edgeIndexModel.close(clear);
         this.vertexModel.close(clear);
@@ -733,7 +734,6 @@ public class HBaseGraph implements Graph {
             this.labelConnectionModel.close(clear);
         }
         HBaseGraphUtils.closeConnections();
-        executor.shutdown();
     }
 
     @VisibleForTesting
