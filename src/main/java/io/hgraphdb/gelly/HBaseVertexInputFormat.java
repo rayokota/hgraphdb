@@ -24,7 +24,8 @@ public class HBaseVertexInputFormat<K, V> extends HBaseElementInputFormat<Tuple2
     @SuppressWarnings("unchecked")
     protected Tuple2<K, V> mapResultToTuple(Result r) {
         HBaseVertex vertex = parseHBaseVertex(r);
-        return new Tuple2<>((K) vertex.id(), (V) property(vertex, getPropertyName()));
+        V property = property(vertex, getPropertyName());
+        return property != null ? new Tuple2<>((K) vertex.id(), property) : null;
     }
 
     private HBaseVertex parseHBaseVertex(Result result) {

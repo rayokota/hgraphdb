@@ -93,8 +93,10 @@ public abstract class HBaseElementInputFormat<T extends Tuple> extends TableInpu
             return (V) element.id();
         } else if (Constants.LABEL.equals(propertyName)) {
             return (V) element.label();
-        } else {
+        } else if (element.hasProperty(propertyName)) {
             return (V) element.property(propertyName).value();
+        } else {
+            return null;
         }
     }
 

@@ -24,7 +24,10 @@ public class HBaseEdgeInputFormat<K, V> extends HBaseElementInputFormat<Tuple3<K
     @SuppressWarnings("unchecked")
     protected Tuple3<K, K, V> mapResultToTuple(Result r) {
         HBaseEdge edge = parseHBaseEdge(r);
-        return new Tuple3<>((K) edge.outVertex().id(), (K) edge.inVertex().id(), (V) property(edge, getPropertyName()));
+        V property = property(edge, getPropertyName());
+        return property != null
+               ? new Tuple3<>((K) edge.outVertex().id(), (K) edge.inVertex().id (), property)
+               : null;
     }
 
     private HBaseEdge parseHBaseEdge(Result result) {
