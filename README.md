@@ -13,6 +13,8 @@
 
 HGraphDB is a client layer for using HBase as a graph database.  It is an implementation of the [Apache TinkerPop 3](http://tinkerpop.apache.org) interfaces.
 
+**Note:  the format of vertex indices has changed between 1.x and 2.x.  If you upgrade, you will need to drop and recreate any existing vertex indices.**
+
 ## Installing
 
 Releases of HGraphDB are deployed to Maven Central.
@@ -21,7 +23,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>1.0.5</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -240,7 +242,7 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.4.1
 gremlin> :install org.apache.hbase hbase-common 1.4.1
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 1.0.5
+gremlin> :install io.hgraphdb hgraphdb 2.0.0
 gremlin> :plugin use io.hgraphdb
 ```
 
