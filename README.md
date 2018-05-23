@@ -13,7 +13,7 @@
 
 HGraphDB is a client layer for using HBase as a graph database.  It is an implementation of the [Apache TinkerPop 3](http://tinkerpop.apache.org) interfaces.
 
-**Note:  the format of vertex indices has changed between 1.x and 2.x.  If you upgrade, you will need to drop and recreate any existing vertex indices.**
+**Note:  the format of vertex indices has changed between 1.x and 2.x.  If you upgrade, you will need to drop any existing vertex indices while on 1.x and recreate them after upgrading to 2.x.**
 
 ## Installing
 
