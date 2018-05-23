@@ -278,6 +278,10 @@ public final class ValueUtils {
 
     public static void serializeWithSalt(PositionedByteRange buffer, Object o) {
         byte[] bytes = serialize(o);
+        serializeWithSalt(buffer, bytes);
+    }
+
+    public static void serializeWithSalt(PositionedByteRange buffer, byte[] bytes) {
         byte saltingByte = getSaltingByte(bytes);
         buffer.put(saltingByte);
         buffer.put(bytes);

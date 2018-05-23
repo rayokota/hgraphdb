@@ -167,9 +167,8 @@ public class VertexIndexModel extends BaseModel {
 
     public byte[] serializeForRead(String label, boolean isUnique, String key, Object value) {
         PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
-        OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
-        OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
-        OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+        byte[] prefix = serializePrefix(label, isUnique, key);
+        ValueUtils.serializeWithSalt(buffer, prefix);
         if (value != null) {
             ValueUtils.serialize(buffer, value);
         }
@@ -182,9 +181,8 @@ public class VertexIndexModel extends BaseModel {
 
     public byte[] serializeForWrite(Vertex vertex, boolean isUnique, String key) {
         PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
-        OrderedBytes.encodeString(buffer, vertex.label(), Order.ASCENDING);
-        OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
-        OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+        byte[] prefix = serializePrefix(vertex.label(), isUnique, key);
+        ValueUtils.serializeWithSalt(buffer, prefix);
         ValueUtils.serialize(buffer, vertex.value(key));
         if (!isUnique) {
             ValueUtils.serialize(buffer, vertex.id());
@@ -196,9 +194,22 @@ public class VertexIndexModel extends BaseModel {
         return bytes;
     }
 
+    private byte[] serializePrefix(String label, boolean isUnique, String key) {
+        PositionedByteRange buffer = new DynamicPositionedMutableByteRange(4096);
+        OrderedBytes.encodeString(buffer, label, Order.ASCENDING);
+        OrderedBytes.encodeInt8(buffer, isUnique ? (byte) 1 : (byte) 0, Order.ASCENDING);
+        OrderedBytes.encodeString(buffer, key, Order.ASCENDING);
+        buffer.setLength(buffer.getPosition());
+        buffer.setPosition(0);
+        byte[] bytes = new byte[buffer.getRemaining()];
+        buffer.get(bytes);
+        return bytes;
+    }
+
     public Vertex deserialize(Result result) {
         byte[] bytes = result.getRow();
         PositionedByteRange buffer = new SimplePositionedByteRange(bytes);
+        buffer.get();  // discard salt
         String label = OrderedBytes.decodeString(buffer);
         boolean isUnique = OrderedBytes.decodeInt8(buffer) == 1;
         String key = OrderedBytes.decodeString(buffer);
