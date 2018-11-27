@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class EdgeIndexModel extends BaseModel {
 
@@ -204,24 +205,50 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String... labels) {
-        return CloseableIteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
+        if (graph.isParallelLoading()) {
+            return StreamUtils.parallelStreamOf(edges(vertex, direction, labels))
+                .flatMap(transformEdgeToStream(vertex))
+                .iterator();
+        } else {
+            return CloseableIteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
+        }
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,
                                      String edgeKey, Object edgeValue) {
-        return CloseableIteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
+        if (graph.isParallelLoading()) {
+            return StreamUtils.parallelStreamOf(edges(vertex, direction, label, edgeKey, edgeValue))
+                .flatMap(transformEdgeToStream(vertex))
+                .iterator();
+        } else {
+            return CloseableIteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
+        }
     }
 
     public Iterator<Vertex> verticesInRange(HBaseVertex vertex, Direction direction, String label,
                                             String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
-        return CloseableIteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
+        if (graph.isParallelLoading()) {
+            return StreamUtils.parallelStreamOf(edgesInRange(vertex, direction, label, edgeKey,
+                inclusiveFromEdgeValue, exclusiveToEdgeValue))
+                .flatMap(transformEdgeToStream(vertex))
+                .iterator();
+        } else {
+            return CloseableIteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
                 inclusiveFromEdgeValue, exclusiveToEdgeValue), transformEdge(vertex));
+        }
     }
 
     public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
                                               String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
-        return CloseableIteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
+        if (graph.isParallelLoading()) {
+            return StreamUtils.parallelStreamOf(edgesWithLimit(vertex, direction, label, edgeKey,
+                fromEdgeValue, limit, reversed))
+                .flatMap(transformEdgeToStream(vertex))
+                .iterator();
+        } else {
+            return CloseableIteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
                 fromEdgeValue, limit, reversed), transformEdge(vertex));
+        }
     }
 
     private Function<Edge, Iterator<Vertex>> transformEdge(HBaseVertex vertex) {
@@ -236,6 +263,22 @@ public class EdgeIndexModel extends BaseModel {
             } catch (final HBaseGraphNotFoundException e) {
                 ((HBaseEdge) edge).removeStaleIndex();
                 return Collections.emptyIterator();
+            }
+        };
+    }
+
+    private Function<Edge, Stream<Vertex>> transformEdgeToStream(HBaseVertex vertex) {
+        return edge -> {
+            Object inVertexId = edge.inVertex().id();
+            Object outVertexId = edge.outVertex().id();
+            Object vertexId = vertex.id().equals(inVertexId) ? outVertexId : inVertexId;
+            try {
+                HBaseVertex v = (HBaseVertex) graph.findOrCreateVertex(vertexId);
+                if (!graph.isLazyLoading()) v.load();
+                return Stream.of(v);
+            } catch (final HBaseGraphNotFoundException e) {
+                ((HBaseEdge) edge).removeStaleIndex();
+                return Stream.empty();
             }
         };
     }

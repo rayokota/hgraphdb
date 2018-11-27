@@ -214,6 +214,10 @@ public class HBaseGraph implements Graph {
         return configuration().isLazyLoading();
     }
 
+    public boolean isParallelLoading() {
+        return configuration().isParallelLoading();
+    }
+
     @Override
     public Vertex addVertex(final Object... keyValues) {
         ElementHelper.legalPropertyKeyValueArray(keyValues);
@@ -237,7 +241,11 @@ public class HBaseGraph implements Graph {
         if (vertexIds.length == 0) {
             return allVertices();
         } else {
-            return Stream.of(vertexIds)
+            Stream<Object> stream = Stream.of(vertexIds);
+            if (isParallelLoading() && vertexIds.length > 1) {
+                stream = stream.parallel();
+            }
+            return stream
                     .map(id -> {
                         if (id instanceof Long)
                             return id;
@@ -330,7 +338,11 @@ public class HBaseGraph implements Graph {
         if (edgeIds.length == 0) {
             return allEdges();
         } else {
-            return Stream.of(edgeIds)
+            Stream<Object> stream = Stream.of(edgeIds);
+            if (isParallelLoading() && edgeIds.length > 1) {
+                stream = stream.parallel();
+            }
+            return stream
                     .map(id -> {
                         if (id instanceof Long)
                             return id;
