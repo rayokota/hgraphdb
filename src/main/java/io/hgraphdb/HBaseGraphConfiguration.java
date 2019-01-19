@@ -46,6 +46,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
         public static final String RELATIONSHIP_CACHE_MAX_SIZE     = "gremlin.hbase.relationshipCacheMaxSize";
         public static final String RELATIONSHIP_CACHE_TTL_SECS     = "gremlin.hbase.relationshipCacheTtlSecs";
         public static final String LAZY_LOADING                    = "gremlin.hbase.lazyLoading";
+        public static final String PARALLEL_LOADING                = "gremlin.hbase.parallelLoading";
         public static final String BULK_LOADER_SKIP_WAL            = "gremlin.hbase.bulkLoaderSkipWAL";
         public static final String USE_SCHEMA                      = "gremlin.hbase.useSchema";
 
@@ -224,6 +225,15 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
 
     public HBaseGraphConfiguration setLazyLoading(boolean lazyLoading) {
         conf.setProperty(Keys.LAZY_LOADING, lazyLoading);
+        return this;
+    }
+
+    public boolean isParallelLoading() {
+        return conf.getBoolean(Keys.PARALLEL_LOADING, true);
+    }
+
+    public HBaseGraphConfiguration setParallelLoading(boolean parallelLoading) {
+        conf.setProperty(Keys.PARALLEL_LOADING, parallelLoading);
         return this;
     }
 
