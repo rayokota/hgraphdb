@@ -23,7 +23,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -242,7 +242,7 @@ plugin activated: tinkerpop.tinkergraph
 gremlin> :install org.apache.hbase hbase-client 1.4.1
 gremlin> :install org.apache.hbase hbase-common 1.4.1
 gremlin> :install org.apache.hadoop hadoop-common 2.5.1
-gremlin> :install io.hgraphdb hgraphdb 2.0.0
+gremlin> :install io.hgraphdb hgraphdb 2.1.0
 gremlin> :plugin use io.hgraphdb
 ```
 
