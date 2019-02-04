@@ -1,8 +1,23 @@
 package io.hgraphdb;
 
+import static io.hgraphdb.Constants.DEFAULT_FAMILY;
+import static io.hgraphdb.HBaseGraphConfiguration.Keys.HBASE_CLIENT_KERBEROS_PRINCIPAL;
+import static io.hgraphdb.HBaseGraphConfiguration.Keys.HBASE_CLIENT_KEYTAB_FILE;
+import static io.hgraphdb.HBaseGraphConfiguration.Keys.HBASE_SECURITY_AUTHENTICATION;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.*;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.NamespaceDescriptor;
+import org.apache.hadoop.hbase.NamespaceNotFoundException;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.mock.MockConnectionFactory;
 import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
@@ -18,12 +33,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
-import static io.hgraphdb.Constants.DEFAULT_FAMILY;
-import static io.hgraphdb.HBaseGraphConfiguration.Keys.*;
 
 public final class HBaseGraphUtils {
 
@@ -242,6 +261,20 @@ public final class HBaseGraphUtils {
             Object value = keyValues[i + 1];
             ElementHelper.validateProperty(keyStr, value);
             props.put(keyStr, value);
+        }
+        return props;
+    }
+
+    public static Map<String, Collection<Object>> propertiesToMultimap(Object... keyValues) {
+        Map<String, Collection<Object>> props = new HashMap<>();
+        for (int i = 0; i < keyValues.length; i = i + 2) {
+            Object key = keyValues[i];
+            if (key.equals(T.id) || key.equals(T.label)) continue;
+            String keyStr = key.toString();
+            Object value = keyValues[i + 1];
+            ElementHelper.validateProperty(keyStr, value);
+            Collection<Object> collection = props.computeIfAbsent(keyStr, k -> new LinkedList<>());
+            collection.add(value);
         }
         return props;
     }

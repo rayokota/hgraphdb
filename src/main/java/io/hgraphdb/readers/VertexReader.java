@@ -1,6 +1,12 @@
 package io.hgraphdb.readers;
 
-import io.hgraphdb.*;
+import io.hgraphdb.Constants;
+import io.hgraphdb.ElementType;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphNotFoundException;
+import io.hgraphdb.HBaseVertex;
+import io.hgraphdb.ValueUtils;
+
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Result;
@@ -8,9 +14,12 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import com.google.common.collect.MapMaker;
 
 public class VertexReader extends LoadingElementReader<Vertex> {
 
@@ -48,8 +57,19 @@ public class VertexReader extends LoadingElementReader<Vertex> {
             }
         }
         final String labelStr = label;
-        Map<String, Object> props = rawProps.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                e -> ValueUtils.deserializePropertyValue(graph, ElementType.VERTEX, labelStr, e.getKey(), e.getValue())));
+        Map<String, Collection<Object>> props = new MapMaker().concurrencyLevel(1).makeMap();
+        for (Map.Entry<String, byte[]> entry : rawProps.entrySet()) {
+            String key = entry.getKey();
+            Object deserialized = ValueUtils.deserializePropertyValue(graph, ElementType.VERTEX, labelStr, key, entry.getValue());
+            props.put(key, new LinkedList<>());
+            if (deserialized instanceof Iterable) {
+                for (Object item : (Iterable)deserialized) {
+                    props.get(key).add(item);
+                }
+            } else {
+                props.get(key).add(deserialized);
+            }
+        }
         HBaseVertex newVertex = new HBaseVertex(graph, vertex.id(), label, createdAt, updatedAt, props);
         ((HBaseVertex) vertex).copyFrom(newVertex);
     }

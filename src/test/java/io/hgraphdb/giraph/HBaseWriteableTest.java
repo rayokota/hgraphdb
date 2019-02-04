@@ -1,23 +1,27 @@
 package io.hgraphdb.giraph;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.ImmutableMap;
+
 import io.hgraphdb.HBaseEdge;
+import io.hgraphdb.HBaseGraphUtils;
 import io.hgraphdb.HBaseVertex;
+
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.Collection;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 public class HBaseWriteableTest {
 
     @Test
     public void testVertexWritable() throws Exception {
-        Map<String, Object> properties = ImmutableMap.of("foo", 4L, "bar", "barVal");
+        Map<String, Collection<Object>> properties = HBaseGraphUtils.propertiesToMultimap("foo", 4L, "bar", "barVal");
         HBaseVertex v = new HBaseVertex(null, 1, "mylabel", 2L, 3L, properties);
         VertexValueWritable writable = new VertexValueWritable(v);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

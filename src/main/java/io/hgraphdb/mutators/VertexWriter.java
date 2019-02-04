@@ -38,7 +38,7 @@ public final class VertexWriter implements Creator {
                 ValueUtils.serialize(((HBaseVertex) vertex).createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
                 ValueUtils.serialize(((HBaseVertex) vertex).updatedAt()));
-        ((HBaseVertex) vertex).getProperties().entrySet()
+        ((HBaseVertex) vertex).propertyEntriesStream()
                 .forEach(entry -> {
                     byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, entry.getKey(), entry.getValue());
                     put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);

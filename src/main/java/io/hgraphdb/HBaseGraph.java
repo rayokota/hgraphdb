@@ -226,7 +226,7 @@ public class HBaseGraph implements Graph {
 
         idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
         long now = System.currentTimeMillis();
-        HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
+        HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMultimap(keyValues));
         newVertex.validate();
         newVertex.writeToIndexModel();
         newVertex.writeToModel();
@@ -677,21 +677,22 @@ public class HBaseGraph implements Graph {
             throw new HBaseGraphNotValidException("Edge label '" + label + "' has not been connected with inVertex '" + inVertex.label()
                     + "' and outVertex '" + outVertex.label() + "'");
         }
-        validateTypes(labelMetadata, id, properties);
+        validateTypes(labelMetadata, id, properties.entrySet().stream());
     }
 
-    public void validateVertex(String label, Object id, Map<String, Object> properties) {
+    public void validateVertex(String label, Object id, Map<String, Collection<Object>> properties) {
         if (!configuration().getUseSchema() || label == null) return;
         LabelMetadata labelMetadata = getLabel(ElementType.VERTEX, label);
-        validateTypes(labelMetadata, id, properties);
+        validateTypes(labelMetadata, id, properties.entrySet().stream()
+                .flatMap(e -> e.getValue().stream().map(o -> new AbstractMap.SimpleEntry<>(e.getKey(), o))));
     }
 
-    private void validateTypes(LabelMetadata labelMetadata, Object id, Map<String, Object> properties) {
+    private void validateTypes(LabelMetadata labelMetadata, Object id, Stream<Map.Entry<String, Object>> properties) {
         ValueType idType = labelMetadata.idType();
         if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
             throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
-        properties.entrySet().forEach(entry ->
+        properties.forEach(entry ->
             getPropertyType(labelMetadata, entry.getKey(), entry.getValue(), true)
         );
     }

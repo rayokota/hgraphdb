@@ -8,19 +8,20 @@ import com.esotericsoftware.kryo.io.Output;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E> {
 
-    public void write(Kryo kryo, Output output, E element) {
+    @Override
+	public void write(Kryo kryo, Output output, E element) {
         byte[] idBytes = ValueUtils.serialize(element.id());
         output.writeInt(idBytes.length);
         output.writeBytes(idBytes);
         output.writeString(element.label());
         output.writeLong(element.createdAt());
         output.writeLong(element.updatedAt());
-        Map<String, Object> properties = element.getProperties();
-        output.writeInt(properties.size());
-        properties.entrySet().forEach(entry -> {
+        output.writeInt(element.propertySize());
+        element.propertyEntriesStream().forEach(entry -> {
             output.writeString(entry.getKey());
             byte[] bytes = ValueUtils.serialize(entry.getValue());
             output.writeInt(bytes.length);
@@ -28,7 +29,8 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
         });
     }
 
-    public E read(Kryo kryo, Input input, Class<E> type) {
+    @Override
+	public E read(Kryo kryo, Input input, Class<E> type) {
         int idBytesLen = input.readInt();
         Object id = ValueUtils.deserialize(input.readBytes(idBytesLen));
         String label = input.readString();

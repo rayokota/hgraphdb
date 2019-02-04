@@ -5,9 +5,11 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.google.common.collect.ImmutableMap;
+
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -106,6 +108,23 @@ public class HBaseElementTest extends HBaseGraphTest {
     }
 
     @Test
+    public void testVertexMultiProperty() {
+        assertEquals(0, count(graph.vertices()));
+        Vertex vertex = graph.addVertex(T.id, id(0), T.label, "a", "key1", "value1");
+        int expect = 2;
+
+        vertex.property(Cardinality.set, "key1", "value2");
+        assertEquals(expect, count(vertex.properties("key1")));
+
+        vertex.property(Cardinality.set, "key1", "value1");
+        assertEquals(expect, count(vertex.properties("key1")));
+
+        vertex.property(Cardinality.set, "key1", "value3");
+        expect++;
+        assertEquals(expect, count(vertex.properties("key1")));
+    }
+
+    @Test
     public void testCountersNotSupportedWithoutSchema() {
         assertEquals(0, count(graph.vertices()));
 
@@ -128,10 +147,12 @@ public class HBaseElementTest extends HBaseGraphTest {
             this.id = id;
         }
 
+        @Override
         public void write(Kryo kryo, Output output) {
             output.write(id.getCode());
         }
 
+        @Override
         public void read(Kryo kryo, Input input) {
             id = ValueType.valueOf(input.readByte());
         }
