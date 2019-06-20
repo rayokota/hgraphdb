@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
@@ -263,6 +264,7 @@ public class HBaseGraph implements Graph {
                             return Stream.empty();
                         }
                     })
+                    .collect(Collectors.toList())
                     .iterator();
         }
     }
@@ -360,6 +362,7 @@ public class HBaseGraph implements Graph {
                             return Stream.empty();
                         }
                     })
+                    .collect(Collectors.toList())
                     .iterator();
         }
     }
