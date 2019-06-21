@@ -1,6 +1,14 @@
 package io.hgraphdb;
 
-import io.hgraphdb.mutators.*;
+import io.hgraphdb.mutators.Creator;
+import io.hgraphdb.mutators.EdgeIndexRemover;
+import io.hgraphdb.mutators.EdgeIndexWriter;
+import io.hgraphdb.mutators.EdgeWriter;
+import io.hgraphdb.mutators.PropertyWriter;
+import io.hgraphdb.mutators.VertexIndexRemover;
+import io.hgraphdb.mutators.VertexIndexWriter;
+import io.hgraphdb.mutators.VertexWriter;
+
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.BufferedMutatorParams;
@@ -84,7 +92,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
             idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
             long now = System.currentTimeMillis();
             HBaseVertex vertex = new HBaseVertex(graph, idValue, label, now, now,
-                    HBaseGraphUtils.propertiesToMap(keyValues));
+                    HBaseGraphUtils.propertiesToMultimap(keyValues));
             vertex.validate();
 
             Iterator<IndexMetadata> indices = vertex.getIndices(OperationType.WRITE);
@@ -192,14 +200,14 @@ public final class HBaseBulkLoader implements AutoCloseable {
             boolean hasIndex = v.hasIndex(OperationType.WRITE, key);
             if (hasIndex) {
                 // only load old value if using index
-                oldValue = v.getProperty(key);
+                oldValue = v.getSingleProperty(key).orElse(null);
                 if (oldValue != null && !oldValue.equals(value)) {
                     VertexIndexRemover indexRemover = new VertexIndexRemover(graph, v, key, null);
                     if (vertexIndicesMutator != null) vertexIndicesMutator.mutate(getMutationList(indexRemover.constructMutations()));
                 }
             }
 
-            v.getProperties().put(key, value);
+            v.cacheProperty(key, value);
             v.updatedAt(System.currentTimeMillis());
 
             if (hasIndex) {
@@ -220,7 +228,8 @@ public final class HBaseBulkLoader implements AutoCloseable {
                 m -> m.setDurability(skipWAL ? Durability.SKIP_WAL : Durability.USE_DEFAULT)));
     }
 
-    public void close() {
+    @Override
+	public void close() {
         try {
             if (edgesMutator != null) edgesMutator.close();
             if (edgeIndicesMutator != null) edgeIndicesMutator.close();

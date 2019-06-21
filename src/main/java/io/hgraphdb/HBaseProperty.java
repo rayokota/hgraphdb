@@ -1,5 +1,6 @@
 package io.hgraphdb;
 
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -26,7 +27,11 @@ public final class HBaseProperty<V> implements Property<V> {
 
     @Override
     public void remove() {
-        element.removeProperty(this.key);
+       if (this.element instanceof Edge) {
+           ((HBaseEdge)this.element).removeProperty(this.key);
+       } else {
+           ((HBaseVertex)this.element).removeProperty(this.key, this.value);
+       }
     }
 
     @Override

@@ -1,12 +1,24 @@
 package io.hgraphdb.models;
 
-import io.hgraphdb.*;
+import io.hgraphdb.CloseableIteratorUtils;
+import io.hgraphdb.Constants;
+import io.hgraphdb.ElementType;
+import io.hgraphdb.HBaseGraph;
+import io.hgraphdb.HBaseGraphConfiguration;
+import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphNotFoundException;
+import io.hgraphdb.HBaseGraphUtils;
+import io.hgraphdb.HBaseVertex;
+import io.hgraphdb.IndexMetadata;
+import io.hgraphdb.OperationType;
+import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.mutators.VertexIndexRemover;
 import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.readers.VertexIndexReader;
 import io.hgraphdb.util.DynamicPositionedMutableByteRange;
+
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
@@ -17,15 +29,23 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
-import org.apache.hadoop.hbase.util.*;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.util.Order;
+import org.apache.hadoop.hbase.util.OrderedBytes;
+import org.apache.hadoop.hbase.util.PositionedByteRange;
+import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.DefaultCloseableIterator;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -62,7 +82,7 @@ public class VertexIndexModel extends BaseModel {
     public Iterator<Vertex> vertices(String label, boolean isUnique, String key, Object value) {
         byte[] valueBytes = ValueUtils.serialize(value);
         return vertices(getVertexIndexScan(label, isUnique, key, value), vertex -> {
-            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
+            byte[] propValueBytes = vertex.hasProperty(key, value) ? ValueUtils.serialize(value) : new byte[] {};
             return Bytes.compareTo(propValueBytes, valueBytes) == 0;
         });
     }
@@ -71,9 +91,15 @@ public class VertexIndexModel extends BaseModel {
         byte[] fromBytes = ValueUtils.serialize(inclusiveFrom);
         byte[] toBytes = ValueUtils.serialize(exclusiveTo);
         return vertices(getVertexIndexScanInRange(label, isUnique, key, inclusiveFrom, exclusiveTo), vertex -> {
-            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
-            return Bytes.compareTo(propValueBytes, fromBytes) >= 0
-                    && Bytes.compareTo(propValueBytes, toBytes) < 0;
+        	Iterator<VertexProperty<Object>> properties = vertex.properties(key);
+        	while (properties.hasNext()) {
+        		VertexProperty<Object> prop = properties.next();
+        		byte[] propValueBytes = ValueUtils.serialize(prop.value());
+        		if (!(Bytes.compareTo(propValueBytes, fromBytes) >= 0 && Bytes.compareTo(propValueBytes, toBytes) < 0)) {
+        			return false;
+        		}
+        	}
+        	return true;
         });
     }
 
@@ -81,9 +107,18 @@ public class VertexIndexModel extends BaseModel {
         byte[] fromBytes = from != null ? ValueUtils.serialize(from) : HConstants.EMPTY_BYTE_ARRAY;
         return CloseableIteratorUtils.limit(vertices(getVertexIndexScanWithLimit(label, isUnique, key, from, limit, reversed), vertex -> {
             if (fromBytes == HConstants.EMPTY_BYTE_ARRAY) return true;
-            byte[] propValueBytes = ValueUtils.serialize(vertex.getProperty(key));
-            int compare = Bytes.compareTo(propValueBytes, fromBytes);
-            return reversed ? compare <= 0 : compare >= 0;
+        	Iterator<VertexProperty<Object>> properties = vertex.properties(key);
+        	while (properties.hasNext()) {
+        		VertexProperty<Object> prop = properties.next();
+        		byte[] propValueBytes = ValueUtils.serialize(prop.value());
+        		int compare = Bytes.compareTo(propValueBytes, fromBytes);
+        		if (reversed && compare > 0) {
+        			return false;
+        		} else if (!reversed && compare < 0) {
+        			return false;
+        		}
+        	}
+        	return true;
         }), limit);
     }
 
@@ -223,8 +258,10 @@ public class VertexIndexModel extends BaseModel {
         }
         Cell createdAtCell = result.getColumnLatestCell(Constants.DEFAULT_FAMILY_BYTES, Constants.CREATED_AT_BYTES);
         Long createdAt = ValueUtils.deserialize(CellUtil.cloneValue(createdAtCell));
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(key, value);
+        Map<String, Collection<Object>> properties = new HashMap<>();
+        List<Object> list = new LinkedList<>();
+        list.add(value);
+        properties.put(key, list);
         HBaseVertex newVertex = new HBaseVertex(graph, vertexId, label, createdAt, null, properties, false);
         HBaseVertex vertex = (HBaseVertex) graph.findOrCreateVertex(vertexId);
         vertex.copyFrom(newVertex);

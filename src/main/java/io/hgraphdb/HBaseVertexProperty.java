@@ -62,7 +62,7 @@ public final class HBaseVertexProperty<V> implements VertexProperty<V> {
 
     @Override
     public void remove() {
-        vertex.removeProperty(this.key);
+        ((HBaseVertex)vertex).removeProperty(this.key, this.value);
     }
 
     @Override
