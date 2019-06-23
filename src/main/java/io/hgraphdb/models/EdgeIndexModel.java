@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EdgeIndexModel extends BaseModel {
@@ -208,6 +209,7 @@ public class EdgeIndexModel extends BaseModel {
         if (graph.isParallelLoading()) {
             return StreamUtils.parallelStreamOf(edges(vertex, direction, labels))
                 .flatMap(transformEdgeToStream(vertex))
+                .collect(Collectors.toList())
                 .iterator();
         } else {
             return CloseableIteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
@@ -219,6 +221,7 @@ public class EdgeIndexModel extends BaseModel {
         if (graph.isParallelLoading()) {
             return StreamUtils.parallelStreamOf(edges(vertex, direction, label, edgeKey, edgeValue))
                 .flatMap(transformEdgeToStream(vertex))
+                .collect(Collectors.toList())
                 .iterator();
         } else {
             return CloseableIteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
@@ -231,6 +234,7 @@ public class EdgeIndexModel extends BaseModel {
             return StreamUtils.parallelStreamOf(edgesInRange(vertex, direction, label, edgeKey,
                 inclusiveFromEdgeValue, exclusiveToEdgeValue))
                 .flatMap(transformEdgeToStream(vertex))
+                .collect(Collectors.toList())
                 .iterator();
         } else {
             return CloseableIteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
@@ -244,6 +248,7 @@ public class EdgeIndexModel extends BaseModel {
             return StreamUtils.parallelStreamOf(edgesWithLimit(vertex, direction, label, edgeKey,
                 fromEdgeValue, limit, reversed))
                 .flatMap(transformEdgeToStream(vertex))
+                .collect(Collectors.toList())
                 .iterator();
         } else {
             return CloseableIteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
