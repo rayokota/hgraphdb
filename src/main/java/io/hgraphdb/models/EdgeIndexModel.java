@@ -1,5 +1,6 @@
 package io.hgraphdb.models;
 
+import com.google.common.collect.Lists;
 import io.hgraphdb.*;
 import io.hgraphdb.mutators.EdgeIndexRemover;
 import io.hgraphdb.mutators.EdgeIndexWriter;
@@ -7,6 +8,8 @@ import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
 import io.hgraphdb.readers.EdgeIndexReader;
 import io.hgraphdb.util.DynamicPositionedMutableByteRange;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
@@ -168,7 +171,8 @@ public class EdgeIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            Iterator<Edge> iterator = CloseableIteratorUtils.flatMap(
+            if (!graph.isParallelLoading()) {
+                Iterator<Edge> iterator = CloseableIteratorUtils.flatMap(
                     CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
@@ -193,12 +197,44 @@ public class EdgeIndexModel extends BaseModel {
                             return Collections.emptyIterator();
                         }
                     });
-            return new DefaultCloseableIterator<Edge>(iterator) {
-                @Override
-                public void close() {
-                    scanner.close();
-                }
-            };
+                return new DefaultCloseableIterator<Edge>(iterator) {
+                    @Override
+                    public void close() {
+                        scanner.close();
+                    }
+                };
+            } else {
+                List<Edge> edges = Lists
+                    .newArrayList(scanner.iterator()).parallelStream()
+                    .flatMap(
+                        result -> {
+                            HBaseEdge edge = (HBaseEdge) parser.parse(result);
+                            try {
+                                boolean isLazy = graph.isLazyLoading();
+                                if (!isLazy)
+                                    edge.load();
+                                boolean passesFilter = (isLazy && useIndex) || filter == null || filter.test(edge);
+                                if (passesFilter) {
+                                    return Stream.of(edge);
+                                } else {
+                                    if (useIndex)
+                                        edge.removeStaleIndex();
+                                    return Stream.empty();
+                                }
+                            } catch (final HBaseGraphNotFoundException e) {
+                                edge.removeStaleIndex();
+                                return Stream.empty();
+                            }
+                        }).collect(Collectors.toList());
+                scanner.close();
+                vertex.cacheEdges(cacheKey, edges);
+                return new DefaultCloseableIterator<Edge>(edges.iterator()) {
+                    @Override
+                    public void close() {
+                        scanner.close();
+                    }
+                };
+            }
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

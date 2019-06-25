@@ -1,5 +1,6 @@
 package io.hgraphdb.models;
 
+import com.google.common.collect.Lists;
 import io.hgraphdb.*;
 import io.hgraphdb.mutators.Mutator;
 import io.hgraphdb.mutators.Mutators;
@@ -7,6 +8,11 @@ import io.hgraphdb.mutators.VertexIndexRemover;
 import io.hgraphdb.mutators.VertexIndexWriter;
 import io.hgraphdb.readers.VertexIndexReader;
 import io.hgraphdb.util.DynamicPositionedMutableByteRange;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
@@ -93,7 +99,8 @@ public class VertexIndexModel extends BaseModel {
         ResultScanner scanner;
         try {
             scanner = table.getScanner(scan);
-            Iterator<Vertex> iterator = CloseableIteratorUtils.flatMap(
+            if (!graph.isParallelLoading()) {
+                Iterator<Vertex> iterator = CloseableIteratorUtils.flatMap(
                     CloseableIteratorUtils.concat(scanner.iterator(), IteratorUtils.of(Result.EMPTY_RESULT)),
                     result -> {
                         if (result == Result.EMPTY_RESULT) {
@@ -116,12 +123,39 @@ public class VertexIndexModel extends BaseModel {
                             return Collections.emptyIterator();
                         }
                     });
-            return new DefaultCloseableIterator<Vertex>(iterator) {
-                @Override
-                public void close() {
-                    scanner.close();
-                }
-            };
+                return new DefaultCloseableIterator<Vertex>(iterator) {
+                    @Override
+                    public void close() {
+                        scanner.close();
+                    }
+                };
+            } else {
+                List<Vertex> vertexList = Lists.newArrayList(scanner.iterator()).parallelStream().flatMap(
+                    result -> {
+                        HBaseVertex vertex = (HBaseVertex) parser.parse(result);
+                        try {
+                            boolean isLazy = graph.isLazyLoading();
+                            if (!isLazy) vertex.load();
+                            boolean passesFilter = isLazy || filter == null || filter.test(vertex);
+                            if (passesFilter) {
+                                return Stream.of(vertex);
+                            } else {
+                                vertex.removeStaleIndex();
+                                return Stream.empty();
+                            }
+                        } catch (final HBaseGraphNotFoundException e) {
+                            vertex.removeStaleIndex();
+                            return Stream.empty();
+                        }
+                    }).collect(Collectors.toList());
+                scanner.close();
+                return new DefaultCloseableIterator<Vertex>(vertexList.iterator()) {
+                    @Override
+                    public void close() {
+                        scanner.close();
+                    }
+                };
+            }
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }
