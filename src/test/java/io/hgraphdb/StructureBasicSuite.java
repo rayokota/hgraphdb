@@ -54,7 +54,6 @@ public class StructureBasicSuite extends AbstractGremlinSuite {
             VertexTest.class
     };
 
-    @SuppressWarnings("deprecation")
     public StructureBasicSuite(final Class<?> klass, final RunnerBuilder builder) throws InitializationError {
         super(klass, builder, allTests, null, false, TraversalEngine.Type.STANDARD);
     }

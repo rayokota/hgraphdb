@@ -22,7 +22,6 @@ import java.util.List;
 
 public class TableInputFormat extends org.apache.hadoop.hbase.mapreduce.TableInputFormat {
 
-    @SuppressWarnings("hiding")
     private static final Log LOG = LogFactory.getLog(TableInputFormat.class);
 
     private final String tablePropertyKey;

@@ -95,20 +95,13 @@ public final class HBaseGraphUtils {
 
     public static void createTables(HBaseGraphConfiguration config, Connection conn) {
         if (config.getInstanceType() == HBaseGraphConfiguration.InstanceType.MOCK) return;
-        Admin admin = null;
-        try {
-            admin = conn.getAdmin();
+        try (Admin admin = conn.getAdmin()) {
             if (config.getInstanceType() != HBaseGraphConfiguration.InstanceType.BIGTABLE) {
                 createNamespace(config, admin);
             }
             createTables(config, admin);
         } catch (Exception e) {
             throw new HBaseGraphException(e);
-        } finally {
-            try {
-                if (admin != null) admin.close();
-            } catch (IOException ignored) {
-            }
         }
     }
 
@@ -162,17 +155,10 @@ public final class HBaseGraphUtils {
     }
 
     public static void dropTables(HBaseGraphConfiguration config, Connection conn) {
-        Admin admin = null;
-        try {
-            admin = conn.getAdmin();
+        try (Admin admin = conn.getAdmin()) {
             dropTables(config, admin);
         } catch (IOException e) {
             throw new HBaseGraphException(e);
-        } finally {
-            try {
-                if (admin != null) admin.close();
-            } catch (IOException ignored) {
-            }
         }
     }
 

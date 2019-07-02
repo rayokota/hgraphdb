@@ -31,7 +31,6 @@ import java.net.InetSocketAddress;
  * <p>
  * Heavily inspired from Apache Mahout's MahoutTestCase
  */
-@SuppressWarnings("unchecked")
 public class InternalHBaseVertexRunner {
 
     /**

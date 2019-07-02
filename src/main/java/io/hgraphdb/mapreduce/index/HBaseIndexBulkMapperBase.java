@@ -45,7 +45,7 @@ public abstract class HBaseIndexBulkMapperBase extends HBaseIndexMapperBase {
                 }
             }
         }
-        Collections.sort(keyValues, KeyValue.COMPARATOR);
+        keyValues.sort(KeyValue.COMPARATOR);
         return keyValues;
     }
 }

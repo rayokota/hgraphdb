@@ -74,7 +74,6 @@ public final class ValueUtils {
         return deserialize(target);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] target) {
         if (target == null) return null;
         PositionedByteRange buffer = new SimplePositionedByteRange(target);
@@ -158,7 +157,6 @@ public final class ValueUtils {
         return deserializeWithSalt(buffer);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T deserializeWithSalt(PositionedByteRange buffer) {
         buffer.get();  // discard salt
         return deserialize(buffer);
@@ -298,7 +296,7 @@ public final class ValueUtils {
         return (byte) (Math.abs(hash) % DEFAULT_NUM_BUCKETS);
     }
 
-    private static int calculateHashCode(byte a[]) {
+    private static int calculateHashCode(byte[] a) {
         if (a == null) return 0;
         int result = 1;
         for (byte b : a) {

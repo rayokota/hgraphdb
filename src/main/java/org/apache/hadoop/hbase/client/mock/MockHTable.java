@@ -711,7 +711,6 @@ public class MockHTable implements Table {
             byte[] family = ef.getKey();
             NavigableMap<byte[], Long> qToVal = ef.getValue();
             for (Map.Entry<byte[], Long> eq : qToVal.entrySet()) {
-                //noinspection UnusedAssignment
                 long newValue = incrementColumnValue(increment.getRow(), family, eq.getKey(), eq.getValue());
                 Map.Entry<Long, byte[]> timestampAndValue = data.get(increment.getRow()).get(family).get(eq.getKey()).lastEntry();
                 kvs.add(new KeyValue(increment.getRow(), family, eq.getKey(), timestampAndValue.getKey(), timestampAndValue.getValue()));

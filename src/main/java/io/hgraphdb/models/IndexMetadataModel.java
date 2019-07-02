@@ -20,7 +20,6 @@ import org.apache.hadoop.hbase.util.Order;
 import org.apache.hadoop.hbase.util.OrderedBytes;
 import org.apache.hadoop.hbase.util.PositionedByteRange;
 import org.apache.hadoop.hbase.util.SimplePositionedByteRange;
-import org.apache.hadoop.hbase.util.SimplePositionedMutableByteRange;
 
 import java.io.IOException;
 import java.util.Iterator;

@@ -333,10 +333,10 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
                 Function.identity(),
                 key -> conf.getProperty(key));
         stream.writeInt(props.size());
-        props.entrySet().forEach(entry -> {
+        props.forEach((key, value) -> {
             try {
-                stream.writeUTF(entry.getKey());
-                stream.writeObject(entry.getValue());
+                stream.writeUTF(key);
+                stream.writeObject(value);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

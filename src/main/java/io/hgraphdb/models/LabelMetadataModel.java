@@ -36,8 +36,8 @@ public class LabelMetadataModel extends BaseModel {
     }
 
     public void addPropertyMetadata(LabelMetadata label, Map<String, ValueType> propertyTypes) {
-        propertyTypes.entrySet().forEach(entry -> {
-            Creator creator = new PropertyMetadataWriter(graph, label, entry.getKey(), entry.getValue());
+        propertyTypes.forEach((key, value) -> {
+            Creator creator = new PropertyMetadataWriter(graph, label, key, value);
             Mutators.create(table, creator);
         });
     }

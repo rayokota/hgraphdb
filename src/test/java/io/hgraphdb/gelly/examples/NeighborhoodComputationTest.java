@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 @Category(SlowTests.class)
 public class NeighborhoodComputationTest extends HBaseGraphTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testNeighborhoodMethods() throws Exception {
 
@@ -44,11 +45,11 @@ public class NeighborhoodComputationTest extends HBaseGraphTest {
 
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         DataSet<Tuple2<Long, Long>> vertices = env.createInput(
-                new HBaseVertexInputFormat<Long, Long>(hconf),
+            new HBaseVertexInputFormat<>(hconf),
                 TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {
                 }));
         DataSet<Tuple3<Long, Long, Double>> edges = env.createInput(
-                new HBaseEdgeInputFormat<Long, Double>(hconf, "weight"),
+            new HBaseEdgeInputFormat<>(hconf, "weight"),
                 TypeInformation.of(new TypeHint<Tuple3<Long, Long, Double>>() {
                 }));
 
@@ -61,10 +62,10 @@ public class NeighborhoodComputationTest extends HBaseGraphTest {
                 .stream()
                 .collect(Collectors.toMap(tuple -> tuple.getField(0), tuple -> tuple.getField(1)));
 
-        assertEquals(0.1, minWeightsMap.get(1L).doubleValue(), 0);
-        assertEquals(0.3, minWeightsMap.get(2L).doubleValue(), 0);
-        assertEquals(0.2, minWeightsMap.get(3L).doubleValue(), 0);
-        assertEquals(0.9, minWeightsMap.get(4L).doubleValue(), 0);
+        assertEquals(0.1, minWeightsMap.get(1L), 0);
+        assertEquals(0.3, minWeightsMap.get(2L), 0);
+        assertEquals(0.2, minWeightsMap.get(3L), 0);
+        assertEquals(0.9, minWeightsMap.get(4L), 0);
         
         DataSet<Tuple2<Long, Long>> verticesWithSum = gelly.reduceOnNeighbors(new SumValues(), EdgeDirection.IN);
         //verticesWithSum.print();
@@ -120,7 +121,7 @@ public class NeighborhoodComputationTest extends HBaseGraphTest {
 
             for (Tuple2<Edge<Long, Double>, Vertex<Long, Long>> neighbor : neighbors) {
                 if (neighbor.f0.f2 > 0.5) {
-                    out.collect(new Tuple2<Vertex<Long, Long>, Vertex<Long, Long>>(vertex, neighbor.f1));
+                    out.collect(new Tuple2<>(vertex, neighbor.f1));
                 }
             }
         }

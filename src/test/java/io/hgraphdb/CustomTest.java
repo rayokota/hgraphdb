@@ -267,6 +267,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
 
     public String fileExtension = ".json";
 
+    @SuppressWarnings("unchecked")
     @Ignore
     @Test
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
@@ -383,6 +384,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
     private final TypeReference<HashMap<String, Object>> mapTypeReference = new TypeReference<HashMap<String, Object>>() {
     };
 
+    @SuppressWarnings("unchecked")
     @Ignore
     @Test
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)

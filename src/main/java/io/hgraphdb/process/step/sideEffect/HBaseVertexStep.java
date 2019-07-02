@@ -27,7 +27,6 @@ public final class HBaseVertexStep<E extends Element> extends VertexStep<E> impl
 
     private final List<HasContainer> hasContainers = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
     public HBaseVertexStep(final VertexStep<E> originalVertexStep) {
         super(originalVertexStep.getTraversal(), originalVertexStep.getReturnClass(), originalVertexStep.getDirection(), originalVertexStep.getEdgeLabels());
         originalVertexStep.getLabels().forEach(this::addLabel);

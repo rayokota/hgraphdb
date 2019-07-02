@@ -158,6 +158,7 @@ public final class CloseableIteratorUtils {
         };
     }
 
+    @SafeVarargs
     public static <S> Iterator<S> concat(final Iterator<S>... iterators) {
         final MultiIterator<S> iterator = new MultiIterator<>();
         for (final Iterator<S> itty : iterators) {

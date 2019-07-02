@@ -43,9 +43,7 @@ public abstract class BaseModel implements AutoCloseable {
     }
 
     private void clear() {
-        ResultScanner scanner = null;
-        try {
-            scanner = table.getScanner(new Scan());
+        try (ResultScanner scanner = table.getScanner(new Scan())) {
             scanner.iterator().forEachRemaining(result -> {
                 try {
                     table.delete(new Delete(result.getRow()));
@@ -55,8 +53,6 @@ public abstract class BaseModel implements AutoCloseable {
             });
         } catch (IOException e) {
             throw new HBaseGraphException(e);
-        } finally {
-            if (scanner != null) scanner.close();
         }
     }
 }

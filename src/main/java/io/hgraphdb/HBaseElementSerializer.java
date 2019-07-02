@@ -20,9 +20,9 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
         output.writeLong(element.updatedAt());
         Map<String, Object> properties = element.getProperties();
         output.writeInt(properties.size());
-        properties.entrySet().forEach(entry -> {
-            output.writeString(entry.getKey());
-            byte[] bytes = ValueUtils.serialize(entry.getValue());
+        properties.forEach((key, value) -> {
+            output.writeString(key);
+            byte[] bytes = ValueUtils.serialize(value);
             output.writeInt(bytes.length);
             output.writeBytes(bytes);
         });

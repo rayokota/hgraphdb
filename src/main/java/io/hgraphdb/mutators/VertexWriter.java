@@ -38,11 +38,10 @@ public final class VertexWriter implements Creator {
                 ValueUtils.serialize(((HBaseVertex) vertex).createdAt()));
         put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Constants.UPDATED_AT_BYTES,
                 ValueUtils.serialize(((HBaseVertex) vertex).updatedAt()));
-        ((HBaseVertex) vertex).getProperties().entrySet()
-                .forEach(entry -> {
-                    byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, entry.getKey(), entry.getValue());
-                    put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(entry.getKey()), bytes);
-                });
+        ((HBaseVertex) vertex).getProperties().forEach((key, value) -> {
+            byte[] bytes = ValueUtils.serializePropertyValue(graph, ElementType.VERTEX, label, key, value);
+            put.addColumn(Constants.DEFAULT_FAMILY_BYTES, Bytes.toBytes(key), bytes);
+        });
 
         return IteratorUtils.of(put);
     }
