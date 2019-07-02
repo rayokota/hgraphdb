@@ -218,33 +218,31 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String... labels) {
-        int batchSize = graph.getLoadingBatchSize();
-        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
-            edges(vertex, direction, labels), batchSize);
-        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
+        Iterator<Edge> edges = edges(vertex, direction, labels);
+        return edgesToVertices(vertex, edges);
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,
                                      String edgeKey, Object edgeValue) {
-        int batchSize = graph.getLoadingBatchSize();
-        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
-            edges(vertex, direction, label, edgeKey, edgeValue), batchSize);
-        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
+        Iterator<Edge> edges = edges(vertex, direction, label, edgeKey, edgeValue);
+        return edgesToVertices(vertex, edges);
     }
 
     public Iterator<Vertex> verticesInRange(HBaseVertex vertex, Direction direction, String label,
                                             String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
-        int batchSize = graph.getLoadingBatchSize();
-        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
-            edgesInRange(vertex, direction, label, edgeKey, inclusiveFromEdgeValue, exclusiveToEdgeValue), batchSize);
-        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
+        Iterator<Edge> edges = edgesInRange(vertex, direction, label, edgeKey, inclusiveFromEdgeValue, exclusiveToEdgeValue);
+        return edgesToVertices(vertex, edges);
     }
 
     public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
                                               String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
+        Iterator<Edge> edges = edgesWithLimit(vertex, direction, label, edgeKey, fromEdgeValue, limit, reversed);
+        return edgesToVertices(vertex, edges);
+    }
+
+    private Iterator<Vertex> edgesToVertices(HBaseVertex vertex, Iterator<Edge> edges) {
         int batchSize = graph.getLoadingBatchSize();
-        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
-            edgesWithLimit(vertex, direction, label, edgeKey, fromEdgeValue, limit, reversed), batchSize);
+        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(edges, batchSize);
         return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
     }
 
