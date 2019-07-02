@@ -161,7 +161,6 @@ public class EdgeIndexModel extends BaseModel {
         }), limit);
     }
 
-    @SuppressWarnings("unchecked")
     private Iterator<Edge> performEdgesScan(HBaseVertex vertex, Scan scan, Tuple cacheKey,
                                             boolean useIndex, Predicate<HBaseEdge> filter) {
         List<Edge> cached = new ArrayList<>();
@@ -219,39 +218,62 @@ public class EdgeIndexModel extends BaseModel {
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String... labels) {
-        return CloseableIteratorUtils.flatMap(edges(vertex, direction, labels), transformEdge(vertex));
+        int batchSize = graph.getLoadingBatchSize();
+        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
+            edges(vertex, direction, labels), batchSize);
+        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
     }
 
     public Iterator<Vertex> vertices(HBaseVertex vertex, Direction direction, String label,
                                      String edgeKey, Object edgeValue) {
-        return CloseableIteratorUtils.flatMap(edges(vertex, direction, label, edgeKey, edgeValue), transformEdge(vertex));
+        int batchSize = graph.getLoadingBatchSize();
+        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
+            edges(vertex, direction, label, edgeKey, edgeValue), batchSize);
+        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
     }
 
     public Iterator<Vertex> verticesInRange(HBaseVertex vertex, Direction direction, String label,
                                             String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
-        return CloseableIteratorUtils.flatMap(edgesInRange(vertex, direction, label, edgeKey,
-            inclusiveFromEdgeValue, exclusiveToEdgeValue), transformEdge(vertex));
+        int batchSize = graph.getLoadingBatchSize();
+        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
+            edgesInRange(vertex, direction, label, edgeKey, inclusiveFromEdgeValue, exclusiveToEdgeValue), batchSize);
+        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
     }
 
     public Iterator<Vertex> verticesWithLimit(HBaseVertex vertex, Direction direction, String label,
                                               String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
-        return CloseableIteratorUtils.flatMap(edgesWithLimit(vertex, direction, label, edgeKey,
-            fromEdgeValue, limit, reversed), transformEdge(vertex));
+        int batchSize = graph.getLoadingBatchSize();
+        Iterator<List<Edge>> partitioned = io.hgraphdb.IteratorUtils.partition(
+            edgesWithLimit(vertex, direction, label, edgeKey, fromEdgeValue, limit, reversed), batchSize);
+        return CloseableIteratorUtils.flatMap(partitioned, transformEdges(vertex));
     }
 
-    private Function<Edge, Iterator<Vertex>> transformEdge(HBaseVertex vertex) {
-        return edge -> {
-            Object inVertexId = edge.inVertex().id();
-            Object outVertexId = edge.outVertex().id();
-            Object vertexId = vertex.id().equals(inVertexId) ? outVertexId : inVertexId;
-            try {
-                HBaseVertex v = (HBaseVertex) graph.findOrCreateVertex(vertexId);
-                if (!graph.isLazyLoading()) v.load();
-                return IteratorUtils.of(v);
-            } catch (final HBaseGraphNotFoundException e) {
-                ((HBaseEdge) edge).removeStaleIndex();
-                return Collections.emptyIterator();
+    private Function<List<Edge>, Iterator<Vertex>> transformEdges(HBaseVertex vertex) {
+        return edges -> {
+            List<Vertex> vertices = edges.stream()
+                .map(edge -> {
+                    Object inVertexId = edge.inVertex().id();
+                    Object outVertexId = edge.outVertex().id();
+                    Object vertexId = vertex.id().equals(inVertexId) ? outVertexId : inVertexId;
+                    return graph.findOrCreateVertex(vertexId);
+                })
+                .collect(Collectors.toList());
+            boolean isLazy = graph.isLazyLoading();
+            if (!isLazy) {
+                graph.getVertexModel().load(vertices);
             }
+            return vertices.stream()
+                .filter(elem -> {
+                    HBaseVertex v = (HBaseVertex) elem;
+                    boolean isLoaded = v.arePropertiesFullyLoaded();
+                    if (isLazy || isLoaded) {
+                        return true;
+                    } else {
+                        v.removeStaleIndex();
+                        return false;
+                    }
+                })
+                .iterator();
         };
     }
 
