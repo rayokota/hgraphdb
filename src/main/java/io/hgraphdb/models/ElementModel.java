@@ -3,6 +3,7 @@ package io.hgraphdb.models;
 import io.hgraphdb.Constants;
 import io.hgraphdb.HBaseGraph;
 import io.hgraphdb.HBaseGraphException;
+import io.hgraphdb.HBaseGraphNotFoundException;
 import io.hgraphdb.ValueUtils;
 import io.hgraphdb.mutators.PropertyIncrementer;
 import io.hgraphdb.mutators.PropertyRemover;
@@ -21,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class ElementModel extends BaseModel {
 
@@ -46,6 +49,33 @@ public abstract class ElementModel extends BaseModel {
         try {
             Result result = table.get(get);
             getReader().load(element, result);
+        } catch (IOException e) {
+            throw new HBaseGraphException(e);
+        }
+    }
+
+    /**
+     * Load the elements from the backing table.
+     *
+     * @param elements The elements
+     */
+    @SuppressWarnings("unchecked")
+    public void load(List<? extends Element> elements) {
+        LOGGER.trace("Executing Batch Get, type: {}", getClass().getSimpleName());
+
+        List<Get> gets = elements.stream()
+            .map(e -> new Get(ValueUtils.serializeWithSalt(e.id())))
+            .collect(Collectors.toList());
+
+        try {
+            Result[] results = table.get(gets);
+            for (int i = 0; i < results.length; i++) {
+                try {
+                    getReader().load(elements.get(i), results[i]);
+                } catch (HBaseGraphNotFoundException e) {
+                    // ignore, the element will not have its properties fully loaded
+                }
+            }
         } catch (IOException e) {
             throw new HBaseGraphException(e);
         }

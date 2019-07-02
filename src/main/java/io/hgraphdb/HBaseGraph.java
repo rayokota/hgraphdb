@@ -215,8 +215,8 @@ public class HBaseGraph implements Graph {
         return configuration().isLazyLoading();
     }
 
-    public boolean isParallelLoading() {
-        return configuration().isParallelLoading();
+    public int getLoadingBatchSize() {
+        return configuration().getLoadingBatchSize();
     }
 
     @Override
@@ -243,12 +243,11 @@ public class HBaseGraph implements Graph {
             return allVertices();
         } else {
             Stream<Object> stream = Stream.of(vertexIds);
-            if (isParallelLoading() && vertexIds.length > 1) {
-                stream = stream.parallel();
-            }
-            return stream
+            List<Vertex> vertices = stream
                     .map(id -> {
-                        if (id instanceof Long)
+                        if (id == null)
+                            throw Exceptions.argumentCanNotBeNull("id");
+                        else if (id instanceof Long)
                             return id;
                         else if (id instanceof Number)
                             return ((Number) id).longValue();
@@ -257,14 +256,11 @@ public class HBaseGraph implements Graph {
                         else
                             return id;
                     })
-                    .flatMap(id -> {
-                        try {
-                            return Stream.of(vertex(id));
-                        } catch (final HBaseGraphNotFoundException e) {
-                            return Stream.empty();
-                        }
-                    })
-                    .collect(Collectors.toList())
+                    .map(this::findOrCreateVertex)
+                    .collect(Collectors.toList());
+            getVertexModel().load(vertices);
+            return vertices.stream()
+                    .filter(v -> ((HBaseVertex) v).arePropertiesFullyLoaded())
                     .iterator();
         }
     }
@@ -341,12 +337,11 @@ public class HBaseGraph implements Graph {
             return allEdges();
         } else {
             Stream<Object> stream = Stream.of(edgeIds);
-            if (isParallelLoading() && edgeIds.length > 1) {
-                stream = stream.parallel();
-            }
-            return stream
+            List<Edge> edges = stream
                     .map(id -> {
-                        if (id instanceof Long)
+                        if (id == null)
+                            throw Exceptions.argumentCanNotBeNull("id");
+                        else if (id instanceof Long)
                             return id;
                         else if (id instanceof Number)
                             return ((Number) id).longValue();
@@ -355,14 +350,11 @@ public class HBaseGraph implements Graph {
                         else
                             return id;
                     })
-                    .flatMap(id -> {
-                        try {
-                            return Stream.of(edge(id));
-                        } catch (final HBaseGraphNotFoundException e) {
-                            return Stream.empty();
-                        }
-                    })
-                    .collect(Collectors.toList())
+                    .map(this::findOrCreateEdge)
+                    .collect(Collectors.toList());
+            getEdgeModel().load(edges);
+            return edges.stream()
+                    .filter(e -> ((HBaseEdge) e).arePropertiesFullyLoaded())
                     .iterator();
         }
     }
@@ -694,8 +686,8 @@ public class HBaseGraph implements Graph {
         if (idType != ValueType.ANY && idType != ValueUtils.getValueType(id)) {
             throw new HBaseGraphNotValidException("ID '" + id + "' not of type " + idType);
         }
-        properties.entrySet().forEach(entry ->
-            getPropertyType(labelMetadata, entry.getKey(), entry.getValue(), true)
+        properties.forEach((key, value) ->
+            getPropertyType(labelMetadata, key, value, true)
         );
     }
 

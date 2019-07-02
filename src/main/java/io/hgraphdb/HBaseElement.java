@@ -111,6 +111,10 @@ public abstract class HBaseElement implements Element {
         return properties;
     }
 
+    public boolean arePropertiesFullyLoaded() {
+        return propertiesFullyLoaded;
+    }
+
     public void copyFrom(HBaseElement element) {
         if (element.label != null) this.label = element.label;
         if (element.createdAt != null) this.createdAt = element.createdAt;
