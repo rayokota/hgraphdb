@@ -210,7 +210,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
 
     private void assert_g_v1_outXknowsX(final Traversal<Vertex, Vertex> traversal) {
         printTraversalForm(traversal);
-        printTraversalForm2(traversal);
         int counter = 0;
         final Set<Vertex> vertices = new HashSet<>();
         while (traversal.hasNext()) {
@@ -222,14 +221,6 @@ public class CustomTest extends AbstractGremlinProcessTest {
         }
         assertEquals(2, counter);
         assertEquals(2, vertices.size());
-    }
-
-    public void printTraversalForm2(final Traversal traversal) {
-        System.out.println(String.format("Testing: %s", name.getMethodName()));
-        System.out.println("   pre-strategy:" + traversal);
-        traversal.hasNext();
-        System.out.println("  post-strategy:" + traversal);
-        verifyUniqueStepIds(traversal.asAdmin());
     }
 
     @Ignore
