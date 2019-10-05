@@ -222,7 +222,7 @@ Configuration cfg = new HBaseGraphConfiguration()
     .setInstanceType(InstanceType.BIGTABLE)
     .setGraphTablePrefix("mygraph")
     .setCreateTables(true)
-    .set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_x.BigtableConnection")
+    .set("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase2_x.BigtableConnection")
     .set("google.bigtable.instance.id", "my-instance-id")
     .set("google.bigtable.project.id", "my-project-id");
 HBaseGraph graph = (HBaseGraph) GraphFactory.open(cfg);
@@ -239,9 +239,9 @@ One benefit of having a TinkerPop layer to HBase is that a number of graph-relat
 plugin activated: tinkerpop.server
 plugin activated: tinkerpop.utilities
 plugin activated: tinkerpop.tinkergraph
-gremlin> :install org.apache.hbase hbase-client 1.4.1
-gremlin> :install org.apache.hbase hbase-common 1.4.1
-gremlin> :install org.apache.hadoop hadoop-common 2.5.1
+gremlin> :install org.apache.hbase hbase-client 2.2.1
+gremlin> :install org.apache.hbase hbase-common 2.2.1
+gremlin> :install org.apache.hadoop hadoop-common 2.7.4
 gremlin> :install io.hgraphdb hgraphdb 3.0.0
 gremlin> :plugin use io.hgraphdb
 ```
