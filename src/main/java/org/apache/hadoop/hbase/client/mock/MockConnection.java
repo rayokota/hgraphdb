@@ -39,6 +39,7 @@ public class MockConnection implements Connection {
     /**
      * @return Configuration instance being used by this Connection instance.
      */
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -58,6 +59,7 @@ public class MockConnection implements Connection {
      * @param tableName the name of the table
      * @return a Table to use for interactions with this table
      */
+    @Override
     public Table getTable(TableName tableName) throws IOException {
         Table table = tables.get(tableName);
         if (table == null) {
@@ -84,6 +86,7 @@ public class MockConnection implements Connection {
      * @param pool The thread pool to use for batch operations, null to use a default pool.
      * @return a Table to use for interactions with this table
      */
+    @Override
     public Table getTable(TableName tableName, ExecutorService pool) throws IOException {
         Table table = tables.get(tableName);
         if (table == null) {
@@ -111,6 +114,7 @@ public class MockConnection implements Connection {
      *
      * @return a {@link BufferedMutator} for the supplied tableName.
      */
+    @Override
     public BufferedMutator getBufferedMutator(TableName tableName) throws IOException {
         return new MockBufferedMutator(this, tableName, config);
     }
@@ -124,6 +128,7 @@ public class MockConnection implements Connection {
      * @param params details on how to instantiate the {@code BufferedMutator}.
      * @return a {@link BufferedMutator} for the supplied tableName.
      */
+    @Override
     public BufferedMutator getBufferedMutator(BufferedMutatorParams params) throws IOException {
         return new MockBufferedMutator(this, params.getTableName(), config);
     }
@@ -143,7 +148,21 @@ public class MockConnection implements Connection {
      * @param tableName Name of the table who's region is to be examined
      * @return A RegionLocator instance
      */
+    @Override
     public RegionLocator getRegionLocator(TableName tableName) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Clear all the entries in the region location cache, for all the tables.
+     * <p/>
+     * If you only want to clear the cache for a specific table, use
+     * {@link RegionLocator#clearRegionLocationCache()}.
+     * <p/>
+     * This may cause performance issue so use it with caution.
+     */
+    @Override
+    public void clearRegionLocationCache() {
         throw new UnsupportedOperationException();
     }
 
@@ -158,6 +177,7 @@ public class MockConnection implements Connection {
      *
      * @return an Admin instance for cluster administration
      */
+    @Override
     public Admin getAdmin() throws IOException {
         throw new UnsupportedOperationException();
     }
@@ -167,6 +187,7 @@ public class MockConnection implements Connection {
      * @param why Why we're aborting.
      * @param e Throwable that caused abort. Can be null.
      */
+    @Override
     public void abort(String why, Throwable e) {
     }
 
@@ -174,6 +195,7 @@ public class MockConnection implements Connection {
      * Check if the server or client was aborted.
      * @return true if the server or client was aborted, false otherwise
      */
+    @Override
     public boolean isAborted() {
         return false;
     }
@@ -186,7 +208,18 @@ public class MockConnection implements Connection {
      * Returns whether the connection is closed or not.
      * @return true if this connection is closed
      */
+    @Override
     public boolean isClosed() {
         return false;
+    }
+
+    /**
+     * Returns an {@link TableBuilder} for creating {@link Table}.
+     * @param tableName the name of the table
+     * @param pool the thread pool to use for requests like batch and scan
+     */
+    @Override
+    public TableBuilder getTableBuilder(TableName tableName, ExecutorService pool) {
+        throw new UnsupportedOperationException();
     }
 }

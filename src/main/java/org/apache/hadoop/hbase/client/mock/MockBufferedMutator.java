@@ -45,6 +45,7 @@ public class MockBufferedMutator implements BufferedMutator {
     /**
      * Gets the fully qualified table name instance of the table that this BufferedMutator writes to.
      */
+    @Override
     public TableName getName() {
         return name;
     }
@@ -55,12 +56,9 @@ public class MockBufferedMutator implements BufferedMutator {
      * The reference returned is not a copy, so any change made to it will
      * affect this instance.
      */
+    @Override
     public Configuration getConfiguration() {
         return config;
-    }
-
-    public List<Mutation> getMutations() {
-        return mutations;
     }
 
     /**
@@ -69,6 +67,7 @@ public class MockBufferedMutator implements BufferedMutator {
      *
      * @param mutation The data to send.
      */
+    @Override
     public void mutate(Mutation mutation) {
         mutations.add(mutation);
     }
@@ -81,6 +80,7 @@ public class MockBufferedMutator implements BufferedMutator {
      * @param ms The data to send.
      * @throws IOException if a remote or network exception occurs.
      */
+    @Override
     public void mutate(List<? extends Mutation> ms) throws IOException {
         mutations.addAll(ms);
     }
@@ -101,6 +101,7 @@ public class MockBufferedMutator implements BufferedMutator {
      *
      * @throws IOException if a remote or network exception occurs.
      */
+    @Override
     public void flush() throws IOException {
         //noinspection EmptyCatchBlock
         try {
@@ -120,7 +121,16 @@ public class MockBufferedMutator implements BufferedMutator {
      *
      * @return The size of the write buffer in bytes.
      */
+    @Override
     public long getWriteBufferSize() {
         return Long.MAX_VALUE;
+    }
+
+    @Override
+    public void setRpcTimeout(int timeout) {
+    }
+
+    @Override
+    public void setOperationTimeout(int timeout) {
     }
 }

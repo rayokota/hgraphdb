@@ -119,13 +119,14 @@ public class MockHTable implements Table {
      * {@inheritDoc}
      */
     @Override
-    public HTableDescriptor getTableDescriptor() throws IOException {
+    public TableDescriptor getDescriptor() throws IOException {
         HTableDescriptor table = new HTableDescriptor(tableName);
         for (String columnFamily : columnFamilies) {
             table.addFamily(new HColumnDescriptor(columnFamily));
         }
         return table;
     }
+
 
     /**
      * {@inheritDoc}
@@ -140,7 +141,7 @@ public class MockHTable implements Table {
             } else if (mutation instanceof Delete) {
                 delete((Delete) mutation);
             }
-            long ts = mutation.getTimeStamp();
+            long ts = mutation.getTimestamp();
             if (ts != HConstants.LATEST_TIMESTAMP && ts > maxTs) maxTs = ts;
         }
         long now = System.currentTimeMillis();
@@ -190,11 +191,6 @@ public class MockHTable implements Table {
         return result != null && !result.isEmpty();
     }
 
-    @Override
-    public boolean[] existsAll(List<Get> var1) throws IOException {
-        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -207,7 +203,6 @@ public class MockHTable implements Table {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
         Object[] results = new Object[actions.size()]; // same size.
         for (int i = 0; i < actions.size(); i++) {
@@ -243,17 +238,6 @@ public class MockHTable implements Table {
     public <R> void batchCallback(
             final List<? extends Row> actions, final Object[] results, final Batch.Callback<R> callback)
             throws IOException, InterruptedException {
-        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <R> Object[] batchCallback(
-            List<? extends Row> actions, Batch.Callback<R> callback) throws IOException,
-            InterruptedException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
@@ -316,7 +300,7 @@ public class MockHTable implements Table {
         for (Get g : gets) {
             results.add(get(g));
         }
-        return results.toArray(new Result[results.size()]);
+        return results.toArray(new Result[0]);
     }
 
     /**
@@ -430,7 +414,7 @@ public class MockHTable implements Table {
                         break;
                     }
                 }
-                return resultSets.toArray(new Result[resultSets.size()]);
+                return resultSets.toArray(new Result[0]);
             }
 
             public Result next() throws IOException {
@@ -475,11 +459,11 @@ public class MockHTable implements Table {
         boolean filteredOnRowKey = false;
         List<Cell> nkvs = new ArrayList<>(tmp.size());
         for (Cell kv : tmp) {
-            if (filter.filterRowKey(kv.getRowArray(), kv.getRowOffset(), kv.getRowLength())) {
+            if (filter.filterRowKey(kv)) {
                 filteredOnRowKey = true;
                 break;
             }
-            Filter.ReturnCode filterResult = filter.filterKeyValue(kv);
+            Filter.ReturnCode filterResult = filter.filterCell(kv);
             if (filterResult == Filter.ReturnCode.INCLUDE || filterResult == Filter.ReturnCode.INCLUDE_AND_NEXT_COL) {
                 nkvs.add(filter.transformCell(kv));
             } else if (filterResult == Filter.ReturnCode.NEXT_ROW) {
@@ -544,7 +528,7 @@ public class MockHTable implements Table {
             }
             NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR));
             for (Cell kv : put.getFamilyCellMap().get(family)) {
-                long ts = put.getTimeStamp();
+                long ts = put.getTimestamp();
                 if (ts == HConstants.LATEST_TIMESTAMP) ts = System.currentTimeMillis();
                 CellUtil.updateLatestStamp(kv, ts);
                 byte[] qualifier = CellUtil.cloneQualifier(kv);
@@ -635,7 +619,7 @@ public class MockHTable implements Table {
             }
             for (Cell kv : delete.getFamilyCellMap().get(family)) {
                 long ts = kv.getTimestamp();
-                if (kv.getTypeByte() == KeyValue.Type.DeleteColumn.getCode()) {
+                if (kv.getType() == Cell.Type.DeleteColumn) {
                     if (ts == HConstants.LATEST_TIMESTAMP) {
                         data.get(row).get(CellUtil.cloneFamily(kv)).remove(CellUtil.cloneQualifier(kv));
                     } else {
@@ -784,21 +768,6 @@ public class MockHTable implements Table {
      * {@inheritDoc}
      */
     @Override
-    public long getWriteBufferSize() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setWriteBufferSize(long writeBufferSize) throws IOException {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <R extends Message> Map<byte[], R> batchCoprocessorService(
             Descriptors.MethodDescriptor methodDescriptor, Message request,
             byte[] startKey, byte[] endKey, R responsePrototype) throws ServiceException {
@@ -825,6 +794,20 @@ public class MockHTable implements Table {
             @Override
             public HRegionLocation getRegionLocation(byte[] bytes, boolean b) throws IOException {
                 return new HRegionLocation(null, ServerName.valueOf("localhost:0", 0));
+            }
+
+            @Override
+            public HRegionLocation getRegionLocation(byte[] bytes, int regionId, boolean b) throws IOException {
+                return new HRegionLocation(null, ServerName.valueOf("localhost:0", 0));
+            }
+
+            @Override
+            public List<HRegionLocation> getRegionLocations(byte[] bytes, boolean b) throws IOException {
+                return Collections.singletonList(getRegionLocation(bytes, b));
+            }
+
+            @Override
+            public void clearRegionLocationCache() {
             }
 
             @Override
@@ -866,45 +849,5 @@ public class MockHTable implements Table {
 
     public HTable asHTable() {
         return Mockito.mock(HTable.class, delegatesTo(this));
-    }
-
-    @Override
-    public void setOperationTimeout(int i) {
-        throw new UnsupportedOperationException("setOperationTimeout");
-    }
-
-    @Override
-    public int getOperationTimeout() {
-        throw new UnsupportedOperationException("getOperationTimeout");
-    }
-
-    @Override
-    public void setRpcTimeout(int i) {
-        throw new UnsupportedOperationException("setRpcTimeout");
-    }
-
-    @Override
-    public int getReadRpcTimeout() {
-        throw new UnsupportedOperationException("getReadRpcTimeout");
-    }
-
-    @Override
-    public void setReadRpcTimeout(int i) {
-        throw new UnsupportedOperationException("setReadRpcTimeout");
-    }
-
-    @Override
-    public int getWriteRpcTimeout() {
-        throw new UnsupportedOperationException("getWriteRpcTimeout");
-    }
-
-    @Override
-    public void setWriteRpcTimeout(int i) {
-        throw new UnsupportedOperationException("setWriteRpcTimeout");
-    }
-
-    @Override
-    public int getRpcTimeout() {
-        throw new UnsupportedOperationException("getRpcTimeout");
     }
 }
