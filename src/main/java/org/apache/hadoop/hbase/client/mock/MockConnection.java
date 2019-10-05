@@ -155,10 +155,10 @@ public class MockConnection implements Connection {
 
     /**
      * Clear all the entries in the region location cache, for all the tables.
-     * <p/>
+     * <p>
      * If you only want to clear the cache for a specific table, use
      * {@link RegionLocator#clearRegionLocationCache()}.
-     * <p/>
+     * <p>
      * This may cause performance issue so use it with caution.
      */
     @Override
