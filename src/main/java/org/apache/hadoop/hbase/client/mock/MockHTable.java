@@ -63,8 +63,8 @@ public class MockHTable implements Table {
     private final List<String> columnFamilies = new ArrayList<>();
     private Configuration config;
 
-    private final NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data
-            = new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR);
+    private final NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data =
+        new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR);
 
     private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, int maxVersions) {
         return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
@@ -314,36 +314,20 @@ public class MockHTable implements Table {
         Filter filter = scan.getFilter();
         int maxResults = scan.getMaxResultsPerColumnFamily();
 
-        Set<byte[]> dataKeySet = scan.isReversed() ? data.descendingKeySet() : data.keySet();
-        for (byte[] row : dataKeySet) {
-            // if row is equal to startRow emit it. When startRow (inclusive) and
-            // stopRow (exclusive) is the same, it should not be excluded which would
-            // happen w/o this control.
-            if (st != null && st.length > 0 &&
-                    Bytes.BYTES_COMPARATOR.compare(st, row) != 0) {
-                if (scan.isReversed()) {
-                    // if row is before startRow do not emit, pass to next row
-                    //noinspection ConstantConditions
-                    if (st != null && st.length > 0 &&
-                            Bytes.BYTES_COMPARATOR.compare(st, row) <= 0)
-                        continue;
-                    // if row is equal to stopRow or after it do not emit, stop iteration
-                    if (sp != null && sp.length > 0 &&
-                            Bytes.BYTES_COMPARATOR.compare(sp, row) > 0)
-                        break;
-                } else {
-                    // if row is before startRow do not emit, pass to next row
-                    //noinspection ConstantConditions
-                    if (st != null && st.length > 0 &&
-                            Bytes.BYTES_COMPARATOR.compare(st, row) > 0)
-                        continue;
-                    // if row is equal to stopRow or after it do not emit, stop iteration
-                    if (sp != null && sp.length > 0 &&
-                            Bytes.BYTES_COMPARATOR.compare(sp, row) <= 0)
-                        break;
-                }
-            }
+        NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> subData =
+            scan.isReversed() ? data.descendingMap() : data;
 
+        if (st == null || st.length == 0) {
+            if (sp != null && sp.length > 0) {
+                subData = subData.headMap(sp, false);
+            }
+        } else if (sp == null || sp.length == 0) {
+            subData = subData.tailMap(st, true);
+        } else {
+            subData = subData.subMap(st, true, sp, false);
+        }
+
+        for (byte[] row : subData.keySet()) {
             List<Cell> kvs;
             if (!scan.hasFamilies()) {
                 kvs = toKeyValue(row, data.get(row), scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
@@ -507,7 +491,7 @@ public class MockHTable implements Table {
         return getScanner(scan);
     }
 
-    private <K, V> V forceFind(NavigableMap<K, V> map, K key, V newObject) {
+    private <K, V> V forceFind(Map<K, V> map, K key, V newObject) {
         V data = map.putIfAbsent(key, newObject);
         if (data == null) {
             data = newObject;
