@@ -66,10 +66,6 @@ public class MockHTable implements Table {
     private final NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data =
         new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR);
 
-    private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, int maxVersions) {
-        return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
-    }
-
     @SuppressWarnings("WeakerAccess")
     public MockHTable(TableName tableName) {
         this.tableName = tableName;
@@ -127,7 +123,6 @@ public class MockHTable implements Table {
         return table;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -159,6 +154,10 @@ public class MockHTable implements Table {
     @Override
     public Result append(Append append) throws IOException {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
+    }
+
+    private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, int maxVersions) {
+        return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
     }
 
     private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd, int maxVersions) {
