@@ -711,7 +711,7 @@ public class MockHTable implements Table {
     @Override
     public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
                                      long amount, Durability durability) throws IOException {
-        throw new RuntimeException(this.getClass() + " does NOT implement this method.");
+        return incrementColumnValue(row, family, qualifier, amount);
     }
 
     /**

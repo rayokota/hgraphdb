@@ -220,6 +220,36 @@ public class MockConnection implements Connection {
      */
     @Override
     public TableBuilder getTableBuilder(TableName tableName, ExecutorService pool) {
-        throw new UnsupportedOperationException();
+        return new TableBuilder() {
+
+            @Override
+            public TableBuilder setWriteRpcTimeout(int arg0) {
+                return this;
+            }
+
+            @Override
+            public TableBuilder setRpcTimeout(int arg0) {
+                return this;
+            }
+
+            @Override
+            public TableBuilder setReadRpcTimeout(int arg0) {
+                return this;
+            }
+
+            @Override
+            public TableBuilder setOperationTimeout(int arg0) {
+                return this;
+            }
+
+            @Override
+            public Table build() {
+                try {
+                    return getTable(tableName, pool);
+                } catch (IOException e) {
+                    throw new RuntimeException("Could not create the table", e);
+                }
+            }
+        };
     }
 }
