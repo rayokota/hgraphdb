@@ -327,7 +327,7 @@ public class MockHTable implements Table {
         }
 
         for (byte[] row : subData.keySet()) {
-            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
+            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = subData.get(row);
             List<Cell> kvs;
             if (!scan.hasFamilies()) {
                 kvs = toKeyValue(row, rowData, scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
