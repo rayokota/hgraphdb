@@ -590,7 +590,7 @@ public class MockHTable implements Table {
         NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
         if (rowData == null)
             return;
-        if (delete.getFamilyCellMap().size() == 0) {
+        if (delete.getFamilyCellMap().isEmpty()) {
             data.remove(row);
             return;
         }

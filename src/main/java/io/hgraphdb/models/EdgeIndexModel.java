@@ -173,7 +173,7 @@ public class EdgeIndexModel extends BaseModel {
             Iterator<Edge> iterator = CloseableIteratorUtils.flatMap(
                 CloseableIteratorUtils.concat(partitioned, IteratorUtils.of(Collections.emptyList())),
                 results -> {
-                    if (results.size() == 0) {
+                    if (results.isEmpty()) {
                         vertex.cacheEdges(cacheKey, cached);
                         scanner.close();
                         return Collections.emptyIterator();

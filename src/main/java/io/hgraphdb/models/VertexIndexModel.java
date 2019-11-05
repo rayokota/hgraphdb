@@ -100,7 +100,7 @@ public class VertexIndexModel extends BaseModel {
             Iterator<Vertex> iterator = CloseableIteratorUtils.flatMap(
                 CloseableIteratorUtils.concat(partitioned, IteratorUtils.of(Collections.emptyList())),
                 results -> {
-                    if (results.size() == 0) {
+                    if (results.isEmpty()) {
                         scanner.close();
                         return Collections.emptyIterator();
                     }
