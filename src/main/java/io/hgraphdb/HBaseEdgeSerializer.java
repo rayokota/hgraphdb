@@ -16,7 +16,7 @@ public class HBaseEdgeSerializer extends HBaseElementSerializer<HBaseEdge> {
         output.writeBytes(inVBytes);
     }
 
-    public HBaseEdge read(Kryo kryo, Input input, Class<HBaseEdge> type) {
+    public HBaseEdge read(Kryo kryo, Input input, Class<? extends HBaseEdge> type) {
         HBaseEdge edge = super.read(kryo, input, type);
         int outVBytesLen = input.readInt();
         Object outVId = ValueUtils.deserialize(input.readBytes(outVBytesLen));

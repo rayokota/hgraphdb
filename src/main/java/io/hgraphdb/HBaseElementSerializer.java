@@ -28,7 +28,7 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
         });
     }
 
-    public E read(Kryo kryo, Input input, Class<E> type) {
+    public E read(Kryo kryo, Input input, Class<? extends E> type) {
         int idBytesLen = input.readInt();
         Object id = ValueUtils.deserialize(input.readBytes(idBytesLen));
         String label = input.readString();
@@ -43,7 +43,7 @@ public class HBaseElementSerializer<E extends HBaseElement> extends Serializer<E
             properties.put(key, value);
         }
         try {
-            Constructor<E> ctor = type.getDeclaredConstructor(
+            Constructor<? extends E> ctor = type.getDeclaredConstructor(
                     HBaseGraph.class, Object.class, String.class, Long.class, Long.class, Map.class);
             return ctor.newInstance(null, id, label, createdAt, updatedAt, properties);
         } catch (Exception e) {

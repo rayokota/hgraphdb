@@ -10,7 +10,7 @@ public class HBaseVertexSerializer extends HBaseElementSerializer<HBaseVertex> {
         super.write(kryo, output, vertex);
     }
 
-    public HBaseVertex read(Kryo kryo, Input input, Class<HBaseVertex> type) {
+    public HBaseVertex read(Kryo kryo, Input input, Class<? extends HBaseVertex> type) {
         return super.read(kryo, input, type);
     }
 }

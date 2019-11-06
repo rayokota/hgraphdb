@@ -134,7 +134,9 @@ public final class ValueUtils {
                     byte[] blob = OrderedBytes.decodeBlobVar(buffer);
                     ByteArrayInputStream bin = new ByteArrayInputStream(blob);
                     Input input = new Input(bin);
-                    return (T) new Kryo().readClassAndObject(input);
+                    Kryo kryo = new Kryo();
+                    kryo.setRegistrationRequired(false);
+                    return (T) kryo.readClassAndObject(input);
                 } catch (KryoException e) {
                     throw new RuntimeException("Unexpected error deserializing object.", e);
                 }
@@ -241,7 +243,9 @@ public final class ValueUtils {
                 try {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream(32);
                     Output output = new Output(baos);
-                    new Kryo().writeClassAndObject(output, o);
+                    Kryo kryo = new Kryo();
+                    kryo.setRegistrationRequired(false);
+                    kryo.writeClassAndObject(output, o);
                     output.close();
                     OrderedBytes.encodeBlobVar(buffer, baos.toByteArray(), order);
                 } catch (KryoException io) {
