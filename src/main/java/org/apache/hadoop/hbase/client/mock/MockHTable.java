@@ -700,8 +700,7 @@ public class MockHTable implements Table {
         }
         NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
         long newValue = Bytes.toLong(rowData.get(family).get(qualifier).lastEntry().getValue()) + amount;
-        rowData.get(family).get(qualifier).put(System.currentTimeMillis(),
-                Bytes.toBytes(newValue));
+        rowData.get(family).get(qualifier).put(System.currentTimeMillis(), Bytes.toBytes(newValue));
         return newValue;
     }
 
