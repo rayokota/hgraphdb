@@ -23,6 +23,7 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.io.TimeRange;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
@@ -156,23 +157,20 @@ public class MockHTable implements Table {
         throw new RuntimeException(this.getClass() + " does NOT implement this method.");
     }
 
-    private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, int maxVersions) {
-        return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
-    }
-
-    private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd, int maxVersions) {
+    private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, TimeRange timeRange, int maxVersions) {
         List<Cell> ret = new ArrayList<>();
         for (byte[] family : rowdata.keySet()) {
             for (byte[] qualifier : rowdata.get(family).keySet()) {
                 int versionsAdded = 0;
                 for (Map.Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).descendingMap().entrySet()) {
-                    if (versionsAdded++ == maxVersions)
+                    if (versionsAdded == maxVersions)
                         break;
                     Long timestamp = tsToVal.getKey();
-                    if (timestamp < timestampStart || timestamp > timestampEnd)
+                    if (!timeRange.withinTimeRange(timestamp))
                         continue;
                     byte[] value = tsToVal.getValue();
                     ret.add(new KeyValue(row, family, qualifier, timestamp, value));
+                    versionsAdded++;
                 }
             }
         }
@@ -192,9 +190,23 @@ public class MockHTable implements Table {
      * {@inheritDoc}
      */
     @Override
+    public boolean[] exists(List<Get> gets) throws IOException {
+        boolean[] result = new boolean[gets.size()];
+        for (int i = 0; i < gets.size(); i++) {
+            result[i] = exists(gets.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException {
         Object[] rows = batch(actions);
-        System.arraycopy(rows, 0, results, 0, rows.length);
+        if (results != null) {
+            System.arraycopy(rows, 0, results, 0, rows.length);
+        }
     }
 
     /**
@@ -253,7 +265,7 @@ public class MockHTable implements Table {
         int maxResults = get.getMaxResultsPerColumnFamily();
 
         if (!get.hasFamilies()) {
-            kvs = toKeyValue(row, rowData, get.getMaxVersions());
+            kvs = toKeyValue(row, rowData, get.getTimeRange(), get.getMaxVersions());
             if (filter != null) {
                 kvs = filter(filter, kvs);
             }
@@ -323,14 +335,18 @@ public class MockHTable implements Table {
         } else if (sp == null || sp.length == 0) {
             subData = subData.tailMap(st, true);
         } else {
-            subData = subData.subMap(st, true, sp, false);
+            boolean stopInclusive = false;
+            if (Arrays.equals(st, sp)) {
+                stopInclusive = true;
+            }
+            subData = subData.subMap(st, true, sp, stopInclusive);
         }
 
         for (byte[] row : subData.keySet()) {
             NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = subData.get(row);
             List<Cell> kvs;
             if (!scan.hasFamilies()) {
-                kvs = toKeyValue(row, rowData, scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
+                kvs = toKeyValue(row, rowData, scan.getTimeRange(), scan.getMaxVersions());
                 if (filter != null) {
                     kvs = filter(filter, kvs);
                 }
@@ -510,12 +526,16 @@ public class MockHTable implements Table {
             }
             NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR));
             for (Cell kv : put.getFamilyCellMap().get(family)) {
-                long ts = put.getTimestamp();
-                if (ts == HConstants.LATEST_TIMESTAMP) ts = System.currentTimeMillis();
-                CellUtil.updateLatestStamp(kv, ts);
+                long ts = kv.getTimestamp();
+                if (ts == HConstants.LATEST_TIMESTAMP) {
+                    ts = put.getTimestamp();
+                }
+                if (ts == HConstants.LATEST_TIMESTAMP) {
+                    ts = System.currentTimeMillis();
+                }
                 byte[] qualifier = CellUtil.cloneQualifier(kv);
                 NavigableMap<Long, byte[]> qualifierData = forceFind(familyData, qualifier, new ConcurrentSkipListMap<>());
-                qualifierData.put(kv.getTimestamp(), CellUtil.cloneValue(kv));
+                qualifierData.put(ts, CellUtil.cloneValue(kv));
             }
         }
     }
