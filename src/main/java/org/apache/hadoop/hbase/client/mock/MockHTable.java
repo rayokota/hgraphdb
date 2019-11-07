@@ -330,16 +330,16 @@ public class MockHTable implements Table {
 
         if (st == null || st.length == 0) {
             if (sp != null && sp.length > 0) {
-                subData = subData.headMap(sp, false);
+                subData = subData.headMap(sp, scan.includeStopRow());
             }
         } else if (sp == null || sp.length == 0) {
-            subData = subData.tailMap(st, true);
+            subData = subData.tailMap(st, scan.includeStartRow());
         } else {
-            boolean stopInclusive = false;
+            boolean includeStopRow = scan.includeStopRow();
             if (Arrays.equals(st, sp)) {
-                stopInclusive = true;
+                includeStopRow = true;
             }
-            subData = subData.subMap(st, true, sp, stopInclusive);
+            subData = subData.subMap(st, scan.includeStartRow(), sp, includeStopRow);
         }
 
         for (byte[] row : subData.keySet()) {
