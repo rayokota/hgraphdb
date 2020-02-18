@@ -36,7 +36,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <hbase.version>2.2.1</hbase.version>
         <hadoop.version>2.7.4</hadoop.version>
-        <tinkerpop.version>3.4.4</tinkerpop.version>
+        <tinkerpop.version>3.4.5</tinkerpop.version>
         <kryo.version>5.0.0-RC4</kryo.version>
         <bigtable-hbase.version>1.12.1</bigtable-hbase.version>
         <giraph.version>1.2.0-hadoop2</giraph.version>
@@ -332,9 +332,9 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.1</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.11</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Default</threshold>
