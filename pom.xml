@@ -40,7 +40,7 @@
         <kryo.version>5.0.0-RC4</kryo.version>
         <bigtable-hbase.version>1.12.1</bigtable-hbase.version>
         <giraph.version>1.2.0-hadoop2</giraph.version>
-        <flink.version>1.9.0</flink.version>
+        <flink.version>1.10.0</flink.version>
     </properties>
 
     <dependencies>
