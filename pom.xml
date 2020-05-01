@@ -262,7 +262,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.3.0</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/runtime-jar-with-dependencies.xml</descriptor>
@@ -300,7 +300,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.3.0</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/test-jar-with-dependencies.xml</descriptor>
