@@ -3,6 +3,7 @@
 [![Build Status][travis-shield]][travis-link]
 [![Maven][maven-shield]][maven-link]
 [![Javadoc][javadoc-shield]][javadoc-link]
+[![Mentioned in Awesome Bigtable](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/zrosenbauer/awesome-bigtable)
 
 [travis-shield]: https://travis-ci.org/rayokota/hgraphdb.svg?branch=master
 [travis-link]: https://travis-ci.org/rayokota/hgraphdb
