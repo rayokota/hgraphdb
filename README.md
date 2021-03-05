@@ -1,12 +1,12 @@
 # HGraphDB - HBase as a TinkerPop Graph Database
 
-[![Build Status][travis-shield]][travis-link]
+[![Build Status][github-actions-shield]][github-actions-link]
 [![Maven][maven-shield]][maven-link]
 [![Javadoc][javadoc-shield]][javadoc-link]
 [![Mentioned in Awesome Bigtable](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/zrosenbauer/awesome-bigtable)
 
-[travis-shield]: https://travis-ci.org/rayokota/hgraphdb.svg?branch=master
-[travis-link]: https://travis-ci.org/rayokota/hgraphdb
+[github-actions-shield]: https://github.com/rayokota/hgraphdb/workflows/build/badge.svg
+[github-actions-link]: https://github.com/rayokota/hgraphdb/actions
 [maven-shield]: https://img.shields.io/maven-central/v/io.hgraphdb/hgraphdb.svg
 [maven-link]: https://search.maven.org/#search%7Cga%7C1%7Cio.hgraphdb
 [javadoc-shield]: https://javadoc.io/badge/io.hgraphdb/hgraphdb.svg?color=blue
