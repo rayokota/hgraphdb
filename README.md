@@ -5,7 +5,7 @@
 [![Javadoc][javadoc-shield]][javadoc-link]
 [![Mentioned in Awesome Bigtable](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/zrosenbauer/awesome-bigtable)
 
-[github-actions-shield]: https://github.com/rayokota/hgraphdb/workflows/build/badge.svg
+[github-actions-shield]: https://github.com/rayokota/hgraphdb/workflows/build/badge.svg?branch=master
 [github-actions-link]: https://github.com/rayokota/hgraphdb/actions
 [maven-shield]: https://img.shields.io/maven-central/v/io.hgraphdb/hgraphdb.svg
 [maven-link]: https://search.maven.org/#search%7Cga%7C1%7Cio.hgraphdb
