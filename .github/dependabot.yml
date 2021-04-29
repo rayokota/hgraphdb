@@ -1,0 +1,23 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.github.spotbugs:spotbugs-maven-plugin
+    versions:
+    - 4.2.2
+  - dependency-name: org.apache.hbase:hbase-server
+    versions:
+    - 2.4.1
+  - dependency-name: org.apache.hbase:hbase-mapreduce
+    versions:
+    - 2.4.1
+  - dependency-name: org.apache.hbase:hbase-client
+    versions:
+    - 2.4.1
+  - dependency-name: org.mockito:mockito-core
+    versions:
+    - 3.7.7
