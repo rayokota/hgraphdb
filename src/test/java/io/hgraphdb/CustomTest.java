@@ -1,7 +1,7 @@
 package io.hgraphdb;
 
 import io.hgraphdb.testclassification.SlowTests;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.tinkerpop.gremlin.LoadGraphWith;
 import org.apache.tinkerpop.gremlin.process.AbstractGremlinProcessTest;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
@@ -350,7 +350,7 @@ public class CustomTest extends AbstractGremlinProcessTest {
     }
 
     public Traversal<Vertex, String> get_g_V_both_hasLabelXpersonX_order_byXage_decrX_limitX5X_name() {
-        return g.V().both().hasLabel("person").order().by("age", Order.decr).limit(5).values("name");
+        return g.V().both().hasLabel("person").order().by("age", Order.desc).limit(5).values("name");
     }
 
     @Ignore

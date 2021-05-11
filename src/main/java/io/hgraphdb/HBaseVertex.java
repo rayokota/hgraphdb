@@ -132,8 +132,13 @@ public class HBaseVertex extends HBaseElement implements Vertex {
             throw VertexProperty.Exceptions.multiPropertiesNotSupported();
         if (keyValues.length > 0)
             throw VertexProperty.Exceptions.metaPropertiesNotSupported();
-        setProperty(key, value);
-        return new HBaseVertexProperty<>(graph, this, key, value);
+        if (value != null) {
+            setProperty(key, value);
+            return new HBaseVertexProperty<>(graph, this, key, value);
+        } else {
+            removeProperty(key);
+            return VertexProperty.empty();
+        }
     }
 
     @Override

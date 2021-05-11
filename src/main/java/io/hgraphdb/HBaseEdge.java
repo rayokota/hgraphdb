@@ -130,8 +130,13 @@ public class HBaseEdge extends HBaseElement implements Edge {
 
     @Override
     public <V> Property<V> property(final String key, final V value) {
-        setProperty(key, value);
-        return new HBaseProperty<>(graph, this, key, value);
+        if (value != null) {
+            setProperty(key, value);
+            return new HBaseProperty<>(graph, this, key, value);
+        } else {
+            removeProperty(key);
+            return Property.empty();
+        }
     }
 
     @Override

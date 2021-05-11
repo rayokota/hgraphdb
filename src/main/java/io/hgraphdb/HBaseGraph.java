@@ -9,7 +9,7 @@ import io.hgraphdb.IndexMetadata.State;
 import io.hgraphdb.models.*;
 import io.hgraphdb.process.strategy.optimization.HBaseGraphStepStrategy;
 import io.hgraphdb.process.strategy.optimization.HBaseVertexStepStrategy;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategies;

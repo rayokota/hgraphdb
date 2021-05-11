@@ -226,6 +226,7 @@ public final class HBaseGraphUtils {
             if (key.equals(T.id) || key.equals(T.label)) continue;
             String keyStr = key.toString();
             Object value = keyValues[i + 1];
+            if (value == null) continue;
             ElementHelper.validateProperty(keyStr, value);
             props.put(keyStr, value);
         }

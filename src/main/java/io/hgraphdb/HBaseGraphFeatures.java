@@ -73,7 +73,6 @@ public class HBaseGraphFeatures implements Graph.Features {
         public boolean supportsThreadedTransactions() {
             return false;
         }
-
     }
 
     public class HBaseVertexFeatures extends HBaseElementFeatures implements VertexFeatures {
@@ -81,6 +80,11 @@ public class HBaseGraphFeatures implements Graph.Features {
         private final VertexPropertyFeatures vertexPropertyFeatures = new HBaseVertexPropertyFeatures();
 
         HBaseVertexFeatures() {
+        }
+
+        @Override
+        public boolean supportsNullPropertyValues() {
+            return false;
         }
 
         @Override
@@ -121,6 +125,11 @@ public class HBaseGraphFeatures implements Graph.Features {
     public class HBaseElementFeatures implements ElementFeatures {
 
         HBaseElementFeatures() {
+        }
+
+        @Override
+        public boolean supportsNullPropertyValues() {
+            return false;
         }
 
         @Override

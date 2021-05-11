@@ -1,8 +1,8 @@
 package io.hgraphdb;
 
-import org.apache.commons.configuration.AbstractConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.AbstractConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
@@ -64,13 +64,11 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
 
     public HBaseGraphConfiguration() {
         conf = new PropertiesConfiguration();
-        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
     }
 
     public HBaseGraphConfiguration(Configuration config) {
         conf = new PropertiesConfiguration();
-        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
         if (config != null) {
             config.getKeys().forEachRemaining(key ->
@@ -80,7 +78,6 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
 
     public HBaseGraphConfiguration(org.apache.hadoop.conf.Configuration config) {
         conf = new PropertiesConfiguration();
-        conf.setDelimiterParsingDisabled(true);
         conf.setProperty(Keys.GRAPH_CLASS, HBASE_GRAPH_CLASSNAME);
         if (config != null) {
             config.iterator().forEachRemaining(entry ->
@@ -283,17 +280,17 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
     }
 
     @Override
-    public boolean isEmpty() {
+    protected boolean isEmptyInternal() {
         return conf.isEmpty();
     }
 
     @Override
-    public boolean containsKey(String key) {
+    protected boolean containsKeyInternal(String key) {
         return conf.containsKey(key);
     }
 
     @Override
-    public Object getProperty(String key) {
+    protected Object getPropertyInternal(String key) {
         return conf.getProperty(key);
     }
 
@@ -303,13 +300,18 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
     }
 
     @Override
-    public Iterator<String> getKeys() {
+    protected Iterator<String> getKeysInternal() {
         return conf.getKeys();
     }
 
     @Override
     protected void addPropertyDirect(String key, Object value) {
         conf.setProperty(key, value);
+    }
+
+    @Override
+    protected void clearPropertyDirect(String key) {
+        conf.clearProperty(key);
     }
 
     public org.apache.hadoop.conf.Configuration toHBaseConfiguration() {
