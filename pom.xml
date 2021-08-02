@@ -34,7 +34,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <hbase.version>2.2.4</hbase.version>
+        <hbase.version>2.4.5</hbase.version>
         <hadoop.version>2.7.4</hadoop.version>
         <tinkerpop.version>3.5.1</tinkerpop.version>
         <kryo.version>5.1.1</kryo.version>
