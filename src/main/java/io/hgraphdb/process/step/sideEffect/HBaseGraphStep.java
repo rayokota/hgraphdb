@@ -52,6 +52,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
         Optional<String> label = hasContainers.stream()
                 .filter(hasContainer -> hasContainer.getKey().equals(T.label.getAccessor()))
                 .filter(hasContainer -> Compare.eq == hasContainer.getBiPredicate())
+                .filter(hasContainer -> hasContainer.getValue() != null)
                 .map(hasContainer -> (String) hasContainer.getValue())
                 .findAny();
         if (label.isPresent()) {
