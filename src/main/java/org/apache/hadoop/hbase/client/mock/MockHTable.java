@@ -128,7 +128,7 @@ public class MockHTable implements Table {
      * {@inheritDoc}
      */
     @Override
-    public void mutateRow(RowMutations rm) throws IOException {
+    public Result mutateRow(RowMutations rm) throws IOException {
         // currently only support Put and Delete
         long maxTs = System.currentTimeMillis();
         for (Mutation mutation : rm.getMutations()) {
@@ -147,6 +147,8 @@ public class MockHTable implements Table {
                 Thread.sleep(maxTs - now + 1);
             } catch (InterruptedException ignored) { }
         }
+        // results of Increment/Append operations, which are currently not supported
+        return Result.EMPTY_RESULT;
     }
 
     /**

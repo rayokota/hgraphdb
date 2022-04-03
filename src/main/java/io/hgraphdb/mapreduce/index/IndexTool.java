@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import io.hgraphdb.*;
 import io.hgraphdb.mapreduce.TableInputFormat;
+import java.util.Base64;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -21,7 +22,6 @@ import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil;
 import org.apache.hadoop.hbase.protobuf.generated.ClientProtos;
-import org.apache.hadoop.hbase.util.Base64;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -337,6 +337,6 @@ public abstract class IndexTool extends Configured implements Tool {
      */
     static String convertScanToString(Scan scan) throws IOException {
         ClientProtos.Scan proto = ProtobufUtil.toScan(scan);
-        return Base64.encodeBytes(proto.toByteArray());
+        return Base64.getEncoder().encodeToString(proto.toByteArray());
     }
 }
