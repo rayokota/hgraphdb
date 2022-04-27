@@ -208,12 +208,12 @@ public final class HBaseGraphUtils {
         return newValue;
     }
 
-    public static Object generateIdIfNeeded(Object id) {
+    public static Object generateIdIfNeeded(Object id, boolean useLongForNumbers) {
         if (id == null) {
             id = UUID.randomUUID().toString();
         } else if (id instanceof Long) {
             // noop
-        } else if (id instanceof Number) {
+        } else if (id instanceof Number && useLongForNumbers) {
             id = ((Number) id).longValue();
         }
         return id;

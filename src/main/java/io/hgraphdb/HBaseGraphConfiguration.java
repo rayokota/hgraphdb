@@ -49,6 +49,7 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
         public static final String LOADING_BATCH_SIZE              = "gremlin.hbase.loadingBatchSize";
         public static final String BULK_LOADER_SKIP_WAL            = "gremlin.hbase.bulkLoaderSkipWAL";
         public static final String USE_SCHEMA                      = "gremlin.hbase.useSchema";
+        public static final String USE_LONG_FOR_NUMBERS            = "gremlin.hbase.useLongForNumbers";
 
         /* How often to refresh the schema cache */
         public static final String SCHEMA_CACHE_REFRESH_SECS       = "gremlin.hbase.schemaCacheRefreshSecs";
@@ -249,6 +250,15 @@ public class HBaseGraphConfiguration extends AbstractConfiguration implements Se
 
     public HBaseGraphConfiguration setUseSchema(boolean useSchema) {
         conf.setProperty(Keys.USE_SCHEMA, useSchema);
+        return this;
+    }
+
+    public boolean getUseLongForNumbers() {
+        return conf.getBoolean(Keys.USE_LONG_FOR_NUMBERS, true);
+    }
+
+    public HBaseGraphConfiguration setUseLongForNumbers(boolean useLongForNumbers) {
+        conf.setProperty(Keys.USE_LONG_FOR_NUMBERS, useLongForNumbers);
         return this;
     }
 

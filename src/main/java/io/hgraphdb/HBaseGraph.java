@@ -225,7 +225,7 @@ public class HBaseGraph implements Graph {
         Object idValue = ElementHelper.getIdValue(keyValues).orElse(null);
         final String label = ElementHelper.getLabelValue(keyValues).orElse(Vertex.DEFAULT_LABEL);
 
-        idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
+        idValue = HBaseGraphUtils.generateIdIfNeeded(idValue, configuration().getUseLongForNumbers());
         long now = System.currentTimeMillis();
         HBaseVertex newVertex = new HBaseVertex(this, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues));
         newVertex.validate();
@@ -249,7 +249,7 @@ public class HBaseGraph implements Graph {
                             throw Exceptions.argumentCanNotBeNull("id");
                         else if (id instanceof Long)
                             return id;
-                        else if (id instanceof Number)
+                        else if (id instanceof Number && configuration().getUseLongForNumbers())
                             return ((Number) id).longValue();
                         else if (id instanceof Vertex)
                             return ((Vertex) id).id();
@@ -282,7 +282,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
-        id = HBaseGraphUtils.generateIdIfNeeded(id);
+        id = HBaseGraphUtils.generateIdIfNeeded(id, configuration().getUseLongForNumbers());
         ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Vertex cachedVertex = vertexCache.getIfPresent(key);
         if (cachedVertex != null && !((HBaseVertex) cachedVertex).isDeleted()) {
@@ -343,7 +343,7 @@ public class HBaseGraph implements Graph {
                             throw Exceptions.argumentCanNotBeNull("id");
                         else if (id instanceof Long)
                             return id;
-                        else if (id instanceof Number)
+                        else if (id instanceof Number && configuration().getUseLongForNumbers())
                             return ((Number) id).longValue();
                         else if (id instanceof Edge)
                             return ((Edge) id).id();
@@ -376,7 +376,7 @@ public class HBaseGraph implements Graph {
         if (id == null) {
             throw Exceptions.argumentCanNotBeNull("id");
         }
-        id = HBaseGraphUtils.generateIdIfNeeded(id);
+        id = HBaseGraphUtils.generateIdIfNeeded(id, configuration().getUseLongForNumbers());
         ByteBuffer key = ByteBuffer.wrap(ValueUtils.serialize(id));
         Edge cachedEdge = edgeCache.getIfPresent(key);
         if (cachedEdge != null && !((HBaseEdge) cachedEdge).isDeleted()) {

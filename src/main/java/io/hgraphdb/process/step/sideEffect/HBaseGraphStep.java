@@ -50,7 +50,7 @@ public final class HBaseGraphStep<S, E extends Element> extends GraphStep<S, E> 
         ////// do index lookups //////
         // get a label being search on
         Optional<String> label = hasContainers.stream()
-                .filter(hasContainer -> hasContainer.getKey().equals(T.label.getAccessor()))
+                .filter(hasContainer -> T.label.getAccessor().equals(hasContainer.getKey()))
                 .filter(hasContainer -> Compare.eq == hasContainer.getBiPredicate())
                 .filter(hasContainer -> hasContainer.getValue() != null)
                 .map(hasContainer -> (String) hasContainer.getValue())

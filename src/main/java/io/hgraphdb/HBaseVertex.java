@@ -81,7 +81,7 @@ public class HBaseVertex extends HBaseElement implements Vertex {
         ElementHelper.legalPropertyKeyValueArray(keyValues);
         Object idValue = ElementHelper.getIdValue(keyValues).orElse(null);
 
-        idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
+        idValue = HBaseGraphUtils.generateIdIfNeeded(idValue, graph.configuration().getUseLongForNumbers());
         long now = System.currentTimeMillis();
         HBaseEdge newEdge = new HBaseEdge(graph, idValue, label, now, now, HBaseGraphUtils.propertiesToMap(keyValues), inVertex, this);
         newEdge.validate();

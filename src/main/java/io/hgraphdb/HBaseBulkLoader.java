@@ -81,7 +81,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
             Object idValue = ElementHelper.getIdValue(keyValues).orElse(null);
             final String label = ElementHelper.getLabelValue(keyValues).orElse(Vertex.DEFAULT_LABEL);
 
-            idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
+            idValue = HBaseGraphUtils.generateIdIfNeeded(idValue, graph.configuration().getUseLongForNumbers());
             long now = System.currentTimeMillis();
             HBaseVertex vertex = new HBaseVertex(graph, idValue, label, now, now,
                     HBaseGraphUtils.propertiesToMap(keyValues));
@@ -115,7 +115,7 @@ public final class HBaseBulkLoader implements AutoCloseable {
             ElementHelper.legalPropertyKeyValueArray(keyValues);
             Object idValue = ElementHelper.getIdValue(keyValues).orElse(null);
 
-            idValue = HBaseGraphUtils.generateIdIfNeeded(idValue);
+            idValue = HBaseGraphUtils.generateIdIfNeeded(idValue, graph.configuration().getUseLongForNumbers());
             long now = System.currentTimeMillis();
             HBaseEdge edge = new HBaseEdge(graph, idValue, label, now, now,
                     HBaseGraphUtils.propertiesToMap(keyValues), inVertex, outVertex);

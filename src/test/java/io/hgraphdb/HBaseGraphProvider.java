@@ -36,6 +36,7 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.MOCK.toString());
                     put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
                     put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                    put(HBaseGraphConfiguration.Keys.USE_LONG_FOR_NUMBERS, false);
                 }};
                 break;
             case BIGTABLE:
@@ -45,6 +46,7 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
                     put(HBaseGraphConfiguration.Keys.GRAPH_TABLE_PREFIX, graphName);
                     put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                    put(HBaseGraphConfiguration.Keys.USE_LONG_FOR_NUMBERS, false);
                     put("hbase.client.connection.impl", "com.google.cloud.bigtable.hbase1_x.BigtableConnection");
                     put("google.bigtable.instance.id", "hgraphdb-bigtable");
                     put("google.bigtable.project.id", "rayokota2");
@@ -56,6 +58,7 @@ public class HBaseGraphProvider extends AbstractGraphProvider {
                     put(HBaseGraphConfiguration.Keys.INSTANCE_TYPE, HBaseGraphConfiguration.InstanceType.DISTRIBUTED.toString());
                     put(HBaseGraphConfiguration.Keys.GRAPH_NAMESPACE, graphName);
                     put(HBaseGraphConfiguration.Keys.CREATE_TABLES, true);
+                    put(HBaseGraphConfiguration.Keys.USE_LONG_FOR_NUMBERS, false);
                     put("hbase.zookeeper.quorum", "127.0.0.1");
                     put("zookeeper.znode.parent", "/hbase-unsecure");
                 }};
