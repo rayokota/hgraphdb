@@ -22,7 +22,7 @@ public class HBaseEdgeInputFormat<K, V> extends HBaseElementInputFormat<Tuple3<K
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Tuple3<K, K, V> mapResultToTuple(Result r) {
+    protected Tuple3<K, K, V> mapResultToOutType(Result r) {
         HBaseEdge edge = parseHBaseEdge(r);
         V property = property(edge, getPropertyName());
         return property != null

@@ -150,7 +150,7 @@ public class MockConnection implements Connection {
      */
     @Override
     public RegionLocator getRegionLocator(TableName tableName) throws IOException {
-        throw new UnsupportedOperationException();
+        return getTable(tableName).getRegionLocator();
     }
 
     /**
