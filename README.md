@@ -24,7 +24,7 @@ Releases of HGraphDB are deployed to Maven Central.
 <dependency>
     <groupId>io.hgraphdb</groupId>
     <artifactId>hgraphdb</artifactId>
-    <version>3.0.0</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
