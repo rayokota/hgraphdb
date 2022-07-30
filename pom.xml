@@ -35,7 +35,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <hbase.version>2.4.13</hbase.version>
-        <hadoop.version>2.10.1</hadoop.version>
+        <hadoop.version>3.3.3</hadoop.version>
         <tinkerpop.version>3.6.1</tinkerpop.version>
         <kryo.version>5.3.0</kryo.version>
         <bigtable-hbase.version>2.5.0</bigtable-hbase.version>
