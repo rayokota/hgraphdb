@@ -38,7 +38,7 @@
         <hadoop.version>2.10.2</hadoop.version>
         <tinkerpop.version>3.7.0</tinkerpop.version>
         <kryo.version>5.5.0</kryo.version>
-        <bigtable-hbase.version>2.10.0</bigtable-hbase.version>
+        <bigtable-hbase.version>2.11.0</bigtable-hbase.version>
         <giraph.version>1.3.0-hadoop2</giraph.version>
         <flink.version>1.16.2</flink.version>
     </properties>
