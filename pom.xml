@@ -37,7 +37,7 @@
         <hbase.version>2.5.8-hadoop3</hbase.version>
         <hadoop.version>2.10.2</hadoop.version>
         <tinkerpop.version>3.7.3</tinkerpop.version>
-        <kryo.version>5.6.0</kryo.version>
+        <kryo.version>5.6.2</kryo.version>
         <bigtable-hbase.version>2.14.3</bigtable-hbase.version>
         <giraph.version>1.3.0-hadoop2</giraph.version>
         <flink.version>1.16.3</flink.version>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.12.0</version>
+            <version>5.14.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.giraph</groupId>
@@ -194,7 +194,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.4</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
